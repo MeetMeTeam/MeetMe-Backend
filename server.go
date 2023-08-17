@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"meetme/be/actions/handlers"
+	"meetme/be/actions/repositories"
+	"meetme/be/actions/services"
 	"net/http"
 	"strings"
 	"time"
@@ -28,9 +31,9 @@ func main() {
 	initTimeZone()
 	db := initDB()
 
-	// userRepository := repositories.NewUserRepositoryDB(db)
-	// userService := services.NewUserService(userRepository)
-	// userHandler := handlers.NewUserHandler(userService)
+	userRepository := repositories.NewUserRepositoryDB(db)
+	userService := services.NewUserService(userRepository)
+	userHandler := handlers.NewUserHandler(userService)
 
 	// rewardRepository := repositories.NewRewardRepositoryDB(db)
 	// rewardService := services.NewRewardService(rewardRepository)
@@ -49,7 +52,9 @@ func main() {
 		return c.String(http.StatusOK, "Migrate DB success !")
 	})
 
-	// api.POST("/register", userHandler.Register)
+	api := e.Group("/api")
+
+	api.POST("/register", userHandler.Register)
 	// api.GET("/user", userHandler.GetUserByLineId)
 	// api.PUT("/user", userHandler.EditUser)
 	// api.POST("/points", userHandler.AddPoints)
