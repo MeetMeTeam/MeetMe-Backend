@@ -16,15 +16,17 @@ func NewUserHandler(userService svInter.UserService) userHandler {
 	return userHandler{userService: userService}
 }
 
+// Register godoc
+// @Summary      Register user
+// @Description  Create user.
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.DataResponse
+// @Router       /register [post]
 func (h userHandler) Register(c echo.Context) error {
 
 	request := new(svInter.RegisterRequest)
-
-	//if err := c.Validate(request); err != nil {
-	//	return c.JSON(http.StatusBadRequest, utils.ErrorResponse{
-	//		Message: err.Error(),
-	//	})
-	//}
 
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{

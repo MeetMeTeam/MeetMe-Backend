@@ -12,6 +12,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
+	echoSwagger "github.com/swaggo/echo-swagger"
+
+	// _ "github.com/swaggo/echo-swagger/example/docs"
+	_ "meetme/be/docs"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -25,6 +30,13 @@ func (l SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 	sql, _ := fc()
 	fmt.Printf("%v\n ======================================\n", sql)
 }
+
+// @title Meet Me API
+// @version 1.0
+// @description This is a API for Meet Me.
+
+// @host localhost:8080
+// @BasePath /api
 func main() {
 
 	initConfig()
@@ -44,7 +56,7 @@ func main() {
 	// redeemHandler := handlers.NewRewardRedeemHandler(redeemService)
 
 	e := echo.New()
-
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
 	e.GET("/migrate", func(c echo.Context) error {

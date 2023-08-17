@@ -1,0 +1,31 @@
+basePath: /api
+definitions:
+  utils.DataResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a API for Meet Me.
+  title: Meet Me API
+  version: "1.0"
+paths:
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Create user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Register user
+      tags:
+      - users
+swagger: "2.0"
