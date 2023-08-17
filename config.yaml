@@ -1,0 +1,10 @@
+app:
+  port: 8080
+
+db:
+  driver: "mysql"
+  host: "127.0.0.1"
+  port: 8889
+  username: "root"
+  password: "root"
+  database: "meet_me"
