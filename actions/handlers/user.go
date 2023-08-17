@@ -43,3 +43,23 @@ func (h userHandler) Register(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, users)
 }
+
+func (h userHandler) Login(c echo.Context) error {
+
+	request := new(svInter.Login)
+
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: "Something wrong.",
+		})
+	}
+
+	users, err := h.userService.Login(*request)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}

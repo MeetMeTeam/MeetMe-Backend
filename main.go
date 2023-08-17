@@ -67,7 +67,7 @@ func main() {
 	api := e.Group("/api")
 
 	api.POST("/register", userHandler.Register)
-	// api.GET("/user", userHandler.GetUserByLineId)
+	api.POST("/login", userHandler.Login)
 	// api.PUT("/user", userHandler.EditUser)
 	// api.POST("/points", userHandler.AddPoints)
 	// api.GET("/rewards", rewardHandler.GetRewards)

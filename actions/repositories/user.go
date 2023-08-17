@@ -14,6 +14,16 @@ func NewUserRepositoryDB(db *gorm.DB) UserRepository {
 	return UserRepository{db: db}
 }
 
+func (r UserRepository) GetByEmail(email string) (*interfaces.User, error) {
+
+	var user interfaces.User
+	result := r.db.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
 func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 
 	newUser := interfaces.User{
