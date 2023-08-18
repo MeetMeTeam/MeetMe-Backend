@@ -10,13 +10,12 @@ import (
 	"strings"
 	"time"
 
+	_ "meetme/be/docs"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/viper"
 	echoSwagger "github.com/swaggo/echo-swagger"
-
-	// _ "github.com/swaggo/echo-swagger/example/docs"
-	_ "meetme/be/docs"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -47,14 +46,6 @@ func main() {
 	userRepository := repositories.NewUserRepositoryDB(db)
 	userService := services.NewUserService(userRepository)
 	userHandler := handlers.NewUserHandler(userService)
-
-	// rewardRepository := repositories.NewRewardRepositoryDB(db)
-	// rewardService := services.NewRewardService(rewardRepository)
-	// rewardHandler := handlers.NewRewardHandler(rewardService)
-
-	// redeemRepository := repositories.NewRewardRedemptionRepositoryDB(db)
-	// redeemService := services.NewRewardRedemptionService(redeemRepository, rewardRepository, userRepository)
-	// redeemHandler := handlers.NewRewardRedeemHandler(redeemService)
 
 	e := echo.New()
 
@@ -129,10 +120,10 @@ func initDB() *gorm.DB {
 
 type User struct {
 	gorm.Model
-	Firstname string    `gorm:"size:255"`
+	Firstname string    `gorm:"size:255;not null"`
 	Lastname  string    `gorm:"size:255"`
-	Birthday  time.Time `gorm:"type:date"`
-	Email     string    `gorm:"size:255"`
-	Password  string
-	Image     string
+	Birthday  time.Time `gorm:"type:date;not null"`
+	Email     string    `gorm:"size:255;not null"`
+	Password  string    `gorm:"not null"`
+	Image     string    `gorm:"not null"`
 }

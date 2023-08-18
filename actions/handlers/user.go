@@ -62,6 +62,13 @@ func (h userHandler) Login(c echo.Context) error {
 			Message: "Something wrong.",
 		})
 	}
+	errrr := utils.CustomValidator(*request)
+
+	if errrr != nil {
+		return c.JSON(http.StatusBadRequest, utils.ValidateResponse{
+			Message: errrr,
+		})
+	}
 
 	users, err := h.userService.Login(*request)
 	if err != nil {
