@@ -58,10 +58,12 @@ func main() {
 
 	e := echo.New()
 
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"https://localhost:" + viper.GetString("app.port"), viper.GetString("app.ngrok")}, // กำหนดโดเมนที่ยอมรับ
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
+	e.Use(middleware.CORS())
+
+	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	// 	AllowOrigins: []string{"https://localhost:" + viper.GetString("app.port"), viper.GetString("app.ngrok")}, // กำหนดโดเมนที่ยอมรับ
+	// 	AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	// }))
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
@@ -132,4 +134,5 @@ type User struct {
 	Birthday  time.Time `gorm:"type:date"`
 	Email     string    `gorm:"size:255"`
 	Password  string
+	Image     string
 }
