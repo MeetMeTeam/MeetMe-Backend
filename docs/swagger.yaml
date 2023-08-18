@@ -3,8 +3,10 @@ definitions:
   interfaces.Login:
     properties:
       email:
+        example: winner@mail.com
         type: string
       password:
+        example: winner
         type: string
     type: object
   interfaces.RegisterRequest:
@@ -34,7 +36,7 @@ definitions:
       message:
         type: string
     type: object
-host: localhost:8080
+host: 3f9d-202-28-7-128.ngrok-free.app
 info:
   contact: {}
   description: This is a API for Meet Me.
@@ -83,6 +85,21 @@ paths:
           schema:
             $ref: '#/definitions/utils.DataResponse'
       summary: Register user
+      tags:
+      - users
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: return list users.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Get all users
       tags:
       - users
 swagger: "2.0"

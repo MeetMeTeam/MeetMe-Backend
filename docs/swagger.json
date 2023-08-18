@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "3f9d-202-28-7-128.ngrok-free.app",
     "basePath": "/api",
     "paths": {
         "/login": {
@@ -76,6 +76,29 @@
                     }
                 }
             }
+        },
+        "/users": {
+            "get": {
+                "description": "return list users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -83,10 +106,12 @@
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "winner@mail.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "winner"
                 }
             }
         },

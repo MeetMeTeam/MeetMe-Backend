@@ -83,6 +83,29 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users": {
+            "get": {
+                "description": "return list users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -90,10 +113,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "winner@mail.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "winner"
                 }
             }
         },
@@ -141,7 +166,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "3f9d-202-28-7-128.ngrok-free.app",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Meet Me API",

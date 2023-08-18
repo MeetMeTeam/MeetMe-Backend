@@ -42,3 +42,14 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 
 	return &newUser, nil
 }
+
+func (r UserRepository) GetAll() ([]interfaces.User, error) {
+	var users []interfaces.User
+	result := r.db.Find(&users)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return users, nil
+
+}

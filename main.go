@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/viper"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
@@ -35,7 +36,7 @@ func (l SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 // @version 1.0
 // @description This is a API for Meet Me.
 
-// @host localhost:8080
+// @host 3f9d-202-28-7-128.ngrok-free.app
 // @BasePath /api
 func main() {
 
@@ -56,6 +57,12 @@ func main() {
 	// redeemHandler := handlers.NewRewardRedeemHandler(redeemService)
 
 	e := echo.New()
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"https://localhost:" + viper.GetString("app.port"), viper.GetString("app.ngrok")}, // กำหนดโดเมนที่ยอมรับ
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
+
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
@@ -68,13 +75,13 @@ func main() {
 
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
-	// api.PUT("/user", userHandler.EditUser)
+	api.GET("/users", userHandler.GetAllUser)
 	// api.POST("/points", userHandler.AddPoints)
 	// api.GET("/rewards", rewardHandler.GetRewards)
 	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
 	// api.POST("/redemption", redeemHandler.Redeem)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":" + viper.GetString("app.port")))
 }
 
 func initConfig() {

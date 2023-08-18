@@ -92,3 +92,29 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	}
 
 }
+
+func (s userService) GetUsers() (interface{}, error) {
+	users, err := s.userRepo.GetAll()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	userResponses := []interfaces.RegisterResponse{}
+	for _, user := range users {
+		userResponse := interfaces.RegisterResponse{
+			ID:        user.ID,
+			Firstname: user.Firstname,
+			Lastname:  user.Lastname,
+			Email:     user.Email,
+			Birthday:  user.Birthday,
+		}
+		userResponses = append(userResponses, userResponse)
+	}
+
+	response := utils.DataResponse{
+		Data:    userResponses,
+		Message: "Get users success.",
+	}
+	return response, nil
+}

@@ -1,6 +1,6 @@
 app:
   port: 8080
-
+  ngrok: "https://3f9d-202-28-7-128.ngrok-free.app/"
 db:
   driver: "mysql"
   host: "127.0.0.1"

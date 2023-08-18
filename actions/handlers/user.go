@@ -72,3 +72,22 @@ func (h userHandler) Login(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, users)
 }
+
+// GetUsers godoc
+// @Summary      Get all users
+// @Description  return list users.
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.DataResponse
+// @Router       /users [get]
+func (h userHandler) GetAllUser(c echo.Context) error {
+	users, err := h.userService.GetUsers()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}

@@ -17,8 +17,8 @@ type RegisterResponse struct {
 }
 
 type Login struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" example:"winner@mail.com"`
+	Password string `json:"password" example:"winner"`
 }
 
 type LoginResponse struct {
@@ -26,7 +26,7 @@ type LoginResponse struct {
 }
 
 type UserService interface {
-	//GetUsers() ([]RegisterResponse, error)
+	GetUsers() (interface{}, error)
 	// GetUserByLineId(string) (interface{}, error)
 	CreateUser(RegisterRequest) (interface{}, error)
 	Login(Login) (interface{}, error)
