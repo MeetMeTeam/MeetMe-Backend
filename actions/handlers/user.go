@@ -22,10 +22,10 @@ func NewUserHandler(userService svInter.UserService) userHandler {
 // @Tags         users
 // @Accept       json
 // @Produce      json
+// @Param users body interfaces.RegisterRequest true "request body register"
 // @Success      200  {object}  utils.DataResponse
 // @Router       /register [post]
 func (h userHandler) Register(c echo.Context) error {
-
 	request := new(svInter.RegisterRequest)
 
 	if err := c.Bind(request); err != nil {
@@ -44,6 +44,15 @@ func (h userHandler) Register(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// Login godoc
+// @Summary      Login
+// @Description  Login user.
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param users body interfaces.Login true "request body login"
+// @Success      200  {object}  utils.DataResponse
+// @Router       /login [post]
 func (h userHandler) Login(c echo.Context) error {
 
 	request := new(svInter.Login)

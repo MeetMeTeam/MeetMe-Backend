@@ -1,11 +1,11 @@
 package interfaces
 
 type RegisterRequest struct {
-	Firstname string `json:"firstname" validate:"required"`
-	Lastname  string `json:"lastname"`
-	Email     string `json:"email" validate:"required,email"`
-	Birthday  string `json:"birthday"`
-	Password  string `json:"password"`
+	Firstname string `json:"firstname" validate:"required" example:"Kanyapat"`
+	Lastname  string `json:"lastname" example:"Wittayamitkul"`
+	Email     string `json:"email" validate:"required,email" example:"winner@mail.com"`
+	Birthday  string `json:"birthday" example:"2023-08-12"`
+	Password  string `json:"password" example:"winner"`
 }
 
 type RegisterResponse struct {

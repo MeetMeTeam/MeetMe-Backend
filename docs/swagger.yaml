@@ -1,5 +1,33 @@
 basePath: /api
 definitions:
+  interfaces.Login:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  interfaces.RegisterRequest:
+    properties:
+      birthday:
+        example: "2023-08-12"
+        type: string
+      email:
+        example: winner@mail.com
+        type: string
+      firstname:
+        example: Kanyapat
+        type: string
+      lastname:
+        example: Wittayamitkul
+        type: string
+      password:
+        example: winner
+        type: string
+    required:
+    - email
+    - firstname
+    type: object
   utils.DataResponse:
     properties:
       data: {}
@@ -13,11 +41,40 @@ info:
   title: Meet Me API
   version: "1.0"
 paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login user.
+      parameters:
+      - description: request body login
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Login
+      tags:
+      - users
   /register:
     post:
       consumes:
       - application/json
       description: Create user.
+      parameters:
+      - description: request body register
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.RegisterRequest'
       produces:
       - application/json
       responses:

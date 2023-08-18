@@ -16,6 +16,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/login": {
+            "post": {
+                "description": "Login user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "request body login",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "description": "Create user.",
@@ -29,6 +63,17 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Register user",
+                "parameters": [
+                    {
+                        "description": "request body register",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.RegisterRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -41,6 +86,46 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "interfaces.Login": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "interfaces.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstname"
+            ],
+            "properties": {
+                "birthday": {
+                    "type": "string",
+                    "example": "2023-08-12"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "winner@mail.com"
+                },
+                "firstname": {
+                    "type": "string",
+                    "example": "Kanyapat"
+                },
+                "lastname": {
+                    "type": "string",
+                    "example": "Wittayamitkul"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "winner"
+                }
+            }
+        },
         "utils.DataResponse": {
             "type": "object",
             "properties": {
