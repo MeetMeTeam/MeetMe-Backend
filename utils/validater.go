@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/go-playground/validator"
 )
 
@@ -18,7 +21,26 @@ func CustomValidator(request interface{}) []string {
 
 		for _, err := range err.(validator.ValidationErrors) {
 
-			reasonErr = append(reasonErr, err.Field()+" is "+err.Tag()+".")
+			message := ""
+			switch err.Tag() {
+			case "required":
+				message = fmt.Sprintf("%s is required.",
+					strings.ToUpper(err.Field()))
+			case "email":
+				message = fmt.Sprintf("%s is not email format",
+					strings.ToUpper(err.Field()))
+			case "date":
+				message = fmt.Sprintf("%s is valid date format",
+					strings.ToUpper(err.Field()))
+			case "number":
+				message = fmt.Sprintf("%sis number required.",
+					strings.ToUpper(err.Field()))
+			case "phone":
+				message = fmt.Sprintf("%s is not phone format.",
+					strings.ToUpper(err.Field()))
+			}
+
+			reasonErr = append(reasonErr, message)
 			// fmt.Println(err.Namespace())
 			// fmt.Println(err.Field())
 			// fmt.Println(err.StructNamespace())

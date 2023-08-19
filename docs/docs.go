@@ -111,6 +111,10 @@ const docTemplate = `{
     "definitions": {
         "interfaces.Login": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string",
@@ -126,7 +130,9 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
-                "firstname"
+                "firstname",
+                "image",
+                "password"
             ],
             "properties": {
                 "birthday": {
@@ -140,6 +146,9 @@ const docTemplate = `{
                 "firstname": {
                     "type": "string",
                     "example": "Kanyapat"
+                },
+                "image": {
+                    "type": "string"
                 },
                 "lastname": {
                     "type": "string",

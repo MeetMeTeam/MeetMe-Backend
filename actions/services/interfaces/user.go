@@ -3,9 +3,10 @@ package interfaces
 type RegisterRequest struct {
 	Firstname string `json:"firstname" validate:"required" example:"Kanyapat"`
 	Lastname  string `json:"lastname" example:"Wittayamitkul"`
-	Email     string `json:"email" validate:"required" example:"winner@mail.com"`
+	Email     string `json:"email" validate:"required,email" example:"winner@mail.com"`
 	Birthday  string `json:"birthday" example:"2023-08-12"`
 	Password  string `json:"password" example:"winner" validate:"required"`
+	Image     string `json:"image" validate:"required"`
 }
 
 type RegisterResponse struct {
@@ -17,7 +18,7 @@ type RegisterResponse struct {
 }
 
 type Login struct {
-	Email    string `json:"email" validate:"required" example:"winner@mail.com"`
+	Email    string `json:"email" validate:"required,email" example:"winner@mail.com"`
 	Password string `json:"password" validate:"required" example:"winner"`
 }
 

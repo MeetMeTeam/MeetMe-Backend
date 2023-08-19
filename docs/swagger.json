@@ -104,6 +104,10 @@
     "definitions": {
         "interfaces.Login": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string",
@@ -119,7 +123,9 @@
             "type": "object",
             "required": [
                 "email",
-                "firstname"
+                "firstname",
+                "image",
+                "password"
             ],
             "properties": {
                 "birthday": {
@@ -133,6 +139,9 @@
                 "firstname": {
                     "type": "string",
                     "example": "Kanyapat"
+                },
+                "image": {
+                    "type": "string"
                 },
                 "lastname": {
                     "type": "string",

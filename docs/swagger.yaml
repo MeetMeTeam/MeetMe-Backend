@@ -8,6 +8,9 @@ definitions:
       password:
         example: winner
         type: string
+    required:
+    - email
+    - password
     type: object
   interfaces.RegisterRequest:
     properties:
@@ -20,6 +23,8 @@ definitions:
       firstname:
         example: Kanyapat
         type: string
+      image:
+        type: string
       lastname:
         example: Wittayamitkul
         type: string
@@ -29,6 +34,8 @@ definitions:
     required:
     - email
     - firstname
+    - image
+    - password
     type: object
   utils.DataResponse:
     properties:

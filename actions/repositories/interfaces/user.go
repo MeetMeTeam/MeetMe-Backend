@@ -7,6 +7,7 @@ type User struct {
 	Birthday  string `db:"birthday"`
 	Email     string `db:"email"`
 	Password  string `db:"password"`
+	Image     string `db:"image"`
 }
 
 type UserRepository interface {

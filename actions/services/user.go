@@ -1,9 +1,11 @@
 package services
 
 import (
+	"errors"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
+	"meetme/be/errs"
 	"time"
 
 	repoInt "meetme/be/actions/repositories/interfaces"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type userService struct {
@@ -30,17 +33,22 @@ func NewUserService(userRepo repositories.UserRepository) userService {
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
 	newUser := repoInt.User{
 		Firstname: request.Firstname,
 		Lastname:  request.Lastname,
 		Birthday:  request.Birthday,
 		Email:     request.Email,
 		Password:  string(bytes),
+		Image:     request.Image,
 	}
 	result, err := s.userRepo.Create(newUser)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, errs.NewInternalError(err.Error())
 	}
 
 	response := utils.DataResponse{
@@ -60,8 +68,11 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	user, err := s.userRepo.GetByEmail(request.Email)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
 		log.Println(err)
-		return nil, err
+		return nil, errs.NewInternalError(err.Error())
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
@@ -78,7 +89,8 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		t, err := token.SignedString([]byte("Hk89LSUPn3r4JDL@#@#$LJJKJDP00-.KJOS"))
 		if err != nil {
-			return err, nil
+			log.Println(err)
+			return nil, errs.NewInternalError(err.Error())
 		}
 		response := interfaces.LoginResponse{
 			AccessToken: t,
@@ -96,8 +108,11 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 func (s userService) GetUsers() (interface{}, error) {
 	users, err := s.userRepo.GetAll()
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
 		log.Println(err)
-		return nil, err
+		return nil, errs.NewInternalError(err.Error())
 	}
 
 	userResponses := []interfaces.RegisterResponse{}

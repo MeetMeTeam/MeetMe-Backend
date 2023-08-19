@@ -2,6 +2,7 @@ package handlers
 
 import (
 	svInter "meetme/be/actions/services/interfaces"
+	"meetme/be/errs"
 	"meetme/be/utils"
 	"net/http"
 
@@ -33,9 +34,23 @@ func (h userHandler) Register(c echo.Context) error {
 			Message: "Something wrong.",
 		})
 	}
+	errrr := utils.CustomValidator(*request)
+
+	if errrr != nil {
+		return c.JSON(http.StatusBadRequest, utils.ValidateResponse{
+			Message: errrr,
+		})
+	}
 
 	users, err := h.userService.CreateUser(*request)
 	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -72,6 +87,13 @@ func (h userHandler) Login(c echo.Context) error {
 
 	users, err := h.userService.Login(*request)
 	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -91,6 +113,13 @@ func (h userHandler) Login(c echo.Context) error {
 func (h userHandler) GetAllUser(c echo.Context) error {
 	users, err := h.userService.GetUsers()
 	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
 			Message: err.Error(),
 		})
