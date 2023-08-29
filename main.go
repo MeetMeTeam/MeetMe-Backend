@@ -47,6 +47,10 @@ func main() {
 	userService := services.NewUserService(userRepository)
 	userHandler := handlers.NewUserHandler(userService)
 
+	inviteRepository := repositories.NewFriendInvitationRepositoryDB(db)
+	inviteService := services.NewFriendInvitationService(inviteRepository)
+	inviteHandler := handlers.NewFriendInvitationHandler(inviteService)
+
 	e := echo.New()
 
 	e.Use(middleware.CORS())
@@ -60,7 +64,7 @@ func main() {
 	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
 	e.GET("/migrate", func(c echo.Context) error {
-		db.AutoMigrate(User{})
+		db.AutoMigrate(User{}, FriendInvitation{})
 		return c.String(http.StatusOK, "Migrate DB success !")
 	})
 
@@ -69,7 +73,7 @@ func main() {
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
 	api.GET("/users", userHandler.GetAllUser)
-	// api.POST("/points", userHandler.AddPoints)
+	api.POST("/add-friend", inviteHandler.InviteFriend)
 	// api.GET("/rewards", rewardHandler.GetRewards)
 	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
 	// api.POST("/redemption", redeemHandler.Redeem)
@@ -126,4 +130,11 @@ type User struct {
 	Email     string    `gorm:"size:255;not null"`
 	Password  string    `gorm:"not null"`
 	Image     string    `gorm:"not null"`
+	//Friend    []int
+}
+
+type FriendInvitation struct {
+	gorm.Model
+	SenderId   int `gorm:"not null"`
+	ReceiverId int `gorm:"not null"`
 }
