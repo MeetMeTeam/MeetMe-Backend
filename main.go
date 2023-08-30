@@ -3,19 +3,21 @@ package main
 import (
 	"context"
 	"fmt"
+	header "github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+	gosocketio "github.com/graarh/golang-socketio"
+	"github.com/graarh/golang-socketio/transport"
+	"github.com/labstack/echo/v4"
+	"github.com/spf13/viper"
+	echoSwagger "github.com/swaggo/echo-swagger"
+	"log"
 	"meetme/be/actions/handlers"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services"
+	_ "meetme/be/docs"
 	"net/http"
 	"strings"
 	"time"
-
-	_ "meetme/be/docs"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/spf13/viper"
-	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -31,6 +33,86 @@ func (l SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 	fmt.Printf("%v\n ======================================\n", sql)
 }
 
+var (
+	router *mux.Router
+	Server *gosocketio.Server
+
+	connectedUsers = make(map[string]ConnectedUser)
+)
+
+type Message struct {
+	Text string `json:"message"`
+}
+
+func init() {
+	Server = gosocketio.NewServer(transport.GetDefaultWebsocketTransport())
+	fmt.Println("Socket Inititalize...")
+}
+
+func LoadSocket() {
+	// socket connection
+	Server.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
+
+		fmt.Println("Connected", c.Id())
+		//fmt.Println("Connected", c)
+		addNewConnectedUser(c.Id())
+		c.Join("Room")
+	})
+
+	// socket disconnection
+	Server.On(gosocketio.OnDisconnection, func(c *gosocketio.Channel) {
+		//fmt.Println("Disconnected", c.Id())
+		removeConnectedUser(c.Id())
+		// handles when someone closes the tab
+		c.Leave("Room")
+	})
+
+	// chat socket
+	Server.On("/chat", func(c *gosocketio.Channel, message Message) string {
+		fmt.Println(message.Text)
+		c.BroadcastTo("Room", "/message", message.Text)
+		return "message sent successfully."
+	})
+}
+
+func CreateRouter() {
+	router = mux.NewRouter()
+}
+
+func InititalizeRoutes() {
+	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
+	})
+	router.Handle("/socket.io/", Server)
+}
+
+func StartServer() {
+	fmt.Println("Server Started at http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", header.CORS(header.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"}), header.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}), header.AllowedOrigins([]string{"*"}))(router)))
+}
+
+type ConnectedUser struct {
+	UserID string
+}
+
+func addNewConnectedUser(userID string) {
+	newUser := ConnectedUser{UserID: userID}
+	connectedUsers[userID] = newUser
+	fmt.Println("new connected users")
+	fmt.Println(connectedUsers)
+}
+
+func removeConnectedUser(userID string) {
+	if _, ok := connectedUsers[userID]; ok {
+		delete(connectedUsers, userID)
+
+	}
+	fmt.Println("users disconnect")
+	fmt.Println(connectedUsers)
+}
+
 // @title Meet Me API
 // @version 1.0
 // @description This is a API for Meet Me.
@@ -38,6 +120,47 @@ func (l SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql st
 // @host 3f9d-202-28-7-128.ngrok-free.app
 // @BasePath /api
 func main() {
+
+	e := echo.New()
+
+	//headers := header.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	//methods := header.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	//origins := header.AllowedOrigins([]string{"*"})
+
+	//e.Use(middleware.CORS())
+
+	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	//	AllowOrigins: []string{"http://localhost:3000"}, // กำหนดโดเมนที่ยอมรับ
+	//	AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	//}))
+
+	//server := socketio.NewServer(nil)
+	//
+	//server.OnConnect("/", func(s socketio.Conn) error {
+	//	s.SetContext("")
+	//	fmt.Println("connected:")
+	//	fmt.Println("connected:", s.ID())
+	//	return nil
+	//})
+	//
+	//go server.Serve()
+	//defer server.Close()
+	//
+
+	connectedUsers := make(map[string]ConnectedUser) // สร้าง map โดยกำหนด key เป็น string และ value เป็น ConnectedUser struct
+
+	// เพิ่มข้อมูลเข้าไปใน map
+	//addNewConnectedUser(connectedUsers, "socket1", "user1")
+	//addNewConnectedUser(connectedUsers, "socket2", "user2")
+
+	// แสดงผลค่าใน map
+	fmt.Println(connectedUsers)
+	LoadSocket()
+	CreateRouter()
+	InititalizeRoutes()
+	StartServer()
+
+	//log.Fatal(http.ListenAndServe(":8080", header.CORS(headers, methods, origins)(e)))
 
 	initConfig()
 	initTimeZone()
@@ -50,15 +173,6 @@ func main() {
 	inviteRepository := repositories.NewFriendInvitationRepositoryDB(db)
 	inviteService := services.NewFriendInvitationService(inviteRepository)
 	inviteHandler := handlers.NewFriendInvitationHandler(inviteService)
-
-	e := echo.New()
-
-	e.Use(middleware.CORS())
-
-	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	// 	AllowOrigins: []string{"https://localhost:" + viper.GetString("app.port"), viper.GetString("app.ngrok")}, // กำหนดโดเมนที่ยอมรับ
-	// 	AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	// }))
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
