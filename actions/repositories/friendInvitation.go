@@ -37,3 +37,12 @@ func (r FriendInvitationRepository) GetInvitationByReceiverId(receiverId int) ([
 	}
 	return invitation, nil
 }
+
+func (r FriendInvitationRepository) Delete(receiverId int, senderId int) error {
+	var invitation interfaces.FriendInvitation
+	result := r.db.Where("receiver_id = ?", receiverId).Where("sender_id = ?", senderId).Delete(&invitation)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

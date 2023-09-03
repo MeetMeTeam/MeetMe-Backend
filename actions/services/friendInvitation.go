@@ -72,3 +72,14 @@ func (s friendInvitationService) CheckFriendInvite(receiverId int) (interface{},
 	}
 	return response, nil
 }
+
+func (s friendInvitationService) RejectInvitation(req interfaces.InviteRequest) (interface{}, error) {
+	err := s.inviteRepo.Delete(req.ReceiverId, req.SenderId)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+	return utils.ErrorResponse{
+		Message: "Reject Friend Success",
+	}, nil
+}

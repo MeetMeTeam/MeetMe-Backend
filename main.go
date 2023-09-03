@@ -191,6 +191,7 @@ func main() {
 	inviteApi := api.Group("/invitation")
 	inviteApi.POST("/add", inviteHandler.InviteFriend)
 	inviteApi.GET("/check/:receiverId", inviteHandler.CheckFriendInvite)
+	inviteApi.POST("/rejected", inviteHandler.RejectFriend)
 	// api.GET("/rewards", rewardHandler.GetRewards)
 	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
 	// api.POST("/redemption", redeemHandler.Redeem)
