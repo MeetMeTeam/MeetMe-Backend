@@ -28,7 +28,7 @@ type LoginResponse struct {
 
 type UserService interface {
 	GetUsers() (interface{}, error)
-	// GetUserByLineId(string) (interface{}, error)
+	//GetUserById(int) (interface{}, error)
 	CreateUser(RegisterRequest) (interface{}, error)
 	Login(Login) (interface{}, error)
 	// AddPoints(PointRequest, string) (interface{}, error)

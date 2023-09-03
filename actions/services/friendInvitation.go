@@ -10,11 +10,12 @@ import (
 )
 
 type friendInvitationService struct {
-	userRepo repositories.FriendInvitationRepository
+	inviteRepo repositories.FriendInvitationRepository
+	userRepo   repositories.UserRepository
 }
 
-func NewFriendInvitationService(userRepo repositories.FriendInvitationRepository) friendInvitationService {
-	return friendInvitationService{userRepo: userRepo}
+func NewFriendInvitationService(inviteRepo repositories.FriendInvitationRepository, userRepo repositories.UserRepository) friendInvitationService {
+	return friendInvitationService{inviteRepo: inviteRepo, userRepo: userRepo}
 }
 
 func (s friendInvitationService) InviteFriend(request interfaces.InviteRequest) (interface{}, error) {
@@ -24,7 +25,7 @@ func (s friendInvitationService) InviteFriend(request interfaces.InviteRequest) 
 		SenderId:   request.SenderId,
 	}
 
-	_, err := s.userRepo.Create(newUser)
+	_, err := s.inviteRepo.Create(newUser)
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
@@ -34,5 +35,40 @@ func (s friendInvitationService) InviteFriend(request interfaces.InviteRequest) 
 		Message: "Invite friend success",
 	}
 
+	return response, nil
+}
+
+func (s friendInvitationService) CheckFriendInvite(receiverId int) (interface{}, error) {
+	result, err := s.inviteRepo.GetInvitationByReceiverId(receiverId)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	if len(result) == 0 {
+		return nil, errs.NewNotFoundError("Friend invitation is empty")
+	}
+	userResponses := []interfaces.RegisterResponse{}
+	for _, receiver := range result {
+		user, err := s.userRepo.GetById(receiver.SenderId)
+		if err != nil {
+			log.Println(err)
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		userResponse := interfaces.RegisterResponse{
+			ID:        user.ID,
+			Firstname: user.Firstname,
+			Lastname:  user.Lastname,
+			Email:     user.Email,
+			Birthday:  user.Birthday,
+		}
+		userResponses = append(userResponses, userResponse)
+	}
+
+	response := utils.DataResponse{
+		Data:    userResponses,
+		Message: "Get sender success.",
+	}
 	return response, nil
 }

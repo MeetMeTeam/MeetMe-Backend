@@ -13,6 +13,7 @@ type User struct {
 type UserRepository interface {
 	GetAll() ([]User, error)
 	GetByEmail(string) (*User, error)
+	GetById(int) (*User, error)
 	Create(User) (*User, error)
 	// UpdateTotalPoint(int, string) (*User, error)
 	// Update(User, string) (*User, error)

@@ -7,4 +7,5 @@ type InviteRequest struct {
 
 type InviteService interface {
 	InviteFriend(InviteRequest) (interface{}, error)
+	CheckFriendInvite(int) (interface{}, error)
 }

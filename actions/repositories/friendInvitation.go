@@ -28,3 +28,12 @@ func (r FriendInvitationRepository) Create(invite interfaces.FriendInvitation) (
 
 	return &newInvite, nil
 }
+
+func (r FriendInvitationRepository) GetInvitationByReceiverId(receiverId int) ([]interfaces.FriendInvitation, error) {
+	var invitation []interfaces.FriendInvitation
+	result := r.db.Where("receiver_id = ?", receiverId).Find(&invitation)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return invitation, nil
+}

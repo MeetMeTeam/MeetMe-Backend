@@ -6,6 +6,7 @@ import (
 	"meetme/be/errs"
 	"meetme/be/utils"
 	"net/http"
+	"strconv"
 )
 
 type friendInvitationHandler struct {
@@ -39,5 +40,29 @@ func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 		})
 	}
 
+	return c.JSON(http.StatusOK, users)
+}
+
+func (h friendInvitationHandler) CheckFriendInvite(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("receiverId"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	users, err := h.userService.CheckFriendInvite(id)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
 	return c.JSON(http.StatusOK, users)
 }

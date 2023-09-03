@@ -147,18 +147,18 @@ func main() {
 	//defer server.Close()
 	//
 
-	connectedUsers := make(map[string]ConnectedUser) // สร้าง map โดยกำหนด key เป็น string และ value เป็น ConnectedUser struct
+	//connectedUsers := make(map[string]ConnectedUser) // สร้าง map โดยกำหนด key เป็น string และ value เป็น ConnectedUser struct
 
 	// เพิ่มข้อมูลเข้าไปใน map
 	//addNewConnectedUser(connectedUsers, "socket1", "user1")
 	//addNewConnectedUser(connectedUsers, "socket2", "user2")
 
 	// แสดงผลค่าใน map
-	fmt.Println(connectedUsers)
-	LoadSocket()
-	CreateRouter()
-	InititalizeRoutes()
-	StartServer()
+	//fmt.Println(connectedUsers)
+	//LoadSocket()
+	//CreateRouter()
+	//InititalizeRoutes()
+	//StartServer()
 
 	//log.Fatal(http.ListenAndServe(":8080", header.CORS(headers, methods, origins)(e)))
 
@@ -171,7 +171,7 @@ func main() {
 	userHandler := handlers.NewUserHandler(userService)
 
 	inviteRepository := repositories.NewFriendInvitationRepositoryDB(db)
-	inviteService := services.NewFriendInvitationService(inviteRepository)
+	inviteService := services.NewFriendInvitationService(inviteRepository, userRepository)
 	inviteHandler := handlers.NewFriendInvitationHandler(inviteService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -187,7 +187,10 @@ func main() {
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
 	api.GET("/users", userHandler.GetAllUser)
-	api.POST("/add-friend", inviteHandler.InviteFriend)
+
+	inviteApi := api.Group("/invitation")
+	inviteApi.POST("/add", inviteHandler.InviteFriend)
+	inviteApi.GET("/check/:receiverId", inviteHandler.CheckFriendInvite)
 	// api.GET("/rewards", rewardHandler.GetRewards)
 	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
 	// api.POST("/redemption", redeemHandler.Redeem)

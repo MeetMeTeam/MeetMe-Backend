@@ -8,4 +8,5 @@ type FriendInvitation struct {
 
 type FriendInvitationRepository interface {
 	Create(FriendInvitation) (*FriendInvitation, error)
+	GetInvitationByReceiverId(int) ([]FriendInvitation, error)
 }

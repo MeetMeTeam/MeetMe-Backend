@@ -24,6 +24,15 @@ func (r UserRepository) GetByEmail(email string) (*interfaces.User, error) {
 	return &user, nil
 }
 
+func (r UserRepository) GetById(id int) (*interfaces.User, error) {
+	var user interfaces.User
+	result := r.db.First(&user, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+
+}
 func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 
 	newUser := interfaces.User{
@@ -52,5 +61,4 @@ func (r UserRepository) GetAll() ([]interfaces.User, error) {
 	}
 
 	return users, nil
-
 }
