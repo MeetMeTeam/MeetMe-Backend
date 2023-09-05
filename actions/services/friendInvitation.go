@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+	"gorm.io/gorm"
 	"log"
 	"meetme/be/actions/repositories"
 	repoInt "meetme/be/actions/repositories/interfaces"
@@ -32,11 +34,17 @@ func (s friendInvitationService) InviteFriend(token string, request interfaces.I
 
 	sender, err := s.userRepo.GetByEmail(email)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
 	}
 	receiver, err := s.userRepo.GetByEmail(request.ReceiverEmail)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
 	}
 
 	isInvite, err := s.inviteRepo.GetByReceiverIdAndSenderId(receiver.ID, sender.ID)
