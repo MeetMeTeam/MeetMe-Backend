@@ -19,6 +19,7 @@ func NewFriendInvitationHandler(userService svInter.InviteService) friendInvitat
 
 func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 	request := new(svInter.InviteRequest)
+	token := c.Request().Header.Get("Authorization")
 
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
@@ -26,7 +27,7 @@ func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 		})
 	}
 
-	users, err := h.userService.InviteFriend(*request)
+	users, err := h.userService.InviteFriend(token, *request)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)

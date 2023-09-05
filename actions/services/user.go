@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"github.com/spf13/viper"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
@@ -22,7 +23,7 @@ type userService struct {
 }
 
 type jwtCustomClaims struct {
-	Name string `json:"name"`
+	Email string `json:"email"`
 	// Admin bool   `json:"admin"`
 	jwt.RegisteredClaims
 }
@@ -89,14 +90,15 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		t, err := token.SignedString([]byte("Hk89LSUPn3r4JDL@#@#$LJJKJDP00-.KJOS"))
+		t, err := token.SignedString([]byte(viper.GetString("app.secret")))
 		if err != nil {
 			log.Println(err)
 			return nil, errs.NewInternalError(err.Error())
 		}
 		response := interfaces.LoginResponse{
-			Token: t,
+
 			UserDetails: interfaces.UserDetails{
+				Token:    t,
 				Mail:     user.Email,
 				Username: user.Username,
 				Id:       user.ID,

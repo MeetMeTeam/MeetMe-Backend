@@ -46,3 +46,12 @@ func (r FriendInvitationRepository) Delete(receiverId int, senderId int) error {
 	}
 	return nil
 }
+
+func (r FriendInvitationRepository) GetByReceiverIdAndSenderId(receiverId int, senderId int) (*interfaces.FriendInvitation, error) {
+	var invitation interfaces.FriendInvitation
+	result := r.db.Where("(receiver_id = ? AND sender_id = ?) OR (receiver_id = ? AND sender_id = ?)", receiverId, senderId, senderId, receiverId).First(&invitation)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &invitation, nil
+}

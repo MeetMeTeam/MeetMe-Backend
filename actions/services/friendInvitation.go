@@ -19,14 +19,41 @@ func NewFriendInvitationService(inviteRepo repositories.FriendInvitationReposito
 	return friendInvitationService{inviteRepo: inviteRepo, userRepo: userRepo, friendRepo: friendRepo}
 }
 
-func (s friendInvitationService) InviteFriend(request interfaces.InviteRequest) (interface{}, error) {
+func (s friendInvitationService) InviteFriend(token string, request interfaces.InviteRequest) (interface{}, error) {
 
-	newUser := repoInt.FriendInvitation{
-		ReceiverId: request.ReceiverId,
-		SenderId:   request.SenderId,
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
 	}
 
-	_, err := s.inviteRepo.Create(newUser)
+	if email == request.ReceiverEmail {
+		return nil, errs.NewBadRequestError("Can not add yourself.")
+	}
+
+	sender, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	receiver, err := s.userRepo.GetByEmail(request.ReceiverEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	isInvite, err := s.inviteRepo.GetByReceiverIdAndSenderId(receiver.ID, sender.ID)
+	if isInvite != nil {
+		return nil, errs.NewBadRequestError("This email is already sent!")
+	}
+
+	isFriend, err := s.friendRepo.GetFriendByReceiverAndSender(receiver.ID, sender.ID)
+	if isFriend != nil {
+		return nil, errs.NewBadRequestError("They are friends now!")
+	}
+	newUser := repoInt.FriendInvitation{
+		SenderId:   sender.ID,
+		ReceiverId: receiver.ID,
+	}
+
+	_, err = s.inviteRepo.Create(newUser)
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
@@ -75,31 +102,33 @@ func (s friendInvitationService) CheckFriendInvite(receiverId int) (interface{},
 }
 
 func (s friendInvitationService) RejectInvitation(req interfaces.InviteRequest) (interface{}, error) {
-	err := s.inviteRepo.Delete(req.ReceiverId, req.SenderId)
-	if err != nil {
-		log.Println(err)
-		return nil, errs.NewInternalError(err.Error())
-	}
+	//err := s.inviteRepo.Delete(req.ReceiverId, req.SenderId)
+	//if err != nil {
+	//	log.Println(err)
+	//	return nil, errs.NewInternalError(err.Error())
+	//}
 	return utils.ErrorResponse{
 		Message: "Reject Friend Success",
 	}, nil
 }
 
 func (s friendInvitationService) AcceptInvitation(req interfaces.InviteRequest) (interface{}, error) {
-	result, err := s.friendRepo.Create(req.SenderId, req.ReceiverId)
-	if err != nil {
-		log.Println(err)
-		return nil, errs.NewInternalError(err.Error())
-	}
-	err = s.inviteRepo.Delete(req.ReceiverId, req.SenderId)
-	if err != nil {
-		log.Println(err)
-		return nil, errs.NewInternalError(err.Error())
-	}
+	//result, err := s.friendRepo.Create(req.SenderId, req.ReceiverId)
+	//if err != nil {
+	//	log.Println(err)
+	//	return nil, errs.NewInternalError(err.Error())
+	//}
+	//err = s.inviteRepo.Delete(req.ReceiverId, req.SenderId)
+	//if err != nil {
+	//	log.Println(err)
+	//	return nil, errs.NewInternalError(err.Error())
+	//}
 
-	return utils.DataResponse{
-		Data:    result,
-		Message: "Add friend success",
-	}, nil
+	//return utils.DataResponse{
+	//	Data:    result,
+	//	Message: "Add friend success",
+	//}, nil
+
+	return nil, nil
 
 }

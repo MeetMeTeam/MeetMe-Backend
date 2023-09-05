@@ -25,11 +25,11 @@ type Login struct {
 }
 
 type LoginResponse struct {
-	Token       string      `json:"token"`
 	UserDetails interface{} `json:"userDetails"`
 }
 
 type UserDetails struct {
+	Token    string `json:"token"`
 	Mail     string `json:"mail"`
 	Username string `json:"username"`
 	Id       int    `json:"_id"`
