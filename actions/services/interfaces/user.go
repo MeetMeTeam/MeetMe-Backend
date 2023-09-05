@@ -23,7 +23,10 @@ type Login struct {
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"accessToken"`
+	Token    string `json:"token"`
+	Mail     string `json:"mail"`
+	Username string `json:"username"`
+	Id       int    `json:"_id"`
 }
 
 type UserService interface {

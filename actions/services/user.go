@@ -93,7 +93,10 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 			return nil, errs.NewInternalError(err.Error())
 		}
 		response := interfaces.LoginResponse{
-			AccessToken: t,
+			Token:    t,
+			Mail:     user.Email,
+			Username: user.Firstname,
+			Id:       user.ID,
 		}
 		return response, nil
 	} else {
