@@ -170,8 +170,10 @@ func main() {
 	userService := services.NewUserService(userRepository)
 	userHandler := handlers.NewUserHandler(userService)
 
+	friendRepository := repositories.NewFriendshipRepositoryDB(db)
+
 	inviteRepository := repositories.NewFriendInvitationRepositoryDB(db)
-	inviteService := services.NewFriendInvitationService(inviteRepository, userRepository)
+	inviteService := services.NewFriendInvitationService(inviteRepository, userRepository, friendRepository)
 	inviteHandler := handlers.NewFriendInvitationHandler(inviteService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -192,6 +194,7 @@ func main() {
 	inviteApi.POST("/add", inviteHandler.InviteFriend)
 	inviteApi.GET("/check/:receiverId", inviteHandler.CheckFriendInvite)
 	inviteApi.POST("/rejected", inviteHandler.RejectFriend)
+	inviteApi.POST("/accept", inviteHandler.AcceptFriend)
 	// api.GET("/rewards", rewardHandler.GetRewards)
 	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
 	// api.POST("/redemption", redeemHandler.Redeem)

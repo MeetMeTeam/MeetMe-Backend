@@ -94,5 +94,27 @@ func (h friendInvitationHandler) RejectFriend(c echo.Context) error {
 }
 
 func (h friendInvitationHandler) AcceptFriend(c echo.Context) error {
-	return nil
+	request := new(svInter.InviteRequest)
+
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: "Something wrong.",
+		})
+	}
+
+	users, err := h.userService.AcceptInvitation(*request)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
 }

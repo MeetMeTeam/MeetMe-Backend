@@ -12,10 +12,11 @@ import (
 type friendInvitationService struct {
 	inviteRepo repositories.FriendInvitationRepository
 	userRepo   repositories.UserRepository
+	friendRepo repositories.FriendshipRepository
 }
 
-func NewFriendInvitationService(inviteRepo repositories.FriendInvitationRepository, userRepo repositories.UserRepository) friendInvitationService {
-	return friendInvitationService{inviteRepo: inviteRepo, userRepo: userRepo}
+func NewFriendInvitationService(inviteRepo repositories.FriendInvitationRepository, userRepo repositories.UserRepository, friendRepo repositories.FriendshipRepository) friendInvitationService {
+	return friendInvitationService{inviteRepo: inviteRepo, userRepo: userRepo, friendRepo: friendRepo}
 }
 
 func (s friendInvitationService) InviteFriend(request interfaces.InviteRequest) (interface{}, error) {
@@ -85,5 +86,20 @@ func (s friendInvitationService) RejectInvitation(req interfaces.InviteRequest) 
 }
 
 func (s friendInvitationService) AcceptInvitation(req interfaces.InviteRequest) (interface{}, error) {
-	return nil, nil
+	result, err := s.friendRepo.Create(req.SenderId, req.ReceiverId)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+	err = s.inviteRepo.Delete(req.ReceiverId, req.SenderId)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	return utils.DataResponse{
+		Data:    result,
+		Message: "Add friend success",
+	}, nil
+
 }
