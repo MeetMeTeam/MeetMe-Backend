@@ -8,6 +8,7 @@ import (
 	gosocketio "github.com/graarh/golang-socketio"
 	"github.com/graarh/golang-socketio/transport"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/viper"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"log"
@@ -123,11 +124,11 @@ func main() {
 
 	e := echo.New()
 
-	//headers := header.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
-	//methods := header.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
-	//origins := header.AllowedOrigins([]string{"*"})
+	headers := header.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	methods := header.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := header.AllowedOrigins([]string{"*"})
 
-	//e.Use(middleware.CORS())
+	e.Use(middleware.CORS())
 
 	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 	//	AllowOrigins: []string{"http://localhost:3000"}, // กำหนดโดเมนที่ยอมรับ
@@ -198,8 +199,8 @@ func main() {
 	// api.GET("/rewards", rewardHandler.GetRewards)
 	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
 	// api.POST("/redemption", redeemHandler.Redeem)
-
-	e.Logger.Fatal(e.Start(":" + viper.GetString("app.port")))
+	//e.Logger.Fatal(http.ListenAndServe(":"+viper.GetString("app.port"), header.CORS(headers, methods, origins)(e)))
+	e.Logger.Fatal(e.Start(":"+viper.GetString("app.port")), header.CORS(headers, methods, origins)(e))
 }
 
 func initConfig() {
