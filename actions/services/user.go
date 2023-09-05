@@ -44,6 +44,7 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		Email:     request.Email,
 		Password:  string(bytes),
 		Image:     request.Image,
+		Username:  request.Username,
 	}
 	result, err := s.userRepo.Create(newUser)
 	if err != nil {
@@ -58,6 +59,7 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 			Lastname:  result.Lastname,
 			Birthday:  result.Birthday,
 			Email:     result.Email,
+			Username:  result.Username,
 		},
 		Message: "Create user success.",
 	}
@@ -93,10 +95,12 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 			return nil, errs.NewInternalError(err.Error())
 		}
 		response := interfaces.LoginResponse{
-			Token:    t,
-			Mail:     user.Email,
-			Username: user.Firstname,
-			Id:       user.ID,
+			Token: t,
+			UserDetails: interfaces.UserDetails{
+				Mail:     user.Email,
+				Username: user.Username,
+				Id:       user.ID,
+			},
 		}
 		return response, nil
 	} else {

@@ -8,6 +8,7 @@ type User struct {
 	Email     string `db:"email"`
 	Password  string `db:"password"`
 	Image     string `db:"image"`
+	Username  string `db:"username"`
 }
 
 type UserRepository interface {

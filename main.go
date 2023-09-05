@@ -246,6 +246,7 @@ func initDB() *gorm.DB {
 
 type User struct {
 	gorm.Model
+	Username  string    `gorm:"size:255;not null"`
 	Firstname string    `gorm:"size:255;not null"`
 	Lastname  string    `gorm:"size:255"`
 	Birthday  time.Time `gorm:"type:date;not null"`
