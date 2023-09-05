@@ -83,3 +83,7 @@ func (s friendInvitationService) RejectInvitation(req interfaces.InviteRequest) 
 		Message: "Reject Friend Success",
 	}, nil
 }
+
+func (s friendInvitationService) AcceptInvitation(req interfaces.InviteRequest) (interface{}, error) {
+	return nil, nil
+}

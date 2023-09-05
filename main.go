@@ -178,7 +178,7 @@ func main() {
 	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
 	e.GET("/migrate", func(c echo.Context) error {
-		db.AutoMigrate(User{}, FriendInvitation{})
+		db.AutoMigrate(User{}, FriendInvitation{}, Friendship{})
 		return c.String(http.StatusOK, "Migrate DB success !")
 	})
 
@@ -248,11 +248,18 @@ type User struct {
 	Email     string    `gorm:"size:255;not null"`
 	Password  string    `gorm:"not null"`
 	Image     string    `gorm:"not null"`
-	//Friend    []int
 }
 
 type FriendInvitation struct {
 	gorm.Model
 	SenderId   int `gorm:"not null"`
 	ReceiverId int `gorm:"not null"`
+}
+
+type Friendship struct {
+	ID       int            `gorm:"autoIncrement"`
+	UserId1  int            `gorm:"not null"`
+	UserID2  int            `gorm:"not null"`
+	DateAdd  time.Time      `gorm:"autoCreateTime"`
+	DeleteAt gorm.DeletedAt `gorm:"index"`
 }

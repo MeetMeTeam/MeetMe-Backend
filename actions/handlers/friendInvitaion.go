@@ -92,3 +92,7 @@ func (h friendInvitationHandler) RejectFriend(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, users)
 }
+
+func (h friendInvitationHandler) AcceptFriend(c echo.Context) error {
+	return nil
+}
