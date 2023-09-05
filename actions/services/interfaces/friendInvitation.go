@@ -7,6 +7,6 @@ type InviteRequest struct {
 type InviteService interface {
 	InviteFriend(string, InviteRequest) (interface{}, error)
 	CheckFriendInvite(int) (interface{}, error)
-	RejectInvitation(InviteRequest) (interface{}, error)
+	RejectInvitation(string, int) (interface{}, error)
 	AcceptInvitation(InviteRequest) (interface{}, error)
 }

@@ -69,15 +69,10 @@ func (h friendInvitationHandler) CheckFriendInvite(c echo.Context) error {
 }
 
 func (h friendInvitationHandler) RejectFriend(c echo.Context) error {
-	request := new(svInter.InviteRequest)
+	id, err := strconv.Atoi(c.Param("inviteId"))
+	token := c.Request().Header.Get("Authorization")
 
-	if err := c.Bind(request); err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
-			Message: "Something wrong.",
-		})
-	}
-
-	users, err := h.userService.RejectInvitation(*request)
+	users, err := h.userService.RejectInvitation(token, id)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)

@@ -109,12 +109,33 @@ func (s friendInvitationService) CheckFriendInvite(receiverId int) (interface{},
 	return response, nil
 }
 
-func (s friendInvitationService) RejectInvitation(req interfaces.InviteRequest) (interface{}, error) {
-	//err := s.inviteRepo.Delete(req.ReceiverId, req.SenderId)
-	//if err != nil {
-	//	log.Println(err)
-	//	return nil, errs.NewInternalError(err.Error())
-	//}
+func (s friendInvitationService) RejectInvitation(token string, inviteId int) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	isInvite, err := s.inviteRepo.GetInvitationByIdAndReceiverId(inviteId, user.ID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("Invitation not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	} else if isInvite == nil {
+		return nil, errs.NewNotFoundError("Invitation not found.")
+	}
+	err = s.inviteRepo.Delete(inviteId)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
 	return utils.ErrorResponse{
 		Message: "Reject Friend Success",
 	}, nil
