@@ -193,9 +193,9 @@ func main() {
 
 	inviteApi := api.Group("/invitation")
 	inviteApi.POST("/add", inviteHandler.InviteFriend)
-	inviteApi.GET("/check/:receiverId", inviteHandler.CheckFriendInvite)
+	inviteApi.GET("/check", inviteHandler.CheckFriendInvite)
 	inviteApi.DELETE("/rejected/:inviteId", inviteHandler.RejectFriend)
-	inviteApi.POST("/accept", inviteHandler.AcceptFriend)
+	inviteApi.POST("/accept/:inviteId", inviteHandler.AcceptFriend)
 	// api.GET("/rewards", rewardHandler.GetRewards)
 	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
 	// api.POST("/redemption", redeemHandler.Redeem)
@@ -262,9 +262,9 @@ type FriendInvitation struct {
 }
 
 type Friendship struct {
-	ID       int            `gorm:"autoIncrement"`
-	UserId1  int            `gorm:"not null"`
-	UserID2  int            `gorm:"not null"`
-	DateAdd  time.Time      `gorm:"autoCreateTime"`
+	ID       int `gorm:"autoIncrement"`
+	UserId1  int `gorm:"not null"`
+	UserID2  int `gorm:"not null"`
+	DateAdd  time.Time
 	DeleteAt gorm.DeletedAt `gorm:"index"`
 }

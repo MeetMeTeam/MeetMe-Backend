@@ -58,7 +58,7 @@ func (r FriendInvitationRepository) GetByReceiverIdAndSenderId(receiverId int, s
 
 func (r FriendInvitationRepository) GetInvitationByIdAndReceiverId(id int, receiverId int) (*interfaces.FriendInvitation, error) {
 	var invitation interfaces.FriendInvitation
-	result := r.db.Where("(id = ? AND sender_id = ?)", id, receiverId).First(&invitation)
+	result := r.db.Where("(id = ? AND receiver_id = ?)", id, receiverId).First(&invitation)
 	if result.Error != nil {
 		return nil, result.Error
 	}

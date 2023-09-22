@@ -28,7 +28,7 @@ func (s friendInvitationService) InviteFriend(token string, request interfaces.I
 		return nil, err
 	}
 
-	if email == request.ReceiverEmail {
+	if email == request.TargetMailAddress {
 		return nil, errs.NewBadRequestError("Can not add yourself.")
 	}
 
@@ -39,7 +39,7 @@ func (s friendInvitationService) InviteFriend(token string, request interfaces.I
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
-	receiver, err := s.userRepo.GetByEmail(request.ReceiverEmail)
+	receiver, err := s.userRepo.GetByEmail(request.TargetMailAddress)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errs.NewNotFoundError("User not found.")
@@ -74,8 +74,21 @@ func (s friendInvitationService) InviteFriend(token string, request interfaces.I
 	return response, nil
 }
 
-func (s friendInvitationService) CheckFriendInvite(receiverId int) (interface{}, error) {
-	result, err := s.inviteRepo.GetInvitationByReceiverId(receiverId)
+func (s friendInvitationService) CheckFriendInvite(token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	receiver, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	result, err := s.inviteRepo.GetInvitationByReceiverId(receiver.ID)
+
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
@@ -84,7 +97,7 @@ func (s friendInvitationService) CheckFriendInvite(receiverId int) (interface{},
 	if len(result) == 0 {
 		return nil, errs.NewNotFoundError("Friend invitation is empty")
 	}
-	userResponses := []interfaces.RegisterResponse{}
+	userResponses := []interfaces.CheckInviteResponse{}
 	for _, receiver := range result {
 		user, err := s.userRepo.GetById(receiver.SenderId)
 		if err != nil {
@@ -92,12 +105,10 @@ func (s friendInvitationService) CheckFriendInvite(receiverId int) (interface{},
 			return nil, errs.NewInternalError(err.Error())
 		}
 
-		userResponse := interfaces.RegisterResponse{
-			ID:        user.ID,
-			Firstname: user.Firstname,
-			Lastname:  user.Lastname,
-			Email:     user.Email,
-			Birthday:  user.Birthday,
+		userResponse := interfaces.CheckInviteResponse{
+			InviteId: receiver.ID,
+			Username: user.Username,
+			Email:    user.Email,
 		}
 		userResponses = append(userResponses, userResponse)
 	}
@@ -141,22 +152,62 @@ func (s friendInvitationService) RejectInvitation(token string, inviteId int) (i
 	}, nil
 }
 
-func (s friendInvitationService) AcceptInvitation(req interfaces.InviteRequest) (interface{}, error) {
-	//result, err := s.friendRepo.Create(req.SenderId, req.ReceiverId)
-	//if err != nil {
-	//	log.Println(err)
-	//	return nil, errs.NewInternalError(err.Error())
-	//}
-	//err = s.inviteRepo.Delete(req.ReceiverId, req.SenderId)
-	//if err != nil {
-	//	log.Println(err)
-	//	return nil, errs.NewInternalError(err.Error())
-	//}
+func (s friendInvitationService) AcceptInvitation(token string, inviteId int) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
 
-	//return utils.DataResponse{
-	//	Data:    result,
-	//	Message: "Add friend success",
-	//}, nil
+	isInvite, err := s.inviteRepo.GetInvitationByIdAndReceiverId(inviteId, user.ID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("Invitation not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	} else if isInvite == nil {
+		return nil, errs.NewNotFoundError("Invitation not found.")
+	}
+
+	result, err := s.friendRepo.Create(isInvite.SenderId, user.ID)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+	err = s.inviteRepo.Delete(isInvite.ID)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	user1, err := s.userRepo.GetById(result.UserId1)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	user2, err := s.userRepo.GetById(result.UserId2)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+	return utils.DataResponse{
+		Data: interfaces.FriendShipResponse{
+			User1: user1.Email,
+			User2: user2.Email,
+		},
+		Message: "Add friend success",
+	}, nil
 
 	return nil, nil
 
