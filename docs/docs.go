@@ -16,6 +16,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/invitation/add": {
+            "post": {
+                "description": "Invite friend by email.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend invitation"
+                ],
+                "summary": "Invite Friend",
+                "parameters": [
+                    {
+                        "description": "request body invite friend",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.InviteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Login user.",
@@ -109,6 +143,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "interfaces.InviteRequest": {
+            "type": "object",
+            "properties": {
+                "targetMailAddress": {
+                    "type": "string",
+                    "example": "winner@mail.com"
+                }
+            }
+        },
         "interfaces.Login": {
             "type": "object",
             "required": [
@@ -157,6 +200,10 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "winner"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "winnerkypt"
                 }
             }
         },
@@ -175,7 +222,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "3f9d-202-28-7-128.ngrok-free.app",
+	Host:             "c001-202-28-7-5.ngrok-free.app",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Meet Me API",

@@ -17,6 +17,15 @@ func NewFriendInvitationHandler(userService svInter.InviteService) friendInvitat
 	return friendInvitationHandler{userService: userService}
 }
 
+// InviteFriend godoc
+// @Summary      Invite Friend
+// @Description  Invite friend by email.
+// @Tags         friend invitation
+// @Accept       json
+// @Produce      json
+// @Param users body interfaces.InviteRequest true "request body invite friend"
+// @Success      200  {object}  utils.DataResponse
+// @Router       /invitation/add [post]
 func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 	request := new(svInter.InviteRequest)
 	token := c.Request().Header.Get("Authorization")

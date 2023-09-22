@@ -118,7 +118,7 @@ func removeConnectedUser(userID string) {
 // @version 1.0
 // @description This is a API for Meet Me.
 
-// @host 3f9d-202-28-7-128.ngrok-free.app
+// @host  c001-202-28-7-5.ngrok-free.app
 // @BasePath /api
 func main() {
 

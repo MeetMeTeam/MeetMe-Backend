@@ -6,9 +6,43 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "3f9d-202-28-7-128.ngrok-free.app",
+    "host": "c001-202-28-7-5.ngrok-free.app",
     "basePath": "/api",
     "paths": {
+        "/invitation/add": {
+            "post": {
+                "description": "Invite friend by email.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend invitation"
+                ],
+                "summary": "Invite Friend",
+                "parameters": [
+                    {
+                        "description": "request body invite friend",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.InviteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Login user.",
@@ -102,6 +136,15 @@
         }
     },
     "definitions": {
+        "interfaces.InviteRequest": {
+            "type": "object",
+            "properties": {
+                "targetMailAddress": {
+                    "type": "string",
+                    "example": "winner@mail.com"
+                }
+            }
+        },
         "interfaces.Login": {
             "type": "object",
             "required": [
@@ -150,6 +193,10 @@
                 "password": {
                     "type": "string",
                     "example": "winner"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "winnerkypt"
                 }
             }
         },
