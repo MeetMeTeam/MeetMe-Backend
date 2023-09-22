@@ -37,3 +37,12 @@ func (r FriendshipRepository) GetFriendByReceiverAndSender(receiverId int, sende
 	}
 	return &invitation, nil
 }
+
+func (r FriendshipRepository) GetFriendById(userId int) ([]interfaces.Friendship, error) {
+	var friend []interfaces.Friendship
+	result := r.db.Where("user_id1 = ? OR user_id2 = ?", userId, userId).Find(&friend)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return friend, nil
+}

@@ -177,6 +177,9 @@ func main() {
 	inviteService := services.NewFriendInvitationService(inviteRepository, userRepository, friendRepository)
 	inviteHandler := handlers.NewFriendInvitationHandler(inviteService)
 
+	friendService := services.NewFriendShipService(friendRepository, userRepository)
+	friendHandler := handlers.NewFriendShipHandler(friendService)
+
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
@@ -191,15 +194,14 @@ func main() {
 	api.POST("/login", userHandler.Login)
 	api.GET("/users", userHandler.GetAllUser)
 
+	api.GET("/friends", friendHandler.FriendList)
+
 	inviteApi := api.Group("/invitation")
 	inviteApi.POST("/add", inviteHandler.InviteFriend)
 	inviteApi.GET("/check", inviteHandler.CheckFriendInvite)
 	inviteApi.DELETE("/rejected/:inviteId", inviteHandler.RejectFriend)
 	inviteApi.POST("/accept/:inviteId", inviteHandler.AcceptFriend)
-	// api.GET("/rewards", rewardHandler.GetRewards)
-	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
-	// api.POST("/redemption", redeemHandler.Redeem)
-	//e.Logger.Fatal(http.ListenAndServe(":"+viper.GetString("app.port"), header.CORS(headers, methods, origins)(e)))
+
 	e.Logger.Fatal(e.Start(":"+viper.GetString("app.port")), header.CORS(headers, methods, origins)(e))
 }
 
