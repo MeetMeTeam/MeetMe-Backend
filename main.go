@@ -233,10 +233,8 @@ func initDB() *gorm.DB {
 		viper.GetInt("db.port"),
 		viper.GetString("db.database"),
 	)
-	//dsn := "root:root@tcp(127.0.0.1:8889)/erc?parseTime=true"
 	dial := mysql.Open(dsn)
 	db, err := gorm.Open(dial, &gorm.Config{
-		Logger: &SqlLogger{},
 		DryRun: false,
 	})
 	if err != nil {
