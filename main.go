@@ -8,6 +8,7 @@ import (
 	gosocketio "github.com/graarh/golang-socketio"
 	"github.com/graarh/golang-socketio/transport"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/viper"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"log"
@@ -117,17 +118,17 @@ func removeConnectedUser(userID string) {
 // @version 1.0
 // @description This is a API for Meet Me.
 
-// @host 3f9d-202-28-7-128.ngrok-free.app
+// @host  c001-202-28-7-5.ngrok-free.app
 // @BasePath /api
 func main() {
 
 	e := echo.New()
 
-	//headers := header.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
-	//methods := header.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
-	//origins := header.AllowedOrigins([]string{"*"})
+	headers := header.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	methods := header.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := header.AllowedOrigins([]string{"*"})
 
-	//e.Use(middleware.CORS())
+	e.Use(middleware.CORS())
 
 	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 	//	AllowOrigins: []string{"http://localhost:3000"}, // กำหนดโดเมนที่ยอมรับ
@@ -176,6 +177,9 @@ func main() {
 	inviteService := services.NewFriendInvitationService(inviteRepository, userRepository, friendRepository)
 	inviteHandler := handlers.NewFriendInvitationHandler(inviteService)
 
+	friendService := services.NewFriendShipService(friendRepository, userRepository)
+	friendHandler := handlers.NewFriendShipHandler(friendService)
+
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
 
@@ -190,16 +194,15 @@ func main() {
 	api.POST("/login", userHandler.Login)
 	api.GET("/users", userHandler.GetAllUser)
 
+	api.GET("/friends", friendHandler.FriendList)
+
 	inviteApi := api.Group("/invitation")
 	inviteApi.POST("/add", inviteHandler.InviteFriend)
-	inviteApi.GET("/check/:receiverId", inviteHandler.CheckFriendInvite)
-	inviteApi.POST("/rejected", inviteHandler.RejectFriend)
-	inviteApi.POST("/accept", inviteHandler.AcceptFriend)
-	// api.GET("/rewards", rewardHandler.GetRewards)
-	// api.GET("/reward/:rewardID", rewardHandler.GetDetailReward)
-	// api.POST("/redemption", redeemHandler.Redeem)
+	inviteApi.GET("/check", inviteHandler.CheckFriendInvite)
+	inviteApi.DELETE("/rejected/:inviteId", inviteHandler.RejectFriend)
+	inviteApi.POST("/accept/:inviteId", inviteHandler.AcceptFriend)
 
-	e.Logger.Fatal(e.Start(":" + viper.GetString("app.port")))
+	e.Logger.Fatal(e.Start(":"+viper.GetString("app.port")), header.CORS(headers, methods, origins)(e))
 }
 
 func initConfig() {
@@ -230,10 +233,8 @@ func initDB() *gorm.DB {
 		viper.GetInt("db.port"),
 		viper.GetString("db.database"),
 	)
-	//dsn := "root:root@tcp(127.0.0.1:8889)/erc?parseTime=true"
 	dial := mysql.Open(dsn)
 	db, err := gorm.Open(dial, &gorm.Config{
-		Logger: &SqlLogger{},
 		DryRun: false,
 	})
 	if err != nil {
@@ -245,6 +246,7 @@ func initDB() *gorm.DB {
 
 type User struct {
 	gorm.Model
+	Username  string    `gorm:"size:255;not null"`
 	Firstname string    `gorm:"size:255;not null"`
 	Lastname  string    `gorm:"size:255"`
 	Birthday  time.Time `gorm:"type:date;not null"`
@@ -260,9 +262,9 @@ type FriendInvitation struct {
 }
 
 type Friendship struct {
-	ID       int            `gorm:"autoIncrement"`
-	UserId1  int            `gorm:"not null"`
-	UserID2  int            `gorm:"not null"`
-	DateAdd  time.Time      `gorm:"autoCreateTime"`
+	ID       int `gorm:"autoIncrement"`
+	UserId1  int `gorm:"not null"`
+	UserID2  int `gorm:"not null"`
+	DateAdd  time.Time
 	DeleteAt gorm.DeletedAt `gorm:"index"`
 }

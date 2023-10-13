@@ -1,5 +1,11 @@
 basePath: /api
 definitions:
+  interfaces.InviteRequest:
+    properties:
+      targetMailAddress:
+        example: winner@mail.com
+        type: string
+    type: object
   interfaces.Login:
     properties:
       email:
@@ -31,6 +37,9 @@ definitions:
       password:
         example: winner
         type: string
+      username:
+        example: winnerkypt
+        type: string
     required:
     - email
     - firstname
@@ -43,13 +52,35 @@ definitions:
       message:
         type: string
     type: object
-host: 3f9d-202-28-7-128.ngrok-free.app
+host: c001-202-28-7-5.ngrok-free.app
 info:
   contact: {}
   description: This is a API for Meet Me.
   title: Meet Me API
   version: "1.0"
 paths:
+  /invitation/add:
+    post:
+      consumes:
+      - application/json
+      description: Invite friend by email.
+      parameters:
+      - description: request body invite friend
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.InviteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Invite Friend
+      tags:
+      - friend invitation
   /login:
     post:
       consumes:

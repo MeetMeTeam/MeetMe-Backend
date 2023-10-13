@@ -10,4 +10,6 @@ type FriendInvitationRepository interface {
 	Create(FriendInvitation) (*FriendInvitation, error)
 	GetInvitationByReceiverId(int) ([]FriendInvitation, error)
 	Delete(int) error
+	GetByReceiverIdAndSenderId(int, int) (*FriendInvitation, error)
+	GetInvitationByIdAndReceiverId(int, int) (*FriendInvitation, error)
 }

@@ -17,8 +17,18 @@ func NewFriendInvitationHandler(userService svInter.InviteService) friendInvitat
 	return friendInvitationHandler{userService: userService}
 }
 
+// InviteFriend godoc
+// @Summary      Invite Friend
+// @Description  Invite friend by email.
+// @Tags         friend invitation
+// @Accept       json
+// @Produce      json
+// @Param users body interfaces.InviteRequest true "request body invite friend"
+// @Success      200  {object}  utils.DataResponse
+// @Router       /invitation/add [post]
 func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 	request := new(svInter.InviteRequest)
+	token := c.Request().Header.Get("Authorization")
 
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
@@ -26,7 +36,7 @@ func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 		})
 	}
 
-	users, err := h.userService.InviteFriend(*request)
+	users, err := h.userService.InviteFriend(token, *request)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)
@@ -44,14 +54,9 @@ func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 }
 
 func (h friendInvitationHandler) CheckFriendInvite(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("receiverId"))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
-			Message: err.Error(),
-		})
-	}
+	token := c.Request().Header.Get("Authorization")
 
-	users, err := h.userService.CheckFriendInvite(id)
+	users, err := h.userService.CheckFriendInvite(token)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)
@@ -68,15 +73,10 @@ func (h friendInvitationHandler) CheckFriendInvite(c echo.Context) error {
 }
 
 func (h friendInvitationHandler) RejectFriend(c echo.Context) error {
-	request := new(svInter.InviteRequest)
+	id, err := strconv.Atoi(c.Param("inviteId"))
+	token := c.Request().Header.Get("Authorization")
 
-	if err := c.Bind(request); err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
-			Message: "Something wrong.",
-		})
-	}
-
-	users, err := h.userService.RejectInvitation(*request)
+	users, err := h.userService.RejectInvitation(token, id)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)
@@ -94,15 +94,10 @@ func (h friendInvitationHandler) RejectFriend(c echo.Context) error {
 }
 
 func (h friendInvitationHandler) AcceptFriend(c echo.Context) error {
-	request := new(svInter.InviteRequest)
+	id, err := strconv.Atoi(c.Param("inviteId"))
+	token := c.Request().Header.Get("Authorization")
 
-	if err := c.Bind(request); err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
-			Message: "Something wrong.",
-		})
-	}
-
-	users, err := h.userService.AcceptInvitation(*request)
+	users, err := h.userService.AcceptInvitation(token, id)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)

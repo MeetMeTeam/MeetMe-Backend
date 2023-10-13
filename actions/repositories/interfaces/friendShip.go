@@ -7,7 +7,9 @@ type Friendship struct {
 }
 
 type FriendshipRepository interface {
-	Create(receiverId int, senderId int) (*Friendship, error)
+	Create(int, int) (*Friendship, error)
+	GetFriendByReceiverAndSender(int, int) (*Friendship, error)
+	GetFriendById(int) ([]Friendship, error)
 	//GetInvitationByReceiverId(int) ([]FriendInvitation, error)
 	//Delete(int) error
 }

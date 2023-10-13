@@ -42,6 +42,7 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 		Birthday:  user.Birthday,
 		Password:  user.Password,
 		Image:     user.Image,
+		Username:  user.Username,
 	}
 
 	result := r.db.Create(&newUser)
