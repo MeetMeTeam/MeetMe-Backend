@@ -1,14 +1,14 @@
 package interfaces
 
 type User struct {
-	ID        int    `db:"id"`
-	Firstname string `db:"firstname"`
-	Lastname  string `db:"lastname"`
-	Birthday  string `db:"birthday"`
-	Email     string `db:"email"`
-	Password  string `db:"password"`
-	Image     string `db:"image"`
-	Username  string `db:"username"`
+	ID        int    `bson:"id"`
+	Firstname string `bson:"firstname"`
+	Lastname  string `bson:"lastname"`
+	Birthday  string `bson:"birthday"`
+	Email     string `bson:"email"`
+	Password  string `bson:"password"`
+	Image     string `bson:"image"`
+	Username  string `bson:"username"`
 }
 
 type UserRepository interface {

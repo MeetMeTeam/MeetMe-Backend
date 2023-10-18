@@ -9,3 +9,6 @@ db:
   username: "root"
   password: "root"
   database: "meet_me"
+mongodb:
+  username: "winnerkypt"
+  password: "Winner_kanyapat2"

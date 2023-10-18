@@ -110,6 +110,7 @@ func (h userHandler) Login(c echo.Context) error {
 // @Produce      json
 // @Success      200  {object}  utils.DataResponse
 // @Router       /users [get]
+
 func (h userHandler) GetAllUser(c echo.Context) error {
 	users, err := h.userService.GetUsers()
 	if err != nil {
