@@ -74,7 +74,7 @@ func main() {
 
 	api := e.Group("/api")
 
-	//api.POST("/register", userHandler.Register)
+	api.POST("/register", userHandler.Register)
 	//api.POST("/login", userHandler.Login)
 	api.GET("/users", userHandler.GetAllUser)
 

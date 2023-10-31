@@ -38,25 +38,22 @@ func (r UserRepository) GetById(id int) (*interfaces.User, error) {
 }
 func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 
-	//newUser := interfaces.User{
-	//	Firstname: user.Firstname,
-	//	Lastname:  user.Lastname,
-	//	Email:     user.Email,
-	//	Birthday:  user.Birthday,
-	//	Password:  user.Password,
-	//	Image:     user.Image,
-	//	Username:  user.Username,
-	//}
-	//
-	//result := r.db.Create(&newUser)
-	//
-	//if result.Error != nil {
-	//	return nil, result.Error
-	//}
+	newUser := interfaces.User{
+		Firstname: user.Firstname,
+		Lastname:  user.Lastname,
+		Email:     user.Email,
+		Birthday:  user.Birthday,
+		Password:  user.Password,
+		Image:     user.Image,
+		Username:  user.Username,
+	}
+	_, err := r.db.Collection("users").InsertOne(context.TODO(), newUser)
 
-	//return &newUser, nil
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	return &newUser, nil
 }
 
 func (r UserRepository) GetAll() ([]interfaces.User, error) {
