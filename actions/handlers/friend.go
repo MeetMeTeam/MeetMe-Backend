@@ -6,15 +6,14 @@ import (
 	"meetme/be/errs"
 	"meetme/be/utils"
 	"net/http"
-	"strconv"
 )
 
-type friendInvitationHandler struct {
-	userService svInter.InviteService
+type friendHandler struct {
+	friendService svInter.FriendService
 }
 
-func NewFriendInvitationHandler(userService svInter.InviteService) friendInvitationHandler {
-	return friendInvitationHandler{userService: userService}
+func NewFriendHandler(friendService svInter.FriendService) friendHandler {
+	return friendHandler{friendService: friendService}
 }
 
 // InviteFriend godoc
@@ -26,7 +25,7 @@ func NewFriendInvitationHandler(userService svInter.InviteService) friendInvitat
 // @Param users body interfaces.InviteRequest true "request body invite friend"
 // @Success      200  {object}  utils.DataResponse
 // @Router       /invitation/add [post]
-func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
+func (h friendHandler) InviteFriend(c echo.Context) error {
 	request := new(svInter.InviteRequest)
 	token := c.Request().Header.Get("Authorization")
 
@@ -36,7 +35,7 @@ func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 		})
 	}
 
-	users, err := h.userService.InviteFriend(token, *request)
+	users, err := h.friendService.InviteFriend(token, *request)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)
@@ -53,10 +52,10 @@ func (h friendInvitationHandler) InviteFriend(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
-func (h friendInvitationHandler) CheckFriendInvite(c echo.Context) error {
+func (h friendHandler) CheckFriendInvite(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
 
-	users, err := h.userService.CheckFriendInvite(token)
+	users, err := h.friendService.CheckFriendInvite(token)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)
@@ -72,11 +71,11 @@ func (h friendInvitationHandler) CheckFriendInvite(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
-func (h friendInvitationHandler) RejectFriend(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("inviteId"))
+func (h friendHandler) RejectFriend(c echo.Context) error {
+	id := c.Param("inviteId")
 	token := c.Request().Header.Get("Authorization")
 
-	users, err := h.userService.RejectInvitation(token, id)
+	users, err := h.friendService.RejectInvitation(token, id)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)
@@ -92,12 +91,11 @@ func (h friendInvitationHandler) RejectFriend(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, users)
 }
-
-func (h friendInvitationHandler) AcceptFriend(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("inviteId"))
+func (h friendHandler) AcceptFriend(c echo.Context) error {
+	id := c.Param("inviteId")
 	token := c.Request().Header.Get("Authorization")
 
-	users, err := h.userService.AcceptInvitation(token, id)
+	users, err := h.friendService.AcceptInvitation(token, id)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)

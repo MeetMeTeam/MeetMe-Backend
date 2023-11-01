@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"meetme/be/actions/repositories/interfaces"
 )
@@ -15,26 +16,37 @@ func NewUserRepositoryDB(db *mongo.Database) UserRepository {
 	return UserRepository{db: db}
 }
 
-func (r UserRepository) GetByEmail(email string) (*interfaces.User, error) {
+func (r UserRepository) GetByEmail(email string) (*interfaces.UserResponse, error) {
+	var users interfaces.UserResponse
+	filter := bson.D{{"email", email}}
+	coll := r.db.Collection("user")
+	err := coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// This error means your query did not match any documents.
+			return nil, err
+		}
+		panic(err)
+	}
 
-	//var user interfaces.User
-	//result := r.db.Where("email = ?", email).First(&user)
-	//if result.Error != nil {
-	//	return nil, result.Error
-	//}
-	//return &user, nil
-	return nil, nil
+	return &users, nil
 }
 
-func (r UserRepository) GetById(id int) (*interfaces.User, error) {
-	//var user interfaces.User
-	//result := r.db.First(&user, id)
-	//if result.Error != nil {
-	//	return nil, result.Error
-	//}
-	//return &user, nil
+func (r UserRepository) GetById(id primitive.ObjectID) (*interfaces.User, error) {
 
-	return nil, nil
+	var users interfaces.User
+	filter := bson.D{{"_id", id}}
+	coll := r.db.Collection("user")
+	err := coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// This error means your query did not match any documents.
+			return nil, err
+		}
+		panic(err)
+	}
+
+	return &users, nil
 }
 func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 
@@ -47,7 +59,7 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 		Image:     user.Image,
 		Username:  user.Username,
 	}
-	_, err := r.db.Collection("users").InsertOne(context.TODO(), newUser)
+	_, err := r.db.Collection("user").InsertOne(context.TODO(), newUser)
 
 	if err != nil {
 		return nil, err
@@ -56,15 +68,15 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 	return &newUser, nil
 }
 
-func (r UserRepository) GetAll() ([]interfaces.User, error) {
-	//client, _ := mongo.Connect(context.TODO())
+func (r UserRepository) GetAll() ([]interfaces.UserResponse, error) {
+
 	filter := bson.D{}
-	coll := r.db.Collection("users")
+	coll := r.db.Collection("user")
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
 		panic(err)
 	}
-	var users []interfaces.User
+	var users []interfaces.UserResponse
 	if err = cursor.All(context.TODO(), &users); err != nil {
 		panic(err)
 	}

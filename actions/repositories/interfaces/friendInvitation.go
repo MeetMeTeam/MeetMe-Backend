@@ -1,15 +1,22 @@
 package interfaces
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type FriendInvitation struct {
-	ID         int `db:"id"`
-	ReceiverId int `db:"receiver_id"`
-	SenderId   int `db:"sender_id"`
+	ReceiverId string `db:"receiver_id"`
+	SenderId   string `db:"sender_id"`
+}
+
+type FriendInvitationResponse struct {
+	ID         primitive.ObjectID `bson:"_id"`
+	ReceiverId primitive.ObjectID `db:"receiver_id"`
+	SenderId   primitive.ObjectID `db:"sender_id"`
 }
 
 type FriendInvitationRepository interface {
 	Create(FriendInvitation) (*FriendInvitation, error)
-	GetInvitationByReceiverId(int) ([]FriendInvitation, error)
+	GetInvitationByReceiverId(string) ([]FriendInvitationResponse, error)
 	Delete(int) error
-	GetByReceiverIdAndSenderId(int, int) (*FriendInvitation, error)
-	GetInvitationByIdAndReceiverId(int, int) (*FriendInvitation, error)
+	GetByReceiverIdAndSenderId(string, string) (*FriendInvitationResponse, error)
+	GetInvitationByIdAndReceiverId(string, string) (*FriendInvitationResponse, error)
 }

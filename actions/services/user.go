@@ -55,7 +55,7 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 
 	response := utils.DataResponse{
 		Data: &interfaces.RegisterResponse{
-			ID:        result.ID,
+			//ID:        result.ID.Hex(),
 			Firstname: result.Firstname,
 			Lastname:  result.Lastname,
 			Birthday:  result.Birthday,
@@ -101,7 +101,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Token:    t,
 				Mail:     user.Email,
 				Username: user.Username,
-				Id:       user.ID,
+				Id:       user.ID.Hex(),
 			},
 		}
 		return response, nil
@@ -124,10 +124,10 @@ func (s userService) GetUsers() (interface{}, error) {
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	userResponses := []interfaces.RegisterResponse{}
+	userResponses := []interfaces.ListUserResponse{}
 	for _, user := range users {
-		userResponse := interfaces.RegisterResponse{
-			ID:        user.ID,
+		userResponse := interfaces.ListUserResponse{
+			ID:        user.ID.Hex(),
 			Firstname: user.Firstname,
 			Lastname:  user.Lastname,
 			Email:     user.Email,

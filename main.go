@@ -56,10 +56,10 @@ func main() {
 	userHandler := handlers.NewUserHandler(userService)
 
 	//friendRepository := repositories.NewFriendshipRepositoryDB(db)
-	//
-	//inviteRepository := repositories.NewFriendInvitationRepositoryDB(db)
-	//inviteService := services.NewFriendInvitationService(inviteRepository, userRepository, friendRepository)
-	//inviteHandler := handlers.NewFriendInvitationHandler(inviteService)
+
+	friendRepository := repositories.NewFriendRepositoryDB(db)
+	friendService := services.NewFriendService(friendRepository, userRepository)
+	friendHandler := handlers.NewFriendHandler(friendService)
 	//
 	//friendService := services.NewFriendShipService(friendRepository, userRepository)
 	//friendHandler := handlers.NewFriendShipHandler(friendService)
@@ -74,17 +74,18 @@ func main() {
 
 	api := e.Group("/api")
 
-	api.POST("/register", userHandler.Register)
-	//api.POST("/login", userHandler.Login)
-	api.GET("/users", userHandler.GetAllUser)
+	userApi := api.Group("/users")
+	userApi.GET("", userHandler.GetAllUser)
+	userApi.POST("/register", userHandler.Register)
+	userApi.POST("/login", userHandler.Login)
+
+	inviteApi := api.Group("/invitations")
+	inviteApi.POST("", friendHandler.InviteFriend)
+	inviteApi.GET("", friendHandler.CheckFriendInvite)
+	inviteApi.DELETE("/:inviteId", friendHandler.RejectFriend)
+	inviteApi.PUT("/:inviteId", friendHandler.AcceptFriend)
 
 	//api.GET("/friends", friendHandler.FriendList)
-	//
-	//inviteApi := api.Group("/invitation")
-	//inviteApi.POST("/add", inviteHandler.InviteFriend)
-	//inviteApi.GET("/check", inviteHandler.CheckFriendInvite)
-	//inviteApi.DELETE("/rejected/:inviteId", inviteHandler.RejectFriend)
-	//inviteApi.POST("/accept/:inviteId", inviteHandler.AcceptFriend)
 
 	e.Logger.Fatal(e.Start(":"+viper.GetString("app.port")), header.CORS(headers, methods, origins)(e))
 }
@@ -121,10 +122,10 @@ func initDB() *mongo.Database {
 	}
 
 	// Send a ping to confirm a successful connection
-	if err := client.Database("meet-me").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+	if err := client.Database("MeetMe").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
 		panic(err)
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	return client.Database("meet-me")
+	return client.Database("MeetMe")
 }

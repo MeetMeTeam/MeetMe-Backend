@@ -14,11 +14,11 @@ import (
 type friendInvitationService struct {
 	inviteRepo repositories.FriendInvitationRepository
 	userRepo   repositories.UserRepository
-	friendRepo repositories.FriendshipRepository
+	//friendRepo repositories.FriendshipRepository
 }
 
-func NewFriendInvitationService(inviteRepo repositories.FriendInvitationRepository, userRepo repositories.UserRepository, friendRepo repositories.FriendshipRepository) friendInvitationService {
-	return friendInvitationService{inviteRepo: inviteRepo, userRepo: userRepo, friendRepo: friendRepo}
+func NewFriendInvitationService(inviteRepo repositories.FriendInvitationRepository, userRepo repositories.UserRepository) friendInvitationService {
+	return friendInvitationService{inviteRepo: inviteRepo, userRepo: userRepo}
 }
 
 func (s friendInvitationService) InviteFriend(token string, request interfaces.InviteRequest) (interface{}, error) {
@@ -47,18 +47,18 @@ func (s friendInvitationService) InviteFriend(token string, request interfaces.I
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	isInvite, err := s.inviteRepo.GetByReceiverIdAndSenderId(receiver.ID, sender.ID)
+	isInvite, err := s.inviteRepo.GetByReceiverIdAndSenderId(receiver.ID.Hex(), sender.ID.Hex())
 	if isInvite != nil {
 		return nil, errs.NewBadRequestError("This email is already sent!")
 	}
 
-	isFriend, err := s.friendRepo.GetFriendByReceiverAndSender(receiver.ID, sender.ID)
-	if isFriend != nil {
-		return nil, errs.NewBadRequestError("They are friends now!")
-	}
+	//isFriend, err := s.friendRepo.GetFriendByReceiverAndSender(receiver.ID, sender.ID)
+	//if isFriend != nil {
+	//	return nil, errs.NewBadRequestError("They are friends now!")
+	//}
 	newUser := repoInt.FriendInvitation{
-		SenderId:   sender.ID,
-		ReceiverId: receiver.ID,
+		SenderId:   sender.ID.Hex(),
+		ReceiverId: receiver.ID.Hex(),
 	}
 
 	_, err = s.inviteRepo.Create(newUser)
@@ -87,7 +87,7 @@ func (s friendInvitationService) CheckFriendInvite(token string) (interface{}, e
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	result, err := s.inviteRepo.GetInvitationByReceiverId(receiver.ID)
+	result, err := s.inviteRepo.GetInvitationByReceiverId(receiver.ID.Hex())
 
 	if err != nil {
 		log.Println(err)
@@ -120,7 +120,7 @@ func (s friendInvitationService) CheckFriendInvite(token string) (interface{}, e
 	return response, nil
 }
 
-func (s friendInvitationService) RejectInvitation(token string, inviteId int) (interface{}, error) {
+func (s friendInvitationService) RejectInvitation(token string, inviteId string) (interface{}, error) {
 	email, err := utils.IsTokenValid(token)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (s friendInvitationService) RejectInvitation(token string, inviteId int) (i
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	isInvite, err := s.inviteRepo.GetInvitationByIdAndReceiverId(inviteId, user.ID)
+	isInvite, err := s.inviteRepo.GetInvitationByIdAndReceiverId(inviteId, user.ID.Hex())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errs.NewNotFoundError("Invitation not found.")
@@ -152,7 +152,7 @@ func (s friendInvitationService) RejectInvitation(token string, inviteId int) (i
 	}, nil
 }
 
-func (s friendInvitationService) AcceptInvitation(token string, inviteId int) (interface{}, error) {
+func (s friendInvitationService) AcceptInvitation(token string, inviteId string) (interface{}, error) {
 	email, err := utils.IsTokenValid(token)
 	if err != nil {
 		return nil, err
@@ -165,7 +165,7 @@ func (s friendInvitationService) AcceptInvitation(token string, inviteId int) (i
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	isInvite, err := s.inviteRepo.GetInvitationByIdAndReceiverId(inviteId, user.ID)
+	isInvite, err := s.inviteRepo.GetInvitationByIdAndReceiverId(inviteId, user.ID.Hex())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errs.NewNotFoundError("Invitation not found.")
@@ -175,18 +175,18 @@ func (s friendInvitationService) AcceptInvitation(token string, inviteId int) (i
 		return nil, errs.NewNotFoundError("Invitation not found.")
 	}
 
-	result, err := s.friendRepo.Create(isInvite.SenderId, user.ID)
+	//result, err := s.friendRepo.Create(isInvite.SenderId, user.ID)
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
-	err = s.inviteRepo.Delete(isInvite.ID)
+	err = s.inviteRepo.Delete(isInvite.ID.Hex())
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	user1, err := s.userRepo.GetById(result.UserId1)
+	//user1, err := s.userRepo.GetById(result.UserId1)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errs.NewNotFoundError("User not found.")
@@ -194,20 +194,20 @@ func (s friendInvitationService) AcceptInvitation(token string, inviteId int) (i
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	user2, err := s.userRepo.GetById(result.UserId2)
+	//user2, err := s.userRepo.GetById(result.UserId2)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errs.NewNotFoundError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
-	return utils.DataResponse{
-		Data: interfaces.FriendShipResponse{
-			User1: user1.Email,
-			User2: user2.Email,
-		},
-		Message: "Add friend success",
-	}, nil
+	//return utils.DataResponse{
+	//	Data: interfaces.FriendShipResponse{
+	//		User1: user1.Email,
+	//		User2: user2.Email,
+	//	},
+	//	Message: "Add friend success",
+	//}, nil
 
 	return nil, nil
 
