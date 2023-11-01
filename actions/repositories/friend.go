@@ -34,18 +34,18 @@ func (r FriendRepository) Create(invite interfaces.FriendRequest) (*interfaces.F
 	return &newInvite, nil
 }
 
-func (r FriendRepository) GetInvitationByReceiverId(receiverId primitive.ObjectID) ([]interfaces.FriendResponse, error) {
+func (r FriendRepository) GetByReceiverId(receiverId primitive.ObjectID) ([]interfaces.FriendResponse, error) {
 	var invitation []interfaces.FriendResponse
 
 	filter := bson.D{{"receiver_id", receiverId}, {"status", "PENDING"}}
 	coll := r.db.Collection("friends")
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	if err = cursor.All(context.TODO(), &invitation); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return invitation, nil
@@ -57,7 +57,7 @@ func (r FriendRepository) UpdateStatus(id primitive.ObjectID) (*interfaces.Frien
 	coll := r.db.Collection("friends")
 	_, err := coll.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
-		panic(err)
+		return nil, err
 		return nil, err
 	}
 
@@ -69,7 +69,7 @@ func (r FriendRepository) UpdateStatus(id primitive.ObjectID) (*interfaces.Frien
 			// This error means your query did not match any documents.
 			return nil, err
 		}
-		panic(err)
+		return nil, err
 	}
 	return &friend, nil
 }
@@ -81,7 +81,7 @@ func (r FriendRepository) Delete(inviteId primitive.ObjectID) error {
 
 	_, err := coll.DeleteOne(context.TODO(), filter)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
@@ -94,7 +94,20 @@ func (r FriendRepository) GetByReceiverIdAndSenderId(receiverId primitive.Object
 	coll := r.db.Collection("friends")
 	err := coll.FindOne(context.TODO(), filter).Decode(&invitation)
 	if err != nil {
-		panic(err)
+		return nil, err
+	}
+
+	return &invitation, nil
+}
+
+func (r FriendRepository) GetByIdAndReceiverIdAndStatus(id primitive.ObjectID, receiverId primitive.ObjectID, status string) (*interfaces.FriendResponse, error) {
+	var invitation interfaces.FriendResponse
+
+	filter := bson.D{{"_id", id}, {"receiver_id", receiverId}, {"status", status}}
+	coll := r.db.Collection("friends")
+	err := coll.FindOne(context.TODO(), filter).Decode(&invitation)
+	if err != nil {
+		return nil, err
 	}
 
 	return &invitation, nil
