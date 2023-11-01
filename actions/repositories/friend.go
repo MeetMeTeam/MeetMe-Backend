@@ -34,10 +34,10 @@ func (r FriendRepository) Create(invite interfaces.FriendRequest) (*interfaces.F
 	return &newInvite, nil
 }
 
-func (r FriendRepository) GetByReceiverId(receiverId primitive.ObjectID) ([]interfaces.FriendResponse, error) {
+func (r FriendRepository) GetByReceiverId(receiverId primitive.ObjectID, status string) ([]interfaces.FriendResponse, error) {
 	var invitation []interfaces.FriendResponse
 
-	filter := bson.D{{"receiver_id", receiverId}, {"status", "PENDING"}}
+	filter := bson.D{{"receiver_id", receiverId}, {"status", status}}
 	coll := r.db.Collection("friends")
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
@@ -111,4 +111,29 @@ func (r FriendRepository) GetByIdAndReceiverIdAndStatus(id primitive.ObjectID, r
 	}
 
 	return &invitation, nil
+}
+
+func (r FriendRepository) GetByUserId(id primitive.ObjectID, status string) ([]interfaces.FriendResponse, error) {
+	var invitation []interfaces.FriendResponse
+
+	filter := bson.D{
+		//{"receiver_id", id},
+		{"$or", bson.A{
+			bson.D{{"sender_id", id}},
+			bson.D{{"receiver_id", id}},
+		}},
+		{"status", status},
+	}
+	//filter := bson.D{{"receiver_id", id}, {"$or", bson.D{"sender_id", id}}, {"status", status}}
+	coll := r.db.Collection("friends")
+	cursor, err := coll.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cursor.All(context.TODO(), &invitation); err != nil {
+		return nil, err
+	}
+
+	return invitation, nil
 }

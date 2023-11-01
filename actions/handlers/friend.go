@@ -111,3 +111,22 @@ func (h friendHandler) AcceptFriend(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, users)
 }
+
+func (h friendHandler) FriendList(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.friendService.GetFriend(token)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, users)
+}

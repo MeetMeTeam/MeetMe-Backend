@@ -85,7 +85,8 @@ func main() {
 	inviteApi.DELETE("/:inviteId", friendHandler.RejectFriend)
 	inviteApi.PUT("/:inviteId", friendHandler.AcceptFriend)
 
-	//api.GET("/friends", friendHandler.FriendList)
+	friendApi := api.Group("/friends")
+	friendApi.GET("", friendHandler.FriendList)
 
 	e.Logger.Fatal(e.Start(":"+viper.GetString("app.port")), header.CORS(headers, methods, origins)(e))
 }

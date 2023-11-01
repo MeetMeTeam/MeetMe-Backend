@@ -90,7 +90,7 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	results, err := s.friendRepo.GetByReceiverId(receiver.ID)
+	results, err := s.friendRepo.GetByReceiverId(receiver.ID, "PENDING")
 
 	if err != nil {
 		log.Println("Friend invitation is empty")
@@ -226,4 +226,63 @@ func (s friendService) RejectInvitation(token string, inviteId string) (interfac
 	return utils.ErrorResponse{
 		Message: "Reject Friend Success",
 	}, nil
+}
+
+func (s friendService) GetFriend(token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		log.Println("User not found.")
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	results, err := s.friendRepo.GetByUserId(user.ID, "FRIEND")
+
+	if err != nil {
+		log.Println("Friend list is empty")
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewNotFoundError("Friend list is empty")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	if len(results) == 0 {
+		return nil, errs.NewNotFoundError("Friend list is empty")
+	}
+	userResponses := []interfaces.RegisterResponse{}
+	for _, result := range results {
+		id := primitive.ObjectID{}
+		if result.Sender != user.ID {
+			id = result.Sender
+		} else if result.Receive != user.ID {
+			id = result.Receive
+		}
+
+		user, err := s.userRepo.GetById(id)
+		if err != nil {
+			log.Println(err)
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		userResponse := interfaces.RegisterResponse{
+			Username:  user.Username,
+			Firstname: user.Firstname,
+			Lastname:  user.Lastname,
+			Birthday:  user.Birthday,
+			Email:     user.Email,
+		}
+		userResponses = append(userResponses, userResponse)
+	}
+
+	response := utils.DataResponse{
+		Data:    userResponses,
+		Message: "Get friend list success.",
+	}
+	return response, nil
 }

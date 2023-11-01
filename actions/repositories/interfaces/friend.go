@@ -17,10 +17,11 @@ type FriendResponse struct {
 
 type FriendRepository interface {
 	Create(FriendRequest) (*FriendRequest, error)
-	GetByReceiverId(id primitive.ObjectID) ([]FriendResponse, error)
+	GetByReceiverId(primitive.ObjectID, string) ([]FriendResponse, error)
 	UpdateStatus(primitive.ObjectID) (*FriendRequest, error)
 	Delete(primitive.ObjectID) error
 	GetByReceiverIdAndSenderId(primitive.ObjectID, primitive.ObjectID) (*FriendResponse, error)
 	GetByIdAndReceiverIdAndStatus(primitive.ObjectID, primitive.ObjectID, string) (*FriendResponse, error)
+	GetByUserId(primitive.ObjectID, string) ([]FriendResponse, error)
 	//GetInvitationByIdAndReceiverId(string, string) (*FriendInvitationResponse, error)
 }
