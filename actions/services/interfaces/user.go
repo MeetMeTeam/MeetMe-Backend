@@ -3,7 +3,7 @@ package interfaces
 type RegisterRequest struct {
 	Firstname string `json:"firstname" validate:"required" example:"Kanyapat"`
 	Lastname  string `json:"lastname" example:"Wittayamitkul"`
-	Username  string `json:"username" example:"winnerkypt"`
+	Username  string `json:"username" validate:"unique" example:"winnerkypt"`
 	Email     string `json:"email" validate:"required,email" example:"winner@mail.com"`
 	Birthday  string `json:"birthday" example:"2023-08-12"`
 	Password  string `json:"password" example:"winner" validate:"required"`

@@ -86,3 +86,16 @@ func (r FriendRepository) Delete(inviteId primitive.ObjectID) error {
 
 	return nil
 }
+
+func (r FriendRepository) GetByReceiverIdAndSenderId(receiverId primitive.ObjectID, senderId primitive.ObjectID) (*interfaces.FriendResponse, error) {
+	var invitation interfaces.FriendResponse
+
+	filter := bson.D{{"receiver_id", receiverId}, {"sender_id", senderId}}
+	coll := r.db.Collection("friends")
+	err := coll.FindOne(context.TODO(), filter).Decode(&invitation)
+	if err != nil {
+		panic(err)
+	}
+
+	return &invitation, nil
+}

@@ -36,28 +36,29 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 
 	sender, err := s.userRepo.GetByEmail(email)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
 	receiver, err := s.userRepo.GetByEmail(request.TargetMailAddress)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	//isInvite, err := s.inviteRepo.GetByReceiverIdAndSenderId(receiver.ID.Hex(), sender.ID.Hex())
-	//if isInvite != nil {
-	//	return nil, errs.NewBadRequestError("This email is already sent!")
-	//}
+	isInvite, err := s.friendRepo.GetByReceiverIdAndSenderId(receiver.ID, sender.ID)
+	if isInvite != nil {
+		if isInvite.Status == "PENDING" {
+			return nil, errs.NewBadRequestError("This email is already sent!")
+		} else if isInvite.Status == "FRIEND" {
+			return nil, errs.NewBadRequestError("They are friends now!")
+		}
 
-	//isFriend, err := s.friendRepo.GetFriendByReceiverAndSender(receiver.ID, sender.ID)
-	//if isFriend != nil {
-	//	return nil, errs.NewBadRequestError("They are friends now!")
-	//}
+	}
+
 	newUser := repoInt.FriendRequest{
 		Receiver: receiver.ID,
 		Sender:   sender.ID,

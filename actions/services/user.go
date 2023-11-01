@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type userService struct {
@@ -71,7 +71,7 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	user, err := s.userRepo.GetByEmail(request.Email)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
 		}
 		log.Println(err)

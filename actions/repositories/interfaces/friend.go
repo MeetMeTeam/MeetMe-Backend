@@ -20,6 +20,6 @@ type FriendRepository interface {
 	GetInvitationByReceiverId(string) ([]FriendResponse, error)
 	UpdateStatus(primitive.ObjectID) (*FriendRequest, error)
 	Delete(primitive.ObjectID) error
-	//GetByReceiverIdAndSenderId(string, string) (*FriendInvitationResponse, error)
+	GetByReceiverIdAndSenderId(primitive.ObjectID, primitive.ObjectID) (*FriendResponse, error)
 	//GetInvitationByIdAndReceiverId(string, string) (*FriendInvitationResponse, error)
 }

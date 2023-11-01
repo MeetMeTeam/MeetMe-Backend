@@ -41,6 +41,9 @@ func CustomValidator(request interface{}) []string {
 			case "phone":
 				message = fmt.Sprintf("%s is not phone format.",
 					strings.ToUpper(err.Field()))
+			case "unique":
+				message = fmt.Sprintf("%s is already.",
+					strings.ToUpper(err.Field()))
 			}
 
 			reasonErr = append(reasonErr, message)
