@@ -63,13 +63,26 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 		Sender:   sender.ID,
 	}
 
-	_, err = s.friendRepo.Create(newUser)
+	createUser, err := s.friendRepo.Create(newUser)
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	response := utils.ErrorResponse{
+	user, err := s.userRepo.GetById(createUser.Receiver)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+	response := utils.DataResponse{
+		Data: interfaces.ListUserResponse{
+			ID:        user.ID.Hex(),
+			Username:  user.Username,
+			Firstname: user.Firstname,
+			Lastname:  user.Lastname,
+			Birthday:  user.Birthday,
+			Email:     user.Email,
+		},
 		Message: "Invite friend success",
 	}
 
