@@ -6,18 +6,21 @@ import (
 	header "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	gosocketio "github.com/graarh/golang-socketio"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/spf13/viper"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gopkg.in/gomail.v2"
+	"log"
 	"meetme/be/actions/handlers"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services"
+	"meetme/be/config"
 	_ "meetme/be/docs"
-	"strings"
+	"os"
 	"time"
 )
 
@@ -49,6 +52,7 @@ func main() {
 
 	initConfig()
 	initTimeZone()
+	initMail()
 	db := initDB()
 
 	userRepository := repositories.NewUserRepositoryDB(db)
@@ -88,20 +92,17 @@ func main() {
 	friendApi := api.Group("/friends")
 	friendApi.GET("", friendHandler.FriendList)
 
-	e.Logger.Fatal(e.Start(":"+viper.GetString("app.port")), header.CORS(headers, methods, origins)(e))
+	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))
 }
 
 func initConfig() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	err := viper.ReadInConfig()
+	err := godotenv.Load(".env")
 	if err != nil {
-		panic(err)
+		log.Fatal("Error load env file", err)
 	}
+	log.Print("env successfully loaded.")
+
 }
 func initTimeZone() {
 	ict, err := time.LoadLocation("Asia/Bangkok")
@@ -113,7 +114,7 @@ func initTimeZone() {
 
 func initDB() *mongo.Database {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI("mongodb+srv://MeetMeUser:Ntw171044.@cluster0.salidj6.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI("mongodb+srv://" + os.Getenv("MONGO_USERNAME") + ":" + os.Getenv("MONGO_PASSWORD") + ".@cluster0.salidj6.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
 	//opts := options.Client().ApplyURI("mongodb+srv://" + url.QueryEscape(viper.GetString("mongodb.username")) + ":" + url.QueryEscape(viper.GetString("mongodb.password")) + "@meetme.wlhqxcx.mongodb.net/?maxPoolSize=100").SetServerAPIOptions(serverAPI)
 
 	// Create a new client and connect to the server
@@ -129,4 +130,19 @@ func initDB() *mongo.Database {
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
 	return client.Database("MeetMe")
+}
+
+func initMail() {
+	config.ConnectMailer(
+		os.Getenv("MAILER_HOST"),
+		os.Getenv("MAILER_USERNAME"),
+		os.Getenv("MAILER_PASSWORD"),
+	)
+
+	m := services.Mailer{}
+	message := gomail.NewMessage()
+	message.SetHeader("To", "kanyapat.winnerkypt@mail.kmutt.ac.th")
+	message.SetHeader("Subject", "Hello! Saharak")
+	message.SetBody("text/html", "ทดสอบการส่ง Email ด้วย Golang <br> สวัสดี Saharak Manoo!")
+	m.Send(message)
 }

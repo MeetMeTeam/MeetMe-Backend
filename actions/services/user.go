@@ -2,12 +2,12 @@ package services
 
 import (
 	"errors"
-	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/errs"
+	"os"
 	"time"
 
 	repoInt "meetme/be/actions/repositories/interfaces"
@@ -90,7 +90,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		t, err := token.SignedString([]byte(viper.GetString("app.secret")))
+		t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
 		if err != nil {
 			log.Println(err)
 			return nil, errs.NewInternalError(err.Error())
