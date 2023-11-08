@@ -25,7 +25,7 @@ type UserResponse struct {
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)
 	GetByEmail(string) (*UserResponse, error)
-	GetById(int) (*User, error)
+	GetById(int) (*UserResponse, error)
 	Create(User) (*User, error)
 	AddFriend() (*User, error)
 	// UpdateTotalPoint(int, string) (*User, error)

@@ -3,8 +3,8 @@ package utils
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/spf13/viper"
 	"meetme/be/errs"
+	"os"
 	"strings"
 
 	"github.com/go-playground/validator"
@@ -76,7 +76,7 @@ func IsTokenValid(authHeader string) (string, error) {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// ในกรณีที่ใช้การเก็บคีย์เป็นสาธารณะและส่วนตัว
 			// คุณสามารถส่งคีย์ในนี้ แต่ควรใช้แนวทางที่ปลอดภัยกว่าในบริการจริง
-			return []byte(viper.GetString("app.secret")), nil
+			return []byte(os.Getenv("APP_SECRET")), nil
 		})
 
 		if err != nil {

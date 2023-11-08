@@ -32,9 +32,9 @@ func (r UserRepository) GetByEmail(email string) (*interfaces.UserResponse, erro
 	return &users, nil
 }
 
-func (r UserRepository) GetById(id primitive.ObjectID) (*interfaces.User, error) {
+func (r UserRepository) GetById(id primitive.ObjectID) (*interfaces.UserResponse, error) {
 
-	var users interfaces.User
+	var users interfaces.UserResponse
 	filter := bson.D{{"_id", id}}
 	coll := r.db.Collection("user")
 	err := coll.FindOne(context.TODO(), filter).Decode(&users)

@@ -55,7 +55,7 @@ func main() {
 
 	initConfig()
 	initTimeZone()
-	initMail()
+	//initMail()
 	db := initDB()
 
 	userRepository := repositories.NewUserRepositoryDB(db)

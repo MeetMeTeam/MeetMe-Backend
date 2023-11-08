@@ -255,7 +255,7 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 	if len(results) == 0 {
 		return nil, errs.NewNotFoundError("Friend list is empty")
 	}
-	userResponses := []interfaces.RegisterResponse{}
+	userResponses := []interfaces.ListUserResponse{}
 	for _, result := range results {
 		id := primitive.ObjectID{}
 		if result.Sender != user.ID {
@@ -270,7 +270,8 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 			return nil, errs.NewInternalError(err.Error())
 		}
 
-		userResponse := interfaces.RegisterResponse{
+		userResponse := interfaces.ListUserResponse{
+			ID:        user.ID.Hex(),
 			Username:  user.Username,
 			Firstname: user.Firstname,
 			Lastname:  user.Lastname,
