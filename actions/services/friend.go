@@ -95,13 +95,19 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 	if err != nil {
 		log.Println("Friend invitation is empty")
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("Friend invitation is empty")
+			return utils.DataResponse{
+				Data:    []int{},
+				Message: "Get sender success.",
+			}, nil
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
 
 	if len(results) == 0 {
-		return nil, errs.NewNotFoundError("Friend invitation is empty")
+		return utils.DataResponse{
+			Data:    []int{},
+			Message: "Get sender success.",
+		}, nil
 	}
 	userResponses := []interfaces.CheckInviteResponse{}
 	for _, result := range results {
@@ -247,13 +253,19 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 	if err != nil {
 		log.Println("Friend list is empty")
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("Friend list is empty")
+			return utils.DataResponse{
+				Data:    []int{},
+				Message: "Get friend list success.",
+			}, nil
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
 
 	if len(results) == 0 {
-		return nil, errs.NewNotFoundError("Friend list is empty")
+		return utils.DataResponse{
+			Data:    []int{},
+			Message: "Get friend list success.",
+		}, nil
 	}
 	userResponses := []interfaces.ListUserResponse{}
 	for _, result := range results {

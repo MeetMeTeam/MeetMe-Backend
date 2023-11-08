@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
@@ -117,9 +118,12 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 func (s userService) GetUsers() (interface{}, error) {
 	users, err := s.userRepo.GetAll()
 	if err != nil {
-		//if errors.Is(err, gorm.ErrRecordNotFound) {
-		//	return nil, errs.NewNotFoundError("User not found.")
-		//}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return utils.DataResponse{
+				Data:    []int{},
+				Message: "Get users success.",
+			}, nil
+		}
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
