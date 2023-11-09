@@ -99,6 +99,7 @@ func main() {
 
 	friendApi := api.Group("/friends")
 	friendApi.GET("", friendHandler.FriendList)
+	friendApi.DELETE("/:friendId", friendHandler.RemoveFriend)
 
 	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))
 }

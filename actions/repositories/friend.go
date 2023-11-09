@@ -77,13 +77,13 @@ func (r FriendRepository) UpdateStatus(receiverId primitive.ObjectID, id primiti
 	return friend, nil
 }
 
-func (r FriendRepository) Delete(receiverId primitive.ObjectID, id primitive.ObjectID) error {
+func (r FriendRepository) Delete(receiverId primitive.ObjectID, id primitive.ObjectID, status string) error {
 
 	filter := bson.D{}
 	if id != primitive.NilObjectID {
-		filter = bson.D{{"_id", id}, {"status", "PENDING"}}
+		filter = bson.D{{"_id", id}, {"status", status}}
 	} else if receiverId != primitive.NilObjectID {
-		filter = bson.D{{"receiver_id", receiverId}, {"status", "PENDING"}}
+		filter = bson.D{{"receiver_id", receiverId}, {"status", status}}
 	}
 
 	coll := r.db.Collection("friends")
@@ -99,7 +99,10 @@ func (r FriendRepository) Delete(receiverId primitive.ObjectID, id primitive.Obj
 func (r FriendRepository) GetByReceiverIdAndSenderId(receiverId primitive.ObjectID, senderId primitive.ObjectID) (*interfaces.FriendResponse, error) {
 	var invitation interfaces.FriendResponse
 
-	filter := bson.D{{"receiver_id", receiverId}, {"sender_id", senderId}}
+	filter := bson.D{{"$or", []interface{}{
+		bson.D{{"receiver_id", receiverId}, {"sender_id", senderId}},
+		bson.D{{"receiver_id", senderId}, {"sender_id", receiverId}},
+	}}}
 	coll := r.db.Collection("friends")
 	err := coll.FindOne(context.TODO(), filter).Decode(&invitation)
 	if err != nil {

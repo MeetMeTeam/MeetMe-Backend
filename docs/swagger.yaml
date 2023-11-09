@@ -76,6 +76,29 @@ paths:
       summary: List Friends.
       tags:
       - friends
+  /friends/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove Friend by Id.
+      parameters:
+      - description: Friend ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove Friend
+      tags:
+      - friends
   /invitations:
     delete:
       consumes:

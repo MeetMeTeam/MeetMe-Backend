@@ -19,7 +19,7 @@ type FriendRepository interface {
 	Create(FriendRequest) (*FriendRequest, error)
 	GetByReceiverId(primitive.ObjectID, string) ([]FriendResponse, error)
 	UpdateStatus(primitive.ObjectID, primitive.ObjectID) ([]FriendResponse, error)
-	Delete(primitive.ObjectID) error
+	Delete(primitive.ObjectID, primitive.ObjectID, string) error
 	GetByReceiverIdAndSenderId(primitive.ObjectID, primitive.ObjectID) (*FriendResponse, error)
 	GetByIdAndReceiverIdAndStatus(primitive.ObjectID, primitive.ObjectID, string) (*FriendResponse, error)
 	GetByUserId(primitive.ObjectID, string) ([]FriendResponse, error)

@@ -244,3 +244,36 @@ func (h friendHandler) FriendList(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, users)
 }
+
+// RemoveFriend godoc
+//
+//	@Summary		Remove Friend
+//	@Description	Remove Friend by Id.
+//	@Tags			friends
+//	@Accept			json
+//	@Produce		json
+//	@Param        	id   path      string  true  "Friend ID"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/friends/{id} [delete]
+//
+// @Security BearerAuth
+func (h friendHandler) RemoveFriend(c echo.Context) error {
+	id := c.Param("friendId")
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.friendService.DeleteFriend(token, id)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}

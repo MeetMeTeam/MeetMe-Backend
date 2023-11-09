@@ -24,4 +24,5 @@ type FriendService interface {
 	AcceptInvitation(string, string) (interface{}, error)
 	AcceptAllInvitations(string) (interface{}, error)
 	GetFriend(string) (interface{}, error)
+	DeleteFriend(token string, id string) (interface{}, error)
 }

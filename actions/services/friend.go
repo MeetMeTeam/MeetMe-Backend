@@ -280,7 +280,7 @@ func (s friendService) RejectInvitation(token string, inviteId string) (interfac
 		return nil, errs.NewNotFoundError("Invitation not found.")
 	}
 
-	err = s.friendRepo.Delete(primitive.NilObjectID, id)
+	err = s.friendRepo.Delete(primitive.NilObjectID, id, "PENDING")
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
@@ -313,7 +313,7 @@ func (s friendService) RejectAllInvitation(token string) (interface{}, error) {
 		return nil, errs.NewNotFoundError("Invitation not found.")
 	}
 
-	err = s.friendRepo.Delete(user.ID, primitive.NilObjectID)
+	err = s.friendRepo.Delete(user.ID, primitive.NilObjectID, "PENDING")
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
@@ -387,4 +387,54 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 		Message: "Get friend list success.",
 	}
 	return response, nil
+}
+
+func (s friendService) DeleteFriend(token string, id string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	friendId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	isInvite, err := s.friendRepo.GetByReceiverIdAndSenderId(friendId, user.ID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewNotFoundError("Invitation not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	} else if isInvite == nil {
+		return nil, errs.NewNotFoundError("Invitation not found.")
+	}
+
+	err = s.friendRepo.Delete(primitive.NilObjectID, isInvite.ID, "FRIEND")
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	friend, err := s.userRepo.GetById(friendId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+	return utils.DataResponse{
+		Data: interfaces.FriendShipResponse{
+			Friend: friend.Email,
+		},
+		Message: "Delete Friend Success",
+	}, nil
 }
