@@ -116,6 +116,22 @@ paths:
       summary: Invite Friend
       tags:
       - invitations
+    put:
+      consumes:
+      - application/json
+      description: Accept All Invitations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Accept All Invitations
+      tags:
+      - invitations
   /invitations/{id}:
     delete:
       consumes:

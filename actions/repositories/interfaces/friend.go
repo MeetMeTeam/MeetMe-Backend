@@ -18,7 +18,7 @@ type FriendResponse struct {
 type FriendRepository interface {
 	Create(FriendRequest) (*FriendRequest, error)
 	GetByReceiverId(primitive.ObjectID, string) ([]FriendResponse, error)
-	UpdateStatus(primitive.ObjectID) (*FriendRequest, error)
+	UpdateStatus(primitive.ObjectID, primitive.ObjectID) ([]FriendResponse, error)
 	Delete(primitive.ObjectID) error
 	GetByReceiverIdAndSenderId(primitive.ObjectID, primitive.ObjectID) (*FriendResponse, error)
 	GetByIdAndReceiverIdAndStatus(primitive.ObjectID, primitive.ObjectID, string) (*FriendResponse, error)

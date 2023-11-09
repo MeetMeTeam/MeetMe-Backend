@@ -173,14 +173,14 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 		return nil, errs.NewNotFoundError("Invitation not found.")
 	}
 
-	result, err := s.friendRepo.UpdateStatus(id)
+	result, err := s.friendRepo.UpdateStatus(primitive.NilObjectID, id)
 	if err != nil {
 		log.Println("Update Status")
 		return nil, errs.NewInternalError(err.Error())
 	}
 
 	log.Print(result)
-	user1, err := s.userRepo.GetById(result.Sender)
+	sender, err := s.userRepo.GetById(result[0].Sender)
 	if err != nil {
 		log.Println("get user 1")
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -189,23 +189,66 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	user2, err := s.userRepo.GetById(result.Receive)
-	if err != nil {
-		log.Println("get user 2")
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
-		}
-		return nil, errs.NewInternalError(err.Error())
-	}
 	return utils.DataResponse{
 		Data: interfaces.FriendShipResponse{
-			User1: user1.Email,
-			User2: user2.Email,
+			Friend: sender.Email,
 		},
 		Message: "Add friend success",
 	}, nil
 
 	return nil, nil
+}
+
+func (s friendService) AcceptAllInvitations(token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewNotFoundError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	isInvite, err := s.friendRepo.GetByReceiverId(user.ID, "PENDING")
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewNotFoundError("Invitation not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	} else if isInvite == nil {
+		return nil, errs.NewNotFoundError("Invitation not found.")
+	}
+
+	results, err := s.friendRepo.UpdateStatus(user.ID, primitive.NilObjectID)
+	if err != nil {
+		log.Println("Update Status")
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	friendResponses := []interfaces.FriendShipResponse{}
+	for _, result := range results {
+		sender, err := s.userRepo.GetById(result.Sender)
+		if err != nil {
+			log.Println("get user 1")
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewNotFoundError("User not found.")
+			}
+			return nil, errs.NewInternalError(err.Error())
+		}
+		friendResponse := interfaces.FriendShipResponse{
+			Friend: sender.Email,
+		}
+		friendResponses = append(friendResponses, friendResponse)
+	}
+
+	return utils.DataResponse{
+		Data:    friendResponses,
+		Message: "Add friend success",
+	}, nil
+
 }
 
 func (s friendService) RejectInvitation(token string, inviteId string) (interface{}, error) {

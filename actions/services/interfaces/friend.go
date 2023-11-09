@@ -7,8 +7,7 @@ type InviteRequest struct {
 }
 
 type FriendShipResponse struct {
-	User1 string `json:"user1" example:"winner@mail.com"`
-	User2 string `json:"user2" example:"winner2@mail.com"`
+	Friend string `json:"friend_email" example:"winner@mail.com"`
 }
 
 type CheckInviteResponse struct {
@@ -22,5 +21,6 @@ type FriendService interface {
 	CheckFriendInvite(string) (interface{}, error)
 	RejectInvitation(string, string) (interface{}, error)
 	AcceptInvitation(string, string) (interface{}, error)
+	AcceptAllInvitations(string) (interface{}, error)
 	GetFriend(string) (interface{}, error)
 }

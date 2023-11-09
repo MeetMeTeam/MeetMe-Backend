@@ -5,7 +5,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"meetme/be/actions/repositories/interfaces"
 )
 
@@ -51,27 +50,31 @@ func (r FriendRepository) GetByReceiverId(receiverId primitive.ObjectID, status 
 	return invitation, nil
 }
 
-func (r FriendRepository) UpdateStatus(id primitive.ObjectID) (*interfaces.FriendResponse, error) {
-	filter := bson.D{{"_id", id}}
+func (r FriendRepository) UpdateStatus(receiverId primitive.ObjectID, id primitive.ObjectID) ([]interfaces.FriendResponse, error) {
+
+	filter := bson.D{}
+	if id != primitive.NilObjectID {
+		filter = bson.D{{"_id", id}}
+	} else if receiverId != primitive.NilObjectID {
+		filter = bson.D{{"receiver_id", receiverId}}
+	}
+
 	update := bson.D{{"$set", bson.D{{"status", "FRIEND"}}}}
 	coll := r.db.Collection("friends")
-	_, err := coll.UpdateOne(context.TODO(), filter, update)
+	_, err := coll.UpdateMany(context.TODO(), filter, update)
 	if err != nil {
-		return nil, err
 		return nil, err
 	}
 
-	var friend interfaces.FriendResponse
-	err = coll.FindOne(context.TODO(), filter).Decode(&friend)
+	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
-		log.Print("mongo no doc")
-		if err == mongo.ErrNoDocuments {
-			// This error means your query did not match any documents.
-			return nil, err
-		}
-		return nil, err
+		panic(err)
 	}
-	return &friend, nil
+	var friend []interfaces.FriendResponse
+	if err = cursor.All(context.TODO(), &friend); err != nil {
+		panic(err)
+	}
+	return friend, nil
 }
 
 func (r FriendRepository) Delete(inviteId primitive.ObjectID) error {

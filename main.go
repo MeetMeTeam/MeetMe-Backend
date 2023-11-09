@@ -94,6 +94,7 @@ func main() {
 	inviteApi.GET("", friendHandler.CheckFriendInvite)
 	inviteApi.DELETE("/:inviteId", friendHandler.RejectFriend)
 	inviteApi.PUT("/:inviteId", friendHandler.AcceptFriend)
+	inviteApi.PUT("", friendHandler.AcceptAllFriend)
 
 	friendApi := api.Group("/friends")
 	friendApi.GET("", friendHandler.FriendList)
