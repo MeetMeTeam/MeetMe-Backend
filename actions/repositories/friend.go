@@ -77,12 +77,18 @@ func (r FriendRepository) UpdateStatus(receiverId primitive.ObjectID, id primiti
 	return friend, nil
 }
 
-func (r FriendRepository) Delete(inviteId primitive.ObjectID) error {
+func (r FriendRepository) Delete(receiverId primitive.ObjectID, id primitive.ObjectID) error {
 
-	filter := bson.D{{"_id", inviteId}, {"status", "PENDING"}}
+	filter := bson.D{}
+	if id != primitive.NilObjectID {
+		filter = bson.D{{"_id", id}, {"status", "PENDING"}}
+	} else if receiverId != primitive.NilObjectID {
+		filter = bson.D{{"receiver_id", receiverId}, {"status", "PENDING"}}
+	}
+
 	coll := r.db.Collection("friends")
 
-	_, err := coll.DeleteOne(context.TODO(), filter)
+	_, err := coll.DeleteMany(context.TODO(), filter)
 	if err != nil {
 		return err
 	}

@@ -118,6 +118,38 @@ func (h friendHandler) RejectFriend(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// RejectAllFriend godoc
+//
+//	@Summary		Reject All Invitations
+//	@Description	Reject All Invitations.
+//	@Tags			invitations
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/invitations [delete]
+//
+// @Security BearerAuth
+func (h friendHandler) RejectAllFriend(c echo.Context) error {
+
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.friendService.RejectAllInvitation(token)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}
+
 // AcceptFriend godoc
 //
 //	@Summary		Accept Invitation

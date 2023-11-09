@@ -20,6 +20,7 @@ type FriendService interface {
 	InviteFriend(string, InviteRequest) (interface{}, error)
 	CheckFriendInvite(string) (interface{}, error)
 	RejectInvitation(string, string) (interface{}, error)
+	RejectAllInvitation(string) (interface{}, error)
 	AcceptInvitation(string, string) (interface{}, error)
 	AcceptAllInvitations(string) (interface{}, error)
 	GetFriend(string) (interface{}, error)

@@ -77,6 +77,22 @@ paths:
       tags:
       - friends
   /invitations:
+    delete:
+      consumes:
+      - application/json
+      description: Reject All Invitations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Reject All Invitations
+      tags:
+      - invitations
     get:
       consumes:
       - application/json
