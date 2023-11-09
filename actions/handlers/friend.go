@@ -17,14 +17,17 @@ func NewFriendHandler(friendService svInter.FriendService) friendHandler {
 }
 
 // InviteFriend godoc
-// @Summary      Invite Friend
-// @Description  Invite friend by email.
-// @Tags         friend invitation
-// @Accept       json
-// @Produce      json
-// @Param users body interfaces.InviteRequest true "request body invite friend"
-// @Success      200  {object}  utils.DataResponse
-// @Router       /invitation/add [post]
+//
+//	@Summary		Invite Friend
+//	@Description	Invite friend by email.
+//	@Tags			invitations
+//	@Accept			json
+//	@Produce		json
+//	@Param			users	body		interfaces.InviteRequest	true	"request body invite friend"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/invitations [post]
+//
+// @Security BearerAuth
 func (h friendHandler) InviteFriend(c echo.Context) error {
 	request := new(svInter.InviteRequest)
 	token := c.Request().Header.Get("Authorization")
@@ -52,6 +55,17 @@ func (h friendHandler) InviteFriend(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// CheckFriendInvite godoc
+//
+//	@Summary		List Invitation.
+//	@Description	Check Invitation List.
+//	@Tags			invitations
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/invitations [get]
+//
+// @Security BearerAuth
 func (h friendHandler) CheckFriendInvite(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
 
@@ -71,6 +85,18 @@ func (h friendHandler) CheckFriendInvite(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// RejectFriend godoc
+//
+//	@Summary		Reject Invitation
+//	@Description	Reject Invitation by Id.
+//	@Tags			invitations
+//	@Accept			json
+//	@Produce		json
+//	@Param        	id   path      string  true  "Invitation ID"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/invitations/{id} [delete]
+//
+// @Security BearerAuth
 func (h friendHandler) RejectFriend(c echo.Context) error {
 	id := c.Param("inviteId")
 	token := c.Request().Header.Get("Authorization")
@@ -91,6 +117,19 @@ func (h friendHandler) RejectFriend(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, users)
 }
+
+// AcceptFriend godoc
+//
+//	@Summary		Accept Invitation
+//	@Description	Accept Invitation by Id.
+//	@Tags			invitations
+//	@Accept			json
+//	@Produce		json
+//	@Param        	id   path      string  true  "Invitation ID"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/invitations/{id} [put]
+//
+// @Security BearerAuth
 func (h friendHandler) AcceptFriend(c echo.Context) error {
 	id := c.Param("inviteId")
 	token := c.Request().Header.Get("Authorization")
@@ -112,6 +151,17 @@ func (h friendHandler) AcceptFriend(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// FriendList godoc
+//
+//	@Summary		List Friends.
+//	@Description	Get Friends List.
+//	@Tags			friends
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/friends [get]
+//
+// @Security BearerAuth
 func (h friendHandler) FriendList(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
 

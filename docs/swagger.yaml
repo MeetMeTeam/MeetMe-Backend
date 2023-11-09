@@ -52,14 +52,47 @@ definitions:
       message:
         type: string
     type: object
-host: c001-202-28-7-5.ngrok-free.app
+host: meetme-backend.com
 info:
   contact: {}
   description: This is a API for Meet Me.
   title: Meet Me API
   version: "1.0"
 paths:
-  /invitation/add:
+  /friends:
+    get:
+      consumes:
+      - application/json
+      description: Get Friends List.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: List Friends.
+      tags:
+      - friends
+  /invitations:
+    get:
+      consumes:
+      - application/json
+      description: Check Invitation List.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: List Invitation.
+      tags:
+      - invitations
     post:
       consumes:
       - application/json
@@ -78,10 +111,72 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
       summary: Invite Friend
       tags:
-      - friend invitation
-  /login:
+      - invitations
+  /invitations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Reject Invitation by Id.
+      parameters:
+      - description: Invitation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Reject Invitation
+      tags:
+      - invitations
+    put:
+      consumes:
+      - application/json
+      description: Accept Invitation by Id.
+      parameters:
+      - description: Invitation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Accept Invitation
+      tags:
+      - invitations
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: return list users.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Get all users
+      tags:
+      - users
+  /users/login:
     post:
       consumes:
       - application/json
@@ -103,7 +198,7 @@ paths:
       summary: Login
       tags:
       - users
-  /register:
+  /users/register:
     post:
       consumes:
       - application/json
@@ -125,19 +220,9 @@ paths:
       summary: Register user
       tags:
       - users
-  /users:
-    get:
-      consumes:
-      - application/json
-      description: return list users.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/utils.DataResponse'
-      summary: Get all users
-      tags:
-      - users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

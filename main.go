@@ -32,12 +32,15 @@ var (
 
 var auth smtp.Auth
 
-// @title Meet Me API
-// @version 1.0
-// @description This is a API for Meet Me.
+//	@title			Meet Me API
+//	@version		1.0
+//	@description	This is a API for Meet Me.
 
-// @host  c001-202-28-7-5.ngrok-free.app
-// @BasePath /api
+// @host		meetme-backend.com
+// @BasePath	/api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 
 	e := echo.New()

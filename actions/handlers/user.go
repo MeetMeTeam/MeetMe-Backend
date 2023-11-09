@@ -18,14 +18,15 @@ func NewUserHandler(userService svInter.UserService) userHandler {
 }
 
 // Register godoc
-// @Summary      Register user
-// @Description  Create user.
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Param users body interfaces.RegisterRequest true "request body register"
-// @Success      200  {object}  utils.DataResponse
-// @Router       /register [post]
+//
+//	@Summary		Register user
+//	@Description	Create user.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			users	body		interfaces.RegisterRequest	true	"request body register"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/users/register [post]
 func (h userHandler) Register(c echo.Context) error {
 	request := new(svInter.RegisterRequest)
 
@@ -60,14 +61,15 @@ func (h userHandler) Register(c echo.Context) error {
 }
 
 // Login godoc
-// @Summary      Login
-// @Description  Login user.
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Param users body interfaces.Login true "request body login"
-// @Success      200  {object}  utils.DataResponse
-// @Router       /login [post]
+//
+//	@Summary		Login
+//	@Description	Login user.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			users	body		interfaces.Login	true	"request body login"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/users/login [post]
 func (h userHandler) Login(c echo.Context) error {
 
 	request := new(svInter.Login)
@@ -102,15 +104,15 @@ func (h userHandler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
-// GetUsers godoc
-// @Summary      Get all users
-// @Description  return list users.
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  utils.DataResponse
-// @Router       /users [get]
-
+// GetAllUser godoc
+//
+//	@Summary		Get all users
+//	@Description	return list users.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	utils.DataResponse
+//	@Router			/users [get]
 func (h userHandler) GetAllUser(c echo.Context) error {
 	users, err := h.userService.GetUsers()
 	if err != nil {
