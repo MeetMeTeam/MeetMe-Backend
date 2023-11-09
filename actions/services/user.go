@@ -2,11 +2,13 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
+	"meetme/be/config"
 	"meetme/be/errs"
 	"os"
 	"time"
@@ -66,6 +68,22 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		Message: "Create user success.",
 	}
 
+	//send verify email
+	templateData := struct {
+		Firstname string
+		Lastname  string
+		URL       string
+	}{
+		Firstname: result.Firstname,
+		Lastname:  result.Lastname,
+		URL:       "www.google.com",
+	}
+	r := config.NewRequest([]string{result.Email}, "Hello Junk!", "Hello, World!")
+	err = r.ParseTemplate("verifyFile.html", templateData)
+	if err == nil {
+		ok, _ := r.SendEmail()
+		fmt.Println(ok)
+	}
 	return response, nil
 }
 
@@ -145,5 +163,6 @@ func (s userService) GetUsers() (interface{}, error) {
 		Data:    userResponses,
 		Message: "Get users success.",
 	}
+
 	return response, nil
 }

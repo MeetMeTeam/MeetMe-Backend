@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	header "github.com/gorilla/handlers"
@@ -14,7 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"html/template"
 	"log"
 	"meetme/be/actions/handlers"
 	"meetme/be/actions/repositories"
@@ -58,29 +56,17 @@ func main() {
 
 	initConfig()
 	initTimeZone()
-	//initMail()
 	db := initDB()
 
 	userRepository := repositories.NewUserRepositoryDB(db)
 	userService := services.NewUserService(userRepository)
 	userHandler := handlers.NewUserHandler(userService)
 
-	//friendRepository := repositories.NewFriendshipRepositoryDB(db)
-
 	friendRepository := repositories.NewFriendRepositoryDB(db)
 	friendService := services.NewFriendService(friendRepository, userRepository)
 	friendHandler := handlers.NewFriendHandler(friendService)
-	//
-	//friendService := services.NewFriendShipService(friendRepository, userRepository)
-	//friendHandler := handlers.NewFriendShipHandler(friendService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
-	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
-
-	//e.GET("/migrate", func(c echo.Context) error {
-	//	db.AutoMigrate(User{}, FriendInvitation{}, Friendship{})
-	//	return c.String(http.StatusOK, "Migrate DB success !")
-	//})
 
 	api := e.Group("/api")
 
@@ -139,76 +125,4 @@ func initDB() *mongo.Database {
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
 	return client.Database("MeetMe")
-}
-
-func initMail() {
-	//config.ConnectMailer(
-	//	os.Getenv("MAILER_HOST"),
-	//	os.Getenv("MAILER_USERNAME"),
-	//	os.Getenv("MAILER_PASSWORD"),
-	//)
-	//
-	//m := services.Mailer{}
-	//message := gomail.NewMessage()
-	//message.SetHeader("To", "kanyapat.winnerkypt@mail.kmutt.ac.th")
-	//message.SetHeader("Subject", "Hello! Saharak")
-	//message.SetBody("text/html", "ทดสอบการส่ง Email ด้วย Golang <br> สวัสดี Saharak Manoo!")
-	//m.Send(message)
-
-	auth = smtp.PlainAuth("", os.Getenv("MAILER_USERNAME"), os.Getenv("MAILER_PASSWORD"), os.Getenv("MAILER_HOST"))
-	templateData := struct {
-		Name string
-		URL  string
-	}{
-		Name: "Dhanush",
-		URL:  "http://geektrust.in",
-	}
-	r := NewRequest([]string{"kanyapat.winnerkypt@mail.kmutt.ac.th"}, "Hello Junk!", "Hello, World!")
-	err := r.ParseTemplate("verifyFile.html", templateData)
-	if err == nil {
-		ok, _ := r.SendEmail()
-		fmt.Println(ok)
-	}
-}
-
-// Request struct
-type Request struct {
-	from    string
-	to      []string
-	subject string
-	body    string
-}
-
-func NewRequest(to []string, subject, body string) *Request {
-	return &Request{
-		to:      to,
-		subject: subject,
-		body:    body,
-	}
-}
-
-func (r *Request) SendEmail() (bool, error) {
-	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	subject := "Subject: " + r.subject + "!\n"
-	msg := []byte(subject + mime + "\n" + r.body)
-	addr := os.Getenv("MAILER_HOST") + ":" + os.Getenv("MAILER_PORT")
-
-	if err := smtp.SendMail(addr, auth, os.Getenv("MAILER_USERNAME"), r.to, msg); err != nil {
-		log.Print(err)
-		return false, err
-	}
-	return true, nil
-}
-
-func (r *Request) ParseTemplate(templateFileName string, data interface{}) error {
-	t, err := template.ParseFiles(templateFileName)
-	if err != nil {
-		return err
-	}
-	buf := new(bytes.Buffer)
-	if err = t.Execute(buf, data); err != nil {
-		return err
-	}
-	r.body = buf.String()
-	return nil
 }
