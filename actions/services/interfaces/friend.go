@@ -7,6 +7,7 @@ type InviteRequest struct {
 }
 
 type FriendShipResponse struct {
+	ID     string `json:"_id"`
 	Friend string `json:"friend_email" example:"winner@mail.com"`
 }
 

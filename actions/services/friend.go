@@ -191,6 +191,7 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 
 	return utils.DataResponse{
 		Data: interfaces.FriendShipResponse{
+			ID:     user.ID.Hex(),
 			Friend: sender.Email,
 		},
 		Message: "Add friend success",
@@ -239,6 +240,7 @@ func (s friendService) AcceptAllInvitations(token string) (interface{}, error) {
 			return nil, errs.NewInternalError(err.Error())
 		}
 		friendResponse := interfaces.FriendShipResponse{
+			ID:     user.ID.Hex(),
 			Friend: sender.Email,
 		}
 		friendResponses = append(friendResponses, friendResponse)
