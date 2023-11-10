@@ -69,11 +69,12 @@ func main() {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	api := e.Group("/api")
+	api.POST("/register", userHandler.Register)
+	api.POST("/login", userHandler.Login)
+	api.POST("/refresh", userHandler.RefreshToken)
 
 	userApi := api.Group("/users")
 	userApi.GET("", userHandler.GetAllUser)
-	userApi.POST("/register", userHandler.Register)
-	userApi.POST("/login", userHandler.Login)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)

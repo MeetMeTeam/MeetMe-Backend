@@ -216,22 +216,7 @@ paths:
       summary: Accept Invitation
       tags:
       - invitations
-  /users:
-    get:
-      consumes:
-      - application/json
-      description: return list users.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/utils.DataResponse'
-      summary: Get all users
-      tags:
-      - users
-  /users/login:
+  /login:
     post:
       consumes:
       - application/json
@@ -253,7 +238,24 @@ paths:
       summary: Login
       tags:
       - users
-  /users/register:
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: return new access token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Refresh Token
+      tags:
+      - users
+  /register:
     post:
       consumes:
       - application/json
@@ -273,6 +275,21 @@ paths:
           schema:
             $ref: '#/definitions/utils.DataResponse'
       summary: Register user
+      tags:
+      - users
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: return list users.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Get all users
       tags:
       - users
 securityDefinitions:

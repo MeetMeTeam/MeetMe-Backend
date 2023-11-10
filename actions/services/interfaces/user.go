@@ -39,15 +39,20 @@ type LoginResponse struct {
 
 type UserDetails struct {
 	Token    string `json:"token"`
+	Refresh  string `json:"refreshToken"`
 	Mail     string `json:"mail"`
 	Username string `json:"username"`
 	Id       string `json:"_id"`
+}
+
+type TokenResponse struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 type UserService interface {
 	GetUsers() (interface{}, error)
 	//GetUserById(int) (interface{}, error)
 	CreateUser(RegisterRequest) (interface{}, error)
 	Login(Login) (interface{}, error)
-	// AddPoints(PointRequest, string) (interface{}, error)
-	// EditUser(EditRequest, string) (interface{}, error)
+	RefreshToken(string) (interface{}, error)
 }

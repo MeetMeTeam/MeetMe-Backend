@@ -11,6 +11,7 @@ import (
 	"meetme/be/config"
 	"meetme/be/errs"
 	"os"
+	"strings"
 	"time"
 
 	repoInt "meetme/be/actions/repositories/interfaces"
@@ -26,7 +27,8 @@ type userService struct {
 }
 
 type jwtCustomClaims struct {
-	Email string `json:"email"`
+	Email     string `json:"email"`
+	IsRefresh bool   `json:"isRefresh"`
 	// Admin bool   `json:"admin"`
 	jwt.RegisteredClaims
 }
@@ -102,14 +104,29 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 
 		claims := &jwtCustomClaims{
 			request.Email,
-			// true,
+			false,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
+			},
+		}
+		refreshClaims := &jwtCustomClaims{
+			request.Email,
+			true,
+			jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			},
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+
 		t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
+		if err != nil {
+			log.Println(err)
+			return nil, errs.NewInternalError(err.Error())
+		}
+		r, err := refreshToken.SignedString([]byte(os.Getenv("APP_SECRET")))
+
 		if err != nil {
 			log.Println(err)
 			return nil, errs.NewInternalError(err.Error())
@@ -118,6 +135,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 
 			UserDetails: interfaces.UserDetails{
 				Token:    t,
+				Refresh:  r,
 				Mail:     user.Email,
 				Username: user.Username,
 				Id:       user.ID.Hex(),
@@ -162,6 +180,38 @@ func (s userService) GetUsers() (interface{}, error) {
 	response := utils.DataResponse{
 		Data:    userResponses,
 		Message: "Get users success.",
+	}
+
+	return response, nil
+}
+
+func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
+	refreshClaims, err := utils.IsTokenValid(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+	if refreshClaims.IsRefresh == false {
+		return nil, errs.NewInternalError("It's not refresh token.")
+	}
+	claims := &jwtCustomClaims{
+		refreshClaims.Email,
+		false,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	response := interfaces.TokenResponse{
+		AccessToken:  t,
+		RefreshToken: strings.Trim(refreshToken, "Bearer "),
 	}
 
 	return response, nil

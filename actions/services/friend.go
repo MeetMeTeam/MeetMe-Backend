@@ -29,11 +29,11 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 		return nil, err
 	}
 
-	if email == request.TargetMailAddress {
+	if email.Email == request.TargetMailAddress {
 		return nil, errs.NewBadRequestError("Can not add yourself.")
 	}
 
-	sender, err := s.userRepo.GetByEmail(email)
+	sender, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
@@ -94,7 +94,7 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	receiver, err := s.userRepo.GetByEmail(email)
+	receiver, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		log.Println("User not found.")
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -150,7 +150,7 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.userRepo.GetByEmail(email)
+	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
@@ -204,7 +204,7 @@ func (s friendService) AcceptAllInvitations(token string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.userRepo.GetByEmail(email)
+	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
@@ -256,7 +256,7 @@ func (s friendService) RejectInvitation(token string, inviteId string) (interfac
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.userRepo.GetByEmail(email)
+	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
@@ -295,7 +295,7 @@ func (s friendService) RejectAllInvitation(token string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.userRepo.GetByEmail(email)
+	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
@@ -328,7 +328,7 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.userRepo.GetByEmail(email)
+	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		log.Println("User not found.")
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -394,7 +394,7 @@ func (s friendService) DeleteFriend(token string, id string) (interface{}, error
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.userRepo.GetByEmail(email)
+	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
