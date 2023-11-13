@@ -143,10 +143,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 		}
 		return response, nil
 	} else {
-		response := utils.ErrorResponse{
-			Message: "Email or password incorrect.",
-		}
-		return response, nil
+		return nil, errs.NewUnauthorizedError("Email or password incorrect.")
 	}
 
 }
