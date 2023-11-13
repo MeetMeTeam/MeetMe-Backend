@@ -11,7 +11,16 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	ID        int    `json:"id"`
+	//ID        string `json:"id"`
+	Username  string `json:"username"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Birthday  string `json:"birthday"`
+	Email     string `json:"email"`
+}
+
+type ListUserResponse struct {
+	ID        string `json:"id"`
 	Username  string `json:"username"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
@@ -30,15 +39,20 @@ type LoginResponse struct {
 
 type UserDetails struct {
 	Token    string `json:"token"`
+	Refresh  string `json:"refreshToken"`
 	Mail     string `json:"mail"`
 	Username string `json:"username"`
-	Id       int    `json:"_id"`
+	Id       string `json:"_id"`
+}
+
+type TokenResponse struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 type UserService interface {
 	GetUsers() (interface{}, error)
 	//GetUserById(int) (interface{}, error)
 	CreateUser(RegisterRequest) (interface{}, error)
 	Login(Login) (interface{}, error)
-	// AddPoints(PointRequest, string) (interface{}, error)
-	// EditUser(EditRequest, string) (interface{}, error)
+	RefreshToken(string) (interface{}, error)
 }

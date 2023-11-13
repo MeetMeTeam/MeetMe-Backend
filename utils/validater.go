@@ -3,8 +3,8 @@ package utils
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/spf13/viper"
 	"meetme/be/errs"
+	"os"
 	"strings"
 
 	"github.com/go-playground/validator"
@@ -12,6 +12,12 @@ import (
 
 type ValidateResponse struct {
 	Message interface{} `json:"message"`
+}
+
+type Claims struct {
+	Email     string  `json:"email"`
+	IsRefresh bool    `json:"isRefresh"`
+	ExpiredAt float64 `json:"expiredAt"`
 }
 
 func CustomValidator(request interface{}) []string {
@@ -41,20 +47,13 @@ func CustomValidator(request interface{}) []string {
 			case "phone":
 				message = fmt.Sprintf("%s is not phone format.",
 					strings.ToUpper(err.Field()))
+			case "unique":
+				message = fmt.Sprintf("%s is already.",
+					strings.ToUpper(err.Field()))
 			}
 
 			reasonErr = append(reasonErr, message)
-			// fmt.Println(err.Namespace())
-			// fmt.Println(err.Field())
-			// fmt.Println(err.StructNamespace())
-			// fmt.Println(err.StructField())
-			// fmt.Println(err.Tag())
-			// fmt.Println(err.ActualTag())
-			// fmt.Println(err.Kind())
-			// fmt.Println(err.Type())
-			// fmt.Println(err.Value())
-			// fmt.Println(err.Param())
-			// fmt.Println()
+
 		}
 
 		// from here you can create your own error messages in whatever language you wish
@@ -64,7 +63,7 @@ func CustomValidator(request interface{}) []string {
 	return reasonErr
 }
 
-func IsTokenValid(authHeader string) (string, error) {
+func IsTokenValid(authHeader string) (*Claims, error) {
 	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
 		// ถอดรหัส Token โดยตัด "Bearer " ออก
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
@@ -73,23 +72,28 @@ func IsTokenValid(authHeader string) (string, error) {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// ในกรณีที่ใช้การเก็บคีย์เป็นสาธารณะและส่วนตัว
 			// คุณสามารถส่งคีย์ในนี้ แต่ควรใช้แนวทางที่ปลอดภัยกว่าในบริการจริง
-			return []byte(viper.GetString("app.secret")), nil
+			return []byte(os.Getenv("APP_SECRET")), nil
 		})
 
 		if err != nil {
-			return "", errs.NewUnauthorizedError("Invalid Token: " + err.Error())
+			return nil, errs.NewUnauthorizedError("Invalid Token: " + err.Error())
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			// ตรวจสอบและเข้าถึงข้อมูลที่คุณต้องการจาก claims
-			email := claims["email"].(string)
 
-			return email, nil
+			claimsRes := Claims{
+				Email:     claims["email"].(string),
+				IsRefresh: claims["isRefresh"].(bool),
+				ExpiredAt: claims["exp"].(float64),
+			}
+
+			return &claimsRes, nil
 		} else {
-			return "", errs.NewUnauthorizedError("Invalid Token: " + err.Error())
+			return nil, errs.NewUnauthorizedError("Invalid Token: " + err.Error())
 		}
 
 	} else {
-		return "", errs.NewUnauthorizedError("Invalid or missing Bearer Token")
+		return nil, errs.NewUnauthorizedError("Invalid or missing Bearer Token")
 	}
 }

@@ -18,14 +18,15 @@ func NewUserHandler(userService svInter.UserService) userHandler {
 }
 
 // Register godoc
-// @Summary      Register user
-// @Description  Create user.
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Param users body interfaces.RegisterRequest true "request body register"
-// @Success      200  {object}  utils.DataResponse
-// @Router       /register [post]
+//
+//	@Summary		Register user
+//	@Description	Create user.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			users	body		interfaces.RegisterRequest	true	"request body register"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/register [post]
 func (h userHandler) Register(c echo.Context) error {
 	request := new(svInter.RegisterRequest)
 
@@ -60,14 +61,15 @@ func (h userHandler) Register(c echo.Context) error {
 }
 
 // Login godoc
-// @Summary      Login
-// @Description  Login user.
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Param users body interfaces.Login true "request body login"
-// @Success      200  {object}  utils.DataResponse
-// @Router       /login [post]
+//
+//	@Summary		Login
+//	@Description	Login user.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			users	body		interfaces.Login	true	"request body login"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/login [post]
 func (h userHandler) Login(c echo.Context) error {
 
 	request := new(svInter.Login)
@@ -102,16 +104,48 @@ func (h userHandler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
-// GetUsers godoc
-// @Summary      Get all users
-// @Description  return list users.
-// @Tags         users
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  utils.DataResponse
-// @Router       /users [get]
+// GetAllUser godoc
+//
+//	@Summary		Get all users
+//	@Description	return list users.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	utils.DataResponse
+//	@Router			/users [get]
 func (h userHandler) GetAllUser(c echo.Context) error {
 	users, err := h.userService.GetUsers()
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}
+
+// RefreshToken godoc
+//
+//	@Summary		Refresh Token
+//	@Description	return new access token.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	utils.DataResponse
+//	@Router			/refresh [post]
+//
+// @Security BearerAuth
+func (h userHandler) RefreshToken(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.userService.RefreshToken(token)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)

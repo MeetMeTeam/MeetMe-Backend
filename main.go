@@ -6,120 +6,39 @@ import (
 	header "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	gosocketio "github.com/graarh/golang-socketio"
-	"github.com/graarh/golang-socketio/transport"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/spf13/viper"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"meetme/be/actions/handlers"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services"
 	_ "meetme/be/docs"
-	"net/http"
-	"strings"
+	"net/smtp"
+	"os"
 	"time"
-
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
-
-type SqlLogger struct {
-	logger.Interface
-}
-
-func (l SqlLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
-	sql, _ := fc()
-	fmt.Printf("%v\n ======================================\n", sql)
-}
 
 var (
 	router *mux.Router
 	Server *gosocketio.Server
-
-	connectedUsers = make(map[string]ConnectedUser)
 )
 
-type Message struct {
-	Text string `json:"message"`
-}
+var auth smtp.Auth
 
-func init() {
-	Server = gosocketio.NewServer(transport.GetDefaultWebsocketTransport())
-	fmt.Println("Socket Inititalize...")
-}
+//	@title			Meet Me API
+//	@version		1.0
+//	@description	This is a API for Meet Me.
 
-func LoadSocket() {
-	// socket connection
-	Server.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
-
-		fmt.Println("Connected", c.Id())
-		//fmt.Println("Connected", c)
-		addNewConnectedUser(c.Id())
-		c.Join("Room")
-	})
-
-	// socket disconnection
-	Server.On(gosocketio.OnDisconnection, func(c *gosocketio.Channel) {
-		//fmt.Println("Disconnected", c.Id())
-		removeConnectedUser(c.Id())
-		// handles when someone closes the tab
-		c.Leave("Room")
-	})
-
-	// chat socket
-	Server.On("/chat", func(c *gosocketio.Channel, message Message) string {
-		fmt.Println(message.Text)
-		c.BroadcastTo("Room", "/message", message.Text)
-		return "message sent successfully."
-	})
-}
-
-func CreateRouter() {
-	router = mux.NewRouter()
-}
-
-func InititalizeRoutes() {
-	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
-	})
-	router.Handle("/socket.io/", Server)
-}
-
-func StartServer() {
-	fmt.Println("Server Started at http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", header.CORS(header.AllowedHeaders([]string{"X-Requested-With", "Access-Control-Allow-Origin", "Content-Type", "Authorization"}), header.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}), header.AllowedOrigins([]string{"*"}))(router)))
-}
-
-type ConnectedUser struct {
-	UserID string
-}
-
-func addNewConnectedUser(userID string) {
-	newUser := ConnectedUser{UserID: userID}
-	connectedUsers[userID] = newUser
-	fmt.Println("new connected users")
-	fmt.Println(connectedUsers)
-}
-
-func removeConnectedUser(userID string) {
-	if _, ok := connectedUsers[userID]; ok {
-		delete(connectedUsers, userID)
-
-	}
-	fmt.Println("users disconnect")
-	fmt.Println(connectedUsers)
-}
-
-// @title Meet Me API
-// @version 1.0
-// @description This is a API for Meet Me.
-
-// @host  c001-202-28-7-5.ngrok-free.app
-// @BasePath /api
+// @host		meetme-backend.com
+// @BasePath	/api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 
 	e := echo.New()
@@ -135,34 +54,6 @@ func main() {
 	//	AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	//}))
 
-	//server := socketio.NewServer(nil)
-	//
-	//server.OnConnect("/", func(s socketio.Conn) error {
-	//	s.SetContext("")
-	//	fmt.Println("connected:")
-	//	fmt.Println("connected:", s.ID())
-	//	return nil
-	//})
-	//
-	//go server.Serve()
-	//defer server.Close()
-	//
-
-	//connectedUsers := make(map[string]ConnectedUser) // สร้าง map โดยกำหนด key เป็น string และ value เป็น ConnectedUser struct
-
-	// เพิ่มข้อมูลเข้าไปใน map
-	//addNewConnectedUser(connectedUsers, "socket1", "user1")
-	//addNewConnectedUser(connectedUsers, "socket2", "user2")
-
-	// แสดงผลค่าใน map
-	//fmt.Println(connectedUsers)
-	//LoadSocket()
-	//CreateRouter()
-	//InititalizeRoutes()
-	//StartServer()
-
-	//log.Fatal(http.ListenAndServe(":8080", header.CORS(headers, methods, origins)(e)))
-
 	initConfig()
 	initTimeZone()
 	db := initDB()
@@ -171,51 +62,43 @@ func main() {
 	userService := services.NewUserService(userRepository)
 	userHandler := handlers.NewUserHandler(userService)
 
-	friendRepository := repositories.NewFriendshipRepositoryDB(db)
-
-	inviteRepository := repositories.NewFriendInvitationRepositoryDB(db)
-	inviteService := services.NewFriendInvitationService(inviteRepository, userRepository, friendRepository)
-	inviteHandler := handlers.NewFriendInvitationHandler(inviteService)
-
-	friendService := services.NewFriendShipService(friendRepository, userRepository)
-	friendHandler := handlers.NewFriendShipHandler(friendService)
+	friendRepository := repositories.NewFriendRepositoryDB(db)
+	friendService := services.NewFriendService(friendRepository, userRepository)
+	friendHandler := handlers.NewFriendHandler(friendService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
-	//e.Validator = &utils.CustomValidator{Validator: validator.New()}
-
-	e.GET("/migrate", func(c echo.Context) error {
-		db.AutoMigrate(User{}, FriendInvitation{}, Friendship{})
-		return c.String(http.StatusOK, "Migrate DB success !")
-	})
 
 	api := e.Group("/api")
-
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
-	api.GET("/users", userHandler.GetAllUser)
+	api.POST("/refresh", userHandler.RefreshToken)
 
-	api.GET("/friends", friendHandler.FriendList)
+	userApi := api.Group("/users")
+	userApi.GET("", userHandler.GetAllUser)
 
-	inviteApi := api.Group("/invitation")
-	inviteApi.POST("/add", inviteHandler.InviteFriend)
-	inviteApi.GET("/check", inviteHandler.CheckFriendInvite)
-	inviteApi.DELETE("/rejected/:inviteId", inviteHandler.RejectFriend)
-	inviteApi.POST("/accept/:inviteId", inviteHandler.AcceptFriend)
+	inviteApi := api.Group("/invitations")
+	inviteApi.POST("", friendHandler.InviteFriend)
+	inviteApi.GET("", friendHandler.CheckFriendInvite)
+	inviteApi.DELETE("/:inviteId", friendHandler.RejectFriend)
+	inviteApi.DELETE("", friendHandler.RejectAllFriend)
+	inviteApi.PUT("/:inviteId", friendHandler.AcceptFriend)
+	inviteApi.PUT("", friendHandler.AcceptAllFriend)
 
-	e.Logger.Fatal(e.Start(":"+viper.GetString("app.port")), header.CORS(headers, methods, origins)(e))
+	friendApi := api.Group("/friends")
+	friendApi.GET("", friendHandler.FriendList)
+	friendApi.DELETE("/:friendId", friendHandler.RemoveFriend)
+
+	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))
 }
 
 func initConfig() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	err := viper.ReadInConfig()
+	err := godotenv.Load(".env")
 	if err != nil {
-		panic(err)
+		log.Fatal("Error load env file", err)
 	}
+	log.Print("env successfully loaded.")
+
 }
 func initTimeZone() {
 	ict, err := time.LoadLocation("Asia/Bangkok")
@@ -225,46 +108,22 @@ func initTimeZone() {
 	time.Local = ict
 }
 
-func initDB() *gorm.DB {
-	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true",
-		viper.GetString("db.username"),
-		viper.GetString("db.password"),
-		viper.GetString("db.host"),
-		viper.GetInt("db.port"),
-		viper.GetString("db.database"),
-	)
-	dial := mysql.Open(dsn)
-	db, err := gorm.Open(dial, &gorm.Config{
-		DryRun: false,
-	})
+func initDB() *mongo.Database {
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI("mongodb+srv://" + os.Getenv("MONGO_USERNAME") + ":" + os.Getenv("MONGO_PASSWORD") + ".@cluster0.salidj6.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
+	//opts := options.Client().ApplyURI("mongodb+srv://" + url.QueryEscape(viper.GetString("mongodb.username")) + ":" + url.QueryEscape(viper.GetString("mongodb.password")) + "@meetme.wlhqxcx.mongodb.net/?maxPoolSize=100").SetServerAPIOptions(serverAPI)
+
+	// Create a new client and connect to the server
+	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
 		panic(err)
 	}
 
-	return db
-}
+	// Send a ping to confirm a successful connection
+	if err := client.Database("MeetMe").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+		panic(err)
+	}
+	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-type User struct {
-	gorm.Model
-	Username  string    `gorm:"size:255;not null"`
-	Firstname string    `gorm:"size:255;not null"`
-	Lastname  string    `gorm:"size:255"`
-	Birthday  time.Time `gorm:"type:date;not null"`
-	Email     string    `gorm:"size:255;not null"`
-	Password  string    `gorm:"not null"`
-	Image     string    `gorm:"not null"`
-}
-
-type FriendInvitation struct {
-	gorm.Model
-	SenderId   int `gorm:"not null"`
-	ReceiverId int `gorm:"not null"`
-}
-
-type Friendship struct {
-	ID       int `gorm:"autoIncrement"`
-	UserId1  int `gorm:"not null"`
-	UserID2  int `gorm:"not null"`
-	DateAdd  time.Time
-	DeleteAt gorm.DeletedAt `gorm:"index"`
+	return client.Database("MeetMe")
 }

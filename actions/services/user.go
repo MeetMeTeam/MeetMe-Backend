@@ -2,11 +2,16 @@ package services
 
 import (
 	"errors"
-	"github.com/spf13/viper"
+	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
+	"meetme/be/config"
 	"meetme/be/errs"
+	"os"
+	"strings"
 	"time"
 
 	repoInt "meetme/be/actions/repositories/interfaces"
@@ -15,7 +20,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type userService struct {
@@ -23,7 +27,8 @@ type userService struct {
 }
 
 type jwtCustomClaims struct {
-	Email string `json:"email"`
+	Email     string `json:"email"`
+	IsRefresh bool   `json:"isRefresh"`
 	// Admin bool   `json:"admin"`
 	jwt.RegisteredClaims
 }
@@ -55,7 +60,7 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 
 	response := utils.DataResponse{
 		Data: &interfaces.RegisterResponse{
-			ID:        result.ID,
+			//ID:        result.ID.Hex(),
 			Firstname: result.Firstname,
 			Lastname:  result.Lastname,
 			Birthday:  result.Birthday,
@@ -65,13 +70,29 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		Message: "Create user success.",
 	}
 
+	//send verify email
+	templateData := struct {
+		Firstname string
+		Lastname  string
+		URL       string
+	}{
+		Firstname: result.Firstname,
+		Lastname:  result.Lastname,
+		URL:       "www.google.com",
+	}
+	r := config.NewRequest([]string{result.Email}, "Hello Junk!", "Hello, World!")
+	err = r.ParseTemplate("verifyFile.html", templateData)
+	if err == nil {
+		ok, _ := r.SendEmail()
+		fmt.Println(ok)
+	}
 	return response, nil
 }
 
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	user, err := s.userRepo.GetByEmail(request.Email)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewNotFoundError("User not found.")
 		}
 		log.Println(err)
@@ -83,14 +104,29 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 
 		claims := &jwtCustomClaims{
 			request.Email,
-			// true,
+			false,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
+			},
+		}
+		refreshClaims := &jwtCustomClaims{
+			request.Email,
+			true,
+			jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			},
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		t, err := token.SignedString([]byte(viper.GetString("app.secret")))
+		refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+
+		t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
+		if err != nil {
+			log.Println(err)
+			return nil, errs.NewInternalError(err.Error())
+		}
+		r, err := refreshToken.SignedString([]byte(os.Getenv("APP_SECRET")))
+
 		if err != nil {
 			log.Println(err)
 			return nil, errs.NewInternalError(err.Error())
@@ -99,17 +135,15 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 
 			UserDetails: interfaces.UserDetails{
 				Token:    t,
+				Refresh:  r,
 				Mail:     user.Email,
 				Username: user.Username,
-				Id:       user.ID,
+				Id:       user.ID.Hex(),
 			},
 		}
 		return response, nil
 	} else {
-		response := utils.ErrorResponse{
-			Message: "Email or password incorrect.",
-		}
-		return response, nil
+		return nil, errs.NewUnauthorizedError("Email or password incorrect.")
 	}
 
 }
@@ -118,20 +152,24 @@ func (s userService) GetUsers() (interface{}, error) {
 	users, err := s.userRepo.GetAll()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return utils.DataResponse{
+				Data:    []int{},
+				Message: "Get users success.",
+			}, nil
 		}
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	userResponses := []interfaces.RegisterResponse{}
+	userResponses := []interfaces.ListUserResponse{}
 	for _, user := range users {
-		userResponse := interfaces.RegisterResponse{
-			ID:        user.ID,
+		userResponse := interfaces.ListUserResponse{
+			ID:        user.ID.Hex(),
 			Firstname: user.Firstname,
 			Lastname:  user.Lastname,
 			Email:     user.Email,
 			Birthday:  user.Birthday,
+			Username:  user.Username,
 		}
 		userResponses = append(userResponses, userResponse)
 	}
@@ -140,5 +178,38 @@ func (s userService) GetUsers() (interface{}, error) {
 		Data:    userResponses,
 		Message: "Get users success.",
 	}
+
+	return response, nil
+}
+
+func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
+	refreshClaims, err := utils.IsTokenValid(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+	if refreshClaims.IsRefresh == false {
+		return nil, errs.NewInternalError("It's not refresh token.")
+	}
+	claims := &jwtCustomClaims{
+		refreshClaims.Email,
+		false,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	response := interfaces.TokenResponse{
+		AccessToken:  t,
+		RefreshToken: strings.Trim(refreshToken, "Bearer "),
+	}
+
 	return response, nil
 }
