@@ -12,7 +12,14 @@ services:
       - '8080:8080'
     networks:
       - apinetwork
-
+  web:
+    image: nginx
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - apinetwork
 networks:
   apinetwork:
     driver: bridge
