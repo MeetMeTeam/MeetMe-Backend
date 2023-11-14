@@ -43,6 +43,7 @@ type UserDetails struct {
 	Mail     string `json:"mail"`
 	Username string `json:"username"`
 	Id       string `json:"_id"`
+	Image    string `json:"image"`
 }
 
 type TokenResponse struct {

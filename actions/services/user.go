@@ -106,7 +106,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 			request.Email,
 			false,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
 			},
 		}
 		refreshClaims := &jwtCustomClaims{
@@ -139,6 +139,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Mail:     user.Email,
 				Username: user.Username,
 				Id:       user.ID.Hex(),
+				Image:    user.Image,
 			},
 		}
 		return response, nil
