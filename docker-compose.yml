@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    environment:
+      APP_PORT: 8080
+      APP_SECRET: "Hk89LSUPn3r4JDL@#@#$LJJKJDP00-.KJOS"
+      MONGO_USERNAME: MeetMeUser
+      MONGO_PASSWORD: Ntw171044
+    ports:
+      - '8080:8080'
+    networks:
+      - apinetwork
+
+networks:
+  apinetwork:
+    driver: bridge
