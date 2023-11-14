@@ -99,7 +99,7 @@ func initConfig() {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error load env file", err)
+		log.Println("Error load env file", err)
 	}
 	log.Print("env successfully loaded.")
 
