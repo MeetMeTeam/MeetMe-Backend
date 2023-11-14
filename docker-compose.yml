@@ -20,6 +20,16 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
     networks:
       - apinetwork
+  fe:
+    container_name: react-docker
+    build: .././MeetMe-Frontend/
+    volumes:
+      - '.:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=${NODE_ENV}
 networks:
   apinetwork:
     driver: bridge
