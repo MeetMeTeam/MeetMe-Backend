@@ -380,6 +380,7 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 			Lastname:  user.Lastname,
 			Birthday:  user.Birthday,
 			Email:     user.Email,
+			Image:     user.Image,
 		}
 		userResponses = append(userResponses, userResponse)
 	}

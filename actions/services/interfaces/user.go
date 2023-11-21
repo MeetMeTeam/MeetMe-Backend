@@ -26,6 +26,7 @@ type ListUserResponse struct {
 	Lastname  string `json:"lastname"`
 	Birthday  string `json:"birthday"`
 	Email     string `json:"email"`
+	Image     string `json:"image"`
 }
 
 type Login struct {
