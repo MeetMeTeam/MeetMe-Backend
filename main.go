@@ -71,7 +71,6 @@ func main() {
 	friendHandler := handlers.NewFriendHandler(friendService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
-
 	api := e.Group("/api")
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
