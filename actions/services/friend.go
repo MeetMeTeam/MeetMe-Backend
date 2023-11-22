@@ -43,7 +43,7 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 	receiver, err := s.userRepo.GetByEmail(request.TargetMailAddress)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
