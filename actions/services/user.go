@@ -44,13 +44,12 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		return nil, errs.NewInternalError(err.Error())
 	}
 	newUser := repoInt.User{
-		Firstname: request.Firstname,
-		Lastname:  request.Lastname,
-		Birthday:  request.Birthday,
-		Email:     request.Email,
-		Password:  string(bytes),
-		Image:     request.Image,
-		Username:  request.Username,
+		DisplayName: request.DisplayName,
+		Birthday:    request.Birthday,
+		Email:       request.Email,
+		Password:    string(bytes),
+		Image:       request.Image,
+		Username:    request.Username,
 	}
 	result, err := s.userRepo.Create(newUser)
 	if err != nil {
@@ -61,24 +60,21 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 	response := utils.DataResponse{
 		Data: &interfaces.RegisterResponse{
 			//ID:        result.ID.Hex(),
-			Firstname: result.Firstname,
-			Lastname:  result.Lastname,
-			Birthday:  result.Birthday,
-			Email:     result.Email,
-			Username:  result.Username,
+
+			Birthday: result.Birthday,
+			Email:    result.Email,
+			Username: result.Username,
 		},
 		Message: "Create user success.",
 	}
 
 	//send verify email
 	templateData := struct {
-		Firstname string
-		Lastname  string
-		URL       string
+		DisplayName string
+		URL         string
 	}{
-		Firstname: result.Firstname,
-		Lastname:  result.Lastname,
-		URL:       "www.google.com",
+		DisplayName: request.DisplayName,
+		URL:         "www.google.com",
 	}
 	r := config.NewRequest([]string{result.Email}, "Hello Junk!", "Hello, World!")
 	err = r.ParseTemplate("verifyFile.html", templateData)
@@ -165,12 +161,11 @@ func (s userService) GetUsers() (interface{}, error) {
 	userResponses := []interfaces.ListUserResponse{}
 	for _, user := range users {
 		userResponse := interfaces.ListUserResponse{
-			ID:        user.ID.Hex(),
-			Firstname: user.Firstname,
-			Lastname:  user.Lastname,
-			Email:     user.Email,
-			Birthday:  user.Birthday,
-			Username:  user.Username,
+			ID:          user.ID.Hex(),
+			DisplayName: user.DisplayName,
+			Email:       user.Email,
+			Birthday:    user.Birthday,
+			Username:    user.Username,
 		}
 		userResponses = append(userResponses, userResponse)
 	}

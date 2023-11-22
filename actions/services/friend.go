@@ -76,12 +76,11 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 	}
 	response := utils.DataResponse{
 		Data: interfaces.ListUserResponse{
-			ID:        user.ID.Hex(),
-			Username:  user.Username,
-			Firstname: user.Firstname,
-			Lastname:  user.Lastname,
-			Birthday:  user.Birthday,
-			Email:     user.Email,
+			ID:          user.ID.Hex(),
+			Username:    user.Username,
+			DisplayName: user.DisplayName,
+			Birthday:    user.Birthday,
+			Email:       user.Email,
 		},
 		Message: "Invite friend success",
 	}
@@ -374,13 +373,12 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 		}
 
 		userResponse := interfaces.ListUserResponse{
-			ID:        user.ID.Hex(),
-			Username:  user.Username,
-			Firstname: user.Firstname,
-			Lastname:  user.Lastname,
-			Birthday:  user.Birthday,
-			Email:     user.Email,
-			Image:     user.Image,
+			ID:          user.ID.Hex(),
+			Username:    user.Username,
+			DisplayName: user.DisplayName,
+			Birthday:    user.Birthday,
+			Email:       user.Email,
+			Image:       user.Image,
 		}
 		userResponses = append(userResponses, userResponse)
 	}

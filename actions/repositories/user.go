@@ -51,13 +51,12 @@ func (r UserRepository) GetById(id primitive.ObjectID) (*interfaces.UserResponse
 func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 
 	newUser := interfaces.User{
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
-		Email:     user.Email,
-		Birthday:  user.Birthday,
-		Password:  user.Password,
-		Image:     user.Image,
-		Username:  user.Username,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+		Birthday:    user.Birthday,
+		Password:    user.Password,
+		Image:       user.Image,
+		Username:    user.Username,
 	}
 	_, err := r.db.Collection("user").InsertOne(context.TODO(), newUser)
 
