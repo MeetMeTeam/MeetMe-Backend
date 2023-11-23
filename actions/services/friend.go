@@ -134,6 +134,7 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 			InviteId: result.ID,
 			Username: user.Username,
 			Email:    user.Email,
+			Image:    user.Image,
 		}
 		userResponses = append(userResponses, userResponse)
 	}

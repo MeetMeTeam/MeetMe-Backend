@@ -15,6 +15,7 @@ type CheckInviteResponse struct {
 	InviteId primitive.ObjectID `json:"inviteId" example:"1"`
 	Username string             `json:"username" example:"winnerkypt"`
 	Email    string             `json:"email" example:"winner@mail.com"`
+	Image    string             `json:"image"`
 }
 
 type FriendService interface {
