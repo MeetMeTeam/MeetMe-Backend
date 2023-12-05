@@ -2,13 +2,11 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
-	"meetme/be/config"
 	"meetme/be/errs"
 	"os"
 	"strings"
@@ -38,6 +36,15 @@ func NewUserService(userRepo repositories.UserRepository) userService {
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
+	isUsernameExist, _ := s.userRepo.GetByUsername(request.Username)
+
+	if isUsernameExist != nil {
+		return nil, errs.NewBadRequestError(request.Username + " is already exist.")
+	}
+	isEmailExist, _ := s.userRepo.GetByEmail(request.Email)
+	if isEmailExist != nil {
+		return nil, errs.NewBadRequestError(request.Email + " is already exist.")
+	}
 	bytes, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
 	if err != nil {
 		log.Println(err)
@@ -69,19 +76,19 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 	}
 
 	//send verify email
-	templateData := struct {
-		DisplayName string
-		URL         string
-	}{
-		DisplayName: request.DisplayName,
-		URL:         "www.google.com",
-	}
-	r := config.NewRequest([]string{result.Email}, "Hello Junk!", "Hello, World!")
-	err = r.ParseTemplate("verifyFile.html", templateData)
-	if err == nil {
-		ok, _ := r.SendEmail()
-		fmt.Println(ok)
-	}
+	//templateData := struct {
+	//	DisplayName string
+	//	URL         string
+	//}{
+	//	DisplayName: request.DisplayName,
+	//	URL:         "www.google.com",
+	//}
+	//r := config.NewRequest([]string{result.Email}, "Hello Junk!", "Hello, World!")
+	//err = r.ParseTemplate("verifyFile.html", templateData)
+	//if err == nil {
+	//	ok, _ := r.SendEmail()
+	//	fmt.Println(ok)
+	//}
 	return response, nil
 }
 

@@ -26,5 +26,6 @@ type UserRepository interface {
 	GetById(int) (*UserResponse, error)
 	Create(User) (*User, error)
 	AddFriend() (*User, error)
+	GetByUsername(string) (*UserResponse, error)
 	// UpdateTotalPoint(int, string) (*User, error)
 }
