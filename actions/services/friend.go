@@ -98,7 +98,7 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 	if err != nil {
 		log.Println("User not found.")
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -154,7 +154,7 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -167,11 +167,11 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 	isInvite, err := s.friendRepo.GetByIdAndReceiverIdAndStatus(id, user.ID, "PENDING")
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("Invitation not found.")
+			return nil, errs.NewBadRequestError("Invitation not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	} else if isInvite == nil {
-		return nil, errs.NewNotFoundError("Invitation not found.")
+		return nil, errs.NewBadRequestError("Invitation not found.")
 	}
 
 	result, err := s.friendRepo.UpdateStatus(primitive.NilObjectID, id)
@@ -185,7 +185,7 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 	if err != nil {
 		log.Println("get user 1")
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -209,7 +209,7 @@ func (s friendService) AcceptAllInvitations(token string) (interface{}, error) {
 	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -217,11 +217,11 @@ func (s friendService) AcceptAllInvitations(token string) (interface{}, error) {
 	isInvite, err := s.friendRepo.GetByReceiverId(user.ID, "PENDING")
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("Invitation not found.")
+			return nil, errs.NewBadRequestError("Invitation not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	} else if isInvite == nil {
-		return nil, errs.NewNotFoundError("Invitation not found.")
+		return nil, errs.NewBadRequestError("Invitation not found.")
 	}
 
 	results, err := s.friendRepo.UpdateStatus(user.ID, primitive.NilObjectID)
@@ -236,7 +236,7 @@ func (s friendService) AcceptAllInvitations(token string) (interface{}, error) {
 		if err != nil {
 			log.Println("get user 1")
 			if errors.Is(err, mongo.ErrNoDocuments) {
-				return nil, errs.NewNotFoundError("User not found.")
+				return nil, errs.NewBadRequestError("User not found.")
 			}
 			return nil, errs.NewInternalError(err.Error())
 		}
@@ -262,7 +262,7 @@ func (s friendService) RejectInvitation(token string, inviteId string) (interfac
 	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -276,11 +276,11 @@ func (s friendService) RejectInvitation(token string, inviteId string) (interfac
 	isInvite, err := s.friendRepo.GetByIdAndReceiverIdAndStatus(id, user.ID, "PENDING")
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("Invitation not found.")
+			return nil, errs.NewBadRequestError("Invitation not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	} else if isInvite == nil {
-		return nil, errs.NewNotFoundError("Invitation not found.")
+		return nil, errs.NewBadRequestError("Invitation not found.")
 	}
 
 	err = s.friendRepo.Delete(primitive.NilObjectID, id, "PENDING")
@@ -301,7 +301,7 @@ func (s friendService) RejectAllInvitation(token string) (interface{}, error) {
 	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -309,11 +309,11 @@ func (s friendService) RejectAllInvitation(token string) (interface{}, error) {
 	isInvite, err := s.friendRepo.GetByReceiverId(user.ID, "PENDING")
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("Invitation not found.")
+			return nil, errs.NewBadRequestError("Invitation not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	} else if isInvite == nil {
-		return nil, errs.NewNotFoundError("Invitation not found.")
+		return nil, errs.NewBadRequestError("Invitation not found.")
 	}
 
 	err = s.friendRepo.Delete(user.ID, primitive.NilObjectID, "PENDING")
@@ -335,7 +335,7 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 	if err != nil {
 		log.Println("User not found.")
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -400,7 +400,7 @@ func (s friendService) DeleteFriend(token string, id string) (interface{}, error
 	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -414,11 +414,11 @@ func (s friendService) DeleteFriend(token string, id string) (interface{}, error
 	isInvite, err := s.friendRepo.GetByReceiverIdAndSenderId(friendId, user.ID)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("Invitation not found.")
+			return nil, errs.NewBadRequestError("Invitation not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	} else if isInvite == nil {
-		return nil, errs.NewNotFoundError("Invitation not found.")
+		return nil, errs.NewBadRequestError("Invitation not found.")
 	}
 
 	err = s.friendRepo.Delete(primitive.NilObjectID, isInvite.ID, "FRIEND")
@@ -430,7 +430,7 @@ func (s friendService) DeleteFriend(token string, id string) (interface{}, error
 	friend, err := s.userRepo.GetById(friendId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewBadRequestError("User not found.")
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
