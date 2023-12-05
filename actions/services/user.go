@@ -96,7 +96,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	user, err := s.userRepo.GetByEmail(request.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewBadRequestError("User not found.")
+			return nil, errs.NewUnauthorizedError("Email or password incorrect.")
 		}
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
