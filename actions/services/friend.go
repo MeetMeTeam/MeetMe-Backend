@@ -436,6 +436,7 @@ func (s friendService) DeleteFriend(token string, id string) (interface{}, error
 	}
 	return utils.DataResponse{
 		Data: interfaces.FriendShipResponse{
+			ID:     friend.ID.Hex(),
 			Friend: friend.Email,
 		},
 		Message: "Delete Friend Success",
