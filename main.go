@@ -113,8 +113,10 @@ func initTimeZone() {
 
 func initDB() *mongo.Database {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI("mongodb+srv://" + os.Getenv("MONGO_USERNAME") + ":" + os.Getenv("MONGO_PASSWORD") + ".@cluster0.salidj6.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
-	//opts := options.Client().ApplyURI("mongodb+srv://" + url.QueryEscape(viper.GetString("mongodb.username")) + ":" + url.QueryEscape(viper.GetString("mongodb.password")) + "@meetme.wlhqxcx.mongodb.net/?maxPoolSize=100").SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI("mongodb+srv://" +
+		os.Getenv("MONGO_USERNAME") + ":" +
+		os.Getenv("MONGO_PASSWORD") +
+		".@cluster0.salidj6.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
 
 	// Create a new client and connect to the server
 	client, err := mongo.Connect(context.TODO(), opts)

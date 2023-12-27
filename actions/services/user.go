@@ -66,8 +66,6 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 
 	response := utils.DataResponse{
 		Data: &interfaces.RegisterResponse{
-			//ID:        result.ID.Hex(),
-
 			Birthday: result.Birthday,
 			Email:    result.Email,
 			Username: result.Username,
