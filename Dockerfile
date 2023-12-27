@@ -3,6 +3,8 @@ FROM golang:1.18-alpine as base
 WORKDIR /builder
 RUN apk add upx
 
+ENV GO111MODULE=on CGO_ENABLED=0
+
 COPY go.mod go.sum /builder/
 RUN go mod download
 
