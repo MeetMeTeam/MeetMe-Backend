@@ -32,6 +32,22 @@ func (r UserRepository) GetByEmail(email string) (*interfaces.UserResponse, erro
 	return &users, nil
 }
 
+func (r UserRepository) GetByUsername(username string) (*interfaces.UserResponse, error) {
+	var users interfaces.UserResponse
+	filter := bson.D{{"username", username}}
+	coll := r.db.Collection("user")
+	err := coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// This error means your query did not match any documents.
+			return nil, err
+		}
+		panic(err)
+	}
+
+	return &users, nil
+}
+
 func (r UserRepository) GetById(id primitive.ObjectID) (*interfaces.UserResponse, error) {
 
 	var users interfaces.UserResponse
@@ -51,13 +67,12 @@ func (r UserRepository) GetById(id primitive.ObjectID) (*interfaces.UserResponse
 func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 
 	newUser := interfaces.User{
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
-		Email:     user.Email,
-		Birthday:  user.Birthday,
-		Password:  user.Password,
-		Image:     user.Image,
-		Username:  user.Username,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+		Birthday:    user.Birthday,
+		Password:    user.Password,
+		Image:       user.Image,
+		Username:    user.Username,
 	}
 	_, err := r.db.Collection("user").InsertOne(context.TODO(), newUser)
 

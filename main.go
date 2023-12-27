@@ -17,6 +17,10 @@ import (
 	"meetme/be/actions/handlers"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services"
+
+	//"meetme/be/actions/handlers"
+	//"meetme/be/actions/repositories"
+	//"meetme/be/actions/services"
 	_ "meetme/be/docs"
 	"net/smtp"
 	"os"
@@ -67,7 +71,6 @@ func main() {
 	friendHandler := handlers.NewFriendHandler(friendService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
-
 	api := e.Group("/api")
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
@@ -95,7 +98,7 @@ func initConfig() {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error load env file", err)
+		log.Println("Error load env file", err)
 	}
 	log.Print("env successfully loaded.")
 
@@ -110,8 +113,10 @@ func initTimeZone() {
 
 func initDB() *mongo.Database {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI("mongodb+srv://" + os.Getenv("MONGO_USERNAME") + ":" + os.Getenv("MONGO_PASSWORD") + ".@cluster0.salidj6.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
-	//opts := options.Client().ApplyURI("mongodb+srv://" + url.QueryEscape(viper.GetString("mongodb.username")) + ":" + url.QueryEscape(viper.GetString("mongodb.password")) + "@meetme.wlhqxcx.mongodb.net/?maxPoolSize=100").SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI("mongodb+srv://" +
+		os.Getenv("MONGO_USERNAME") + ":" +
+		os.Getenv("MONGO_PASSWORD") +
+		".@cluster0.salidj6.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
 
 	// Create a new client and connect to the server
 	client, err := mongo.Connect(context.TODO(), opts)

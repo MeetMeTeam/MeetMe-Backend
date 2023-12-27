@@ -2,13 +2,11 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
-	"meetme/be/config"
 	"meetme/be/errs"
 	"os"
 	"strings"
@@ -38,19 +36,27 @@ func NewUserService(userRepo repositories.UserRepository) userService {
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
+	isUsernameExist, _ := s.userRepo.GetByUsername(request.Username)
+
+	if isUsernameExist != nil {
+		return nil, errs.NewBadRequestError(request.Username + " is already exist.")
+	}
+	isEmailExist, _ := s.userRepo.GetByEmail(request.Email)
+	if isEmailExist != nil {
+		return nil, errs.NewBadRequestError(request.Email + " is already exist.")
+	}
 	bytes, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
 	if err != nil {
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 	newUser := repoInt.User{
-		Firstname: request.Firstname,
-		Lastname:  request.Lastname,
-		Birthday:  request.Birthday,
-		Email:     request.Email,
-		Password:  string(bytes),
-		Image:     request.Image,
-		Username:  request.Username,
+		DisplayName: request.DisplayName,
+		Birthday:    request.Birthday,
+		Email:       request.Email,
+		Password:    string(bytes),
+		Image:       request.Image,
+		Username:    request.Username,
 	}
 	result, err := s.userRepo.Create(newUser)
 	if err != nil {
@@ -60,32 +66,27 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 
 	response := utils.DataResponse{
 		Data: &interfaces.RegisterResponse{
-			//ID:        result.ID.Hex(),
-			Firstname: result.Firstname,
-			Lastname:  result.Lastname,
-			Birthday:  result.Birthday,
-			Email:     result.Email,
-			Username:  result.Username,
+			Birthday: result.Birthday,
+			Email:    result.Email,
+			Username: result.Username,
 		},
 		Message: "Create user success.",
 	}
 
 	//send verify email
-	templateData := struct {
-		Firstname string
-		Lastname  string
-		URL       string
-	}{
-		Firstname: result.Firstname,
-		Lastname:  result.Lastname,
-		URL:       "www.google.com",
-	}
-	r := config.NewRequest([]string{result.Email}, "Hello Junk!", "Hello, World!")
-	err = r.ParseTemplate("verifyFile.html", templateData)
-	if err == nil {
-		ok, _ := r.SendEmail()
-		fmt.Println(ok)
-	}
+	//templateData := struct {
+	//	DisplayName string
+	//	URL         string
+	//}{
+	//	DisplayName: request.DisplayName,
+	//	URL:         "www.google.com",
+	//}
+	//r := config.NewRequest([]string{result.Email}, "Hello Junk!", "Hello, World!")
+	//err = r.ParseTemplate("verifyFile.html", templateData)
+	//if err == nil {
+	//	ok, _ := r.SendEmail()
+	//	fmt.Println(ok)
+	//}
 	return response, nil
 }
 
@@ -93,7 +94,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	user, err := s.userRepo.GetByEmail(request.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewNotFoundError("User not found.")
+			return nil, errs.NewUnauthorizedError("Email or password incorrect.")
 		}
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
@@ -106,7 +107,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 			request.Email,
 			false,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
 			},
 		}
 		refreshClaims := &jwtCustomClaims{
@@ -139,6 +140,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Mail:     user.Email,
 				Username: user.Username,
 				Id:       user.ID.Hex(),
+				Image:    user.Image,
 			},
 		}
 		return response, nil
@@ -164,12 +166,11 @@ func (s userService) GetUsers() (interface{}, error) {
 	userResponses := []interfaces.ListUserResponse{}
 	for _, user := range users {
 		userResponse := interfaces.ListUserResponse{
-			ID:        user.ID.Hex(),
-			Firstname: user.Firstname,
-			Lastname:  user.Lastname,
-			Email:     user.Email,
-			Birthday:  user.Birthday,
-			Username:  user.Username,
+			ID:          user.ID.Hex(),
+			DisplayName: user.DisplayName,
+			Email:       user.Email,
+			Birthday:    user.Birthday,
+			Username:    user.Username,
 		}
 		userResponses = append(userResponses, userResponse)
 	}

@@ -3,24 +3,22 @@ package interfaces
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type User struct {
-	Firstname string `bson:"firstname"`
-	Lastname  string `bson:"lastname"`
-	Birthday  string `bson:"birthday"`
-	Email     string `bson:"email"`
-	Password  string `bson:"password"`
-	Image     string `bson:"image"`
-	Username  string `bson:"username"`
+	DisplayName string `bson:"displayName"`
+	Birthday    string `bson:"birthday"`
+	Email       string `bson:"email"`
+	Password    string `bson:"password"`
+	Image       string `bson:"image"`
+	Username    string `bson:"username"`
 }
 
 type UserResponse struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	Firstname string             `bson:"firstname"`
-	Lastname  string             `bson:"lastname"`
-	Birthday  string             `bson:"birthday"`
-	Email     string             `bson:"email"`
-	Password  string             `bson:"password"`
-	Image     string             `bson:"image"`
-	Username  string             `bson:"username"`
+	ID          primitive.ObjectID `bson:"_id"`
+	DisplayName string             `bson:"displayName"`
+	Birthday    string             `bson:"birthday"`
+	Email       string             `bson:"email"`
+	Password    string             `bson:"password"`
+	Image       string             `bson:"image"`
+	Username    string             `bson:"username"`
 }
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)
@@ -28,5 +26,6 @@ type UserRepository interface {
 	GetById(int) (*UserResponse, error)
 	Create(User) (*User, error)
 	AddFriend() (*User, error)
+	GetByUsername(string) (*UserResponse, error)
 	// UpdateTotalPoint(int, string) (*User, error)
 }
