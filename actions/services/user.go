@@ -177,7 +177,7 @@ func (s userService) GetUsers() (interface{}, error) {
 
 	response := utils.DataResponse{
 		Data:    userResponses,
-		Message: "Get users success.",
+		Message: "Get users success.[test automated deploy]",
 	}
 
 	return response, nil
