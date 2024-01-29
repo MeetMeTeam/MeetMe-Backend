@@ -98,3 +98,21 @@ func (r UserRepository) GetAll() ([]interfaces.UserResponse, error) {
 
 	return users, nil
 }
+
+func (r UserRepository) UpdatePasswordByEmail(email string, password string) (*interfaces.User, error) {
+	filter := bson.D{{"email", email}}
+
+	update := bson.D{{"$set", bson.D{{"password", password}}}}
+	coll := r.db.Collection("user")
+	_, err := coll.UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	var users *interfaces.User
+	err = coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}

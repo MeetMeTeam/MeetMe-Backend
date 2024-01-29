@@ -1,5 +1,12 @@
 basePath: /api
 definitions:
+  interfaces.Email:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   interfaces.InviteRequest:
     properties:
       targetMailAddress:
@@ -18,21 +25,25 @@ definitions:
     - email
     - password
     type: object
+  interfaces.Password:
+    properties:
+      password:
+        type: string
+    required:
+    - password
+    type: object
   interfaces.RegisterRequest:
     properties:
       birthday:
         example: "2023-08-12"
         type: string
+      displayName:
+        example: winnerkypt
+        type: string
       email:
         example: winner@mail.com
         type: string
-      firstname:
-        example: Kanyapat
-        type: string
       image:
-        type: string
-      lastname:
-        example: Wittayamitkul
         type: string
       password:
         example: winner
@@ -42,7 +53,6 @@ definitions:
         type: string
     required:
     - email
-    - firstname
     - image
     - password
     type: object
@@ -52,7 +62,12 @@ definitions:
       message:
         type: string
     type: object
-host: meetme-backend.com
+  utils.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:8080
 info:
   contact: {}
   description: This is a API for Meet Me.
@@ -290,6 +305,52 @@ paths:
           schema:
             $ref: '#/definitions/utils.DataResponse'
       summary: Get all users
+      tags:
+      - users
+  /users/forgot-password:
+    put:
+      consumes:
+      - application/json
+      description: Send mail to reset password.
+      parameters:
+      - description: request body to send mail
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.Email'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Forgot Password
+      tags:
+      - users
+  /users/reset-password:
+    put:
+      consumes:
+      - application/json
+      description: Change password.
+      parameters:
+      - description: request body to change password
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.Password'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Reset Password
       tags:
       - users
 securityDefinitions:

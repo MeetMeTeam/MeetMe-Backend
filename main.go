@@ -38,7 +38,7 @@ var auth smtp.Auth
 //	@version		1.0
 //	@description	This is a API for Meet Me.
 
-// @host		meetme-backend.com
+// @host		localhost:8080
 // @BasePath	/api
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -78,6 +78,8 @@ func main() {
 
 	userApi := api.Group("/users")
 	userApi.GET("", userHandler.GetAllUser)
+	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
+	userApi.PUT("/reset-password", userHandler.ChangePassword)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)
@@ -125,10 +127,10 @@ func initDB() *mongo.Database {
 	}
 
 	// Send a ping to confirm a successful connection
-	if err := client.Database("MeetMe").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+	if err := client.Database(os.Getenv("MONGO_DATABASE")).RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
 		panic(err)
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	return client.Database("MeetMe")
+	return client.Database(os.Getenv("MONGO_DATABASE"))
 }
