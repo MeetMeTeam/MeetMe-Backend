@@ -9,6 +9,7 @@ type User struct {
 	Password    string `bson:"password"`
 	Image       string `bson:"image"`
 	Username    string `bson:"username"`
+	Coin        int    `bson:"coin"`
 }
 
 type UserResponse struct {
@@ -19,6 +20,7 @@ type UserResponse struct {
 	Password    string             `bson:"password"`
 	Image       string             `bson:"image"`
 	Username    string             `bson:"username"`
+	Coin        int                `bson:"coin"`
 }
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)

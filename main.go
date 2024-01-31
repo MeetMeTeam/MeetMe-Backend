@@ -80,6 +80,7 @@ func main() {
 	userApi.GET("", userHandler.GetAllUser)
 	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
+	userApi.GET("/coins", userHandler.GetCoins)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)

@@ -143,6 +143,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Username: user.Username,
 				Id:       user.ID.Hex(),
 				Image:    user.Image,
+				Coin:     user.Coin,
 			},
 		}
 		return response, nil
@@ -276,4 +277,28 @@ func (s userService) ResetPassword(token string, password interfaces.Password) (
 		Message: "Change password of " + result.Email + " success.",
 	}
 	return response, nil
+}
+
+func (s userService) GetCoin(token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	type Coin struct {
+		Coin int `json:"coin"`
+	}
+	return utils.DataResponse{
+		Data: Coin{
+			Coin: user.Coin,
+		},
+		Message: "Get Coin of " + user.Email + " success.",
+	}, nil
 }

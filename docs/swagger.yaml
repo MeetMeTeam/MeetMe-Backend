@@ -307,6 +307,23 @@ paths:
       summary: Get all users
       tags:
       - users
+  /users/coins:
+    get:
+      consumes:
+      - application/json
+      description: Get coin by token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Coin.
+      tags:
+      - users
   /users/forgot-password:
     put:
       consumes:

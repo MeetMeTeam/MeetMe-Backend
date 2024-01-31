@@ -250,3 +250,34 @@ func (h userHandler) ChangePassword(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, message)
 }
+
+// GetCoins godoc
+//
+//	@Summary		Get Coin.
+//	@Description	Get coin by token.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	utils.ErrorResponse
+//	@Router			/users/coins [get]
+//
+// @Security BearerAuth
+func (h userHandler) GetCoins(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.userService.GetCoin(token)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}

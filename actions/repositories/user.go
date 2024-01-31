@@ -19,7 +19,7 @@ func NewUserRepositoryDB(db *mongo.Database) UserRepository {
 func (r UserRepository) GetByEmail(email string) (*interfaces.UserResponse, error) {
 	var users interfaces.UserResponse
 	filter := bson.D{{"email", email}}
-	coll := r.db.Collection("user")
+	coll := r.db.Collection("users")
 	err := coll.FindOne(context.TODO(), filter).Decode(&users)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -35,7 +35,7 @@ func (r UserRepository) GetByEmail(email string) (*interfaces.UserResponse, erro
 func (r UserRepository) GetByUsername(username string) (*interfaces.UserResponse, error) {
 	var users interfaces.UserResponse
 	filter := bson.D{{"username", username}}
-	coll := r.db.Collection("user")
+	coll := r.db.Collection("users")
 	err := coll.FindOne(context.TODO(), filter).Decode(&users)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -52,7 +52,7 @@ func (r UserRepository) GetById(id primitive.ObjectID) (*interfaces.UserResponse
 
 	var users interfaces.UserResponse
 	filter := bson.D{{"_id", id}}
-	coll := r.db.Collection("user")
+	coll := r.db.Collection("users")
 	err := coll.FindOne(context.TODO(), filter).Decode(&users)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -74,7 +74,7 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 		Image:       user.Image,
 		Username:    user.Username,
 	}
-	_, err := r.db.Collection("user").InsertOne(context.TODO(), newUser)
+	_, err := r.db.Collection("users").InsertOne(context.TODO(), newUser)
 
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 func (r UserRepository) GetAll() ([]interfaces.UserResponse, error) {
 
 	filter := bson.D{}
-	coll := r.db.Collection("user")
+	coll := r.db.Collection("users")
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
 		panic(err)
@@ -103,7 +103,7 @@ func (r UserRepository) UpdatePasswordByEmail(email string, password string) (*i
 	filter := bson.D{{"email", email}}
 
 	update := bson.D{{"$set", bson.D{{"password", password}}}}
-	coll := r.db.Collection("user")
+	coll := r.db.Collection("users")
 	_, err := coll.UpdateMany(context.TODO(), filter, update)
 	if err != nil {
 		return nil, err

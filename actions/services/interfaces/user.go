@@ -42,6 +42,7 @@ type UserDetails struct {
 	Username string `json:"username"`
 	Id       string `json:"_id"`
 	Image    string `json:"image"`
+	Coin     int    `json:"coin"`
 }
 
 type TokenResponse struct {
@@ -65,4 +66,5 @@ type UserService interface {
 	RefreshToken(string) (interface{}, error)
 	ForgotPassword(Email) (interface{}, error)
 	ResetPassword(string, Password) (interface{}, error)
+	GetCoin(string) (interface{}, error)
 }
