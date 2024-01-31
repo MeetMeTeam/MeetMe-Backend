@@ -2,11 +2,13 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
+	"meetme/be/config"
 	"meetme/be/errs"
 	"os"
 	"strings"
@@ -141,6 +143,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Username: user.Username,
 				Id:       user.ID.Hex(),
 				Image:    user.Image,
+				Coin:     user.Coin,
 			},
 		}
 		return response, nil
@@ -177,7 +180,7 @@ func (s userService) GetUsers() (interface{}, error) {
 
 	response := utils.DataResponse{
 		Data:    userResponses,
-		Message: "Get users success.",
+		Message: "Get users success.[test automated deploy]",
 	}
 
 	return response, nil
@@ -213,4 +216,89 @@ func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
 	}
 
 	return response, nil
+}
+
+func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) {
+
+	claims := &jwtCustomClaims{
+		mail.Email,
+		false,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	templateData := struct {
+		URL string
+	}{
+		URL: os.Getenv("APP_URL") + "reset-password/" + t,
+	}
+
+	fmt.Println(mail.Email)
+	r := config.NewRequest([]string{mail.Email}, "Hello Junk!", "")
+	err = r.ParseTemplate("forgotPassword.html", templateData)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	ok, err := r.SendEmail()
+	if err != nil || !ok {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	return utils.ErrorResponse{Message: "Send mail for reset password success."}, nil
+}
+func (s userService) ResetPassword(token string, password interfaces.Password) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password.Password), 14)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	result, err := s.userRepo.UpdatePasswordByEmail(email.Email, string(bytes))
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewUnauthorizedError("User not found")
+		}
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	response := utils.ErrorResponse{
+		Message: "Change password of " + result.Email + " success.",
+	}
+	return response, nil
+}
+
+func (s userService) GetCoin(token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	type Coin struct {
+		Coin int `json:"coin"`
+	}
+	return utils.DataResponse{
+		Data: Coin{
+			Coin: user.Coin,
+		},
+		Message: "Get Coin of " + user.Email + " success.",
+	}, nil
 }

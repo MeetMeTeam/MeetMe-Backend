@@ -387,9 +387,121 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/coins": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get coin by token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get Coin.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/forgot-password": {
+            "put": {
+                "description": "Send mail to reset password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Forgot Password",
+                "parameters": [
+                    {
+                        "description": "request body to send mail",
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.Email"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/reset-password": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Reset Password",
+                "parameters": [
+                    {
+                        "description": "request body to change password",
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.Password"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "interfaces.Email": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "interfaces.InviteRequest": {
             "type": "object",
             "properties": {
@@ -416,11 +528,21 @@ const docTemplate = `{
                 }
             }
         },
+        "interfaces.Password": {
+            "type": "object",
+            "required": [
+                "password"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "interfaces.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
-                "firstname",
                 "image",
                 "password"
             ],
@@ -429,20 +551,16 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2023-08-12"
                 },
+                "displayName": {
+                    "type": "string",
+                    "example": "winnerkypt"
+                },
                 "email": {
                     "type": "string",
                     "example": "winner@mail.com"
                 },
-                "firstname": {
-                    "type": "string",
-                    "example": "Kanyapat"
-                },
                 "image": {
                     "type": "string"
-                },
-                "lastname": {
-                    "type": "string",
-                    "example": "Wittayamitkul"
                 },
                 "password": {
                     "type": "string",
@@ -462,6 +580,14 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "utils.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -476,7 +602,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "meetme-backend.com",
+	Host:             "localhost:8080",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Meet Me API",

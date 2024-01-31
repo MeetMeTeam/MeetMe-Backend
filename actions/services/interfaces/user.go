@@ -42,16 +42,29 @@ type UserDetails struct {
 	Username string `json:"username"`
 	Id       string `json:"_id"`
 	Image    string `json:"image"`
+	Coin     int    `json:"coin"`
 }
 
 type TokenResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 }
+
+type Email struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type Password struct {
+	Password string `json:"password" validate:"required"`
+}
+
 type UserService interface {
 	GetUsers() (interface{}, error)
 	//GetUserById(int) (interface{}, error)
 	CreateUser(RegisterRequest) (interface{}, error)
 	Login(Login) (interface{}, error)
 	RefreshToken(string) (interface{}, error)
+	ForgotPassword(Email) (interface{}, error)
+	ResetPassword(string, Password) (interface{}, error)
+	GetCoin(string) (interface{}, error)
 }

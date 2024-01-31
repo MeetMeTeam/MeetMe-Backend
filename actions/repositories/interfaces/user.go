@@ -9,6 +9,7 @@ type User struct {
 	Password    string `bson:"password"`
 	Image       string `bson:"image"`
 	Username    string `bson:"username"`
+	Coin        int    `bson:"coin"`
 }
 
 type UserResponse struct {
@@ -19,6 +20,7 @@ type UserResponse struct {
 	Password    string             `bson:"password"`
 	Image       string             `bson:"image"`
 	Username    string             `bson:"username"`
+	Coin        int                `bson:"coin"`
 }
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)
@@ -27,5 +29,6 @@ type UserRepository interface {
 	Create(User) (*User, error)
 	AddFriend() (*User, error)
 	GetByUsername(string) (*UserResponse, error)
+	UpdatePasswordByEmail(string, string) (*User, error)
 	// UpdateTotalPoint(int, string) (*User, error)
 }

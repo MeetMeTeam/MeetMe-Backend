@@ -76,7 +76,7 @@ func (h userHandler) Login(c echo.Context) error {
 
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
-			Message: "Something wrong.",
+			Message: err.Error(),
 		})
 	}
 	errrr := utils.CustomValidator(*request)
@@ -146,6 +146,126 @@ func (h userHandler) RefreshToken(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
 
 	users, err := h.userService.RefreshToken(token)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}
+
+// SendMailForResetPassword godoc
+//
+//	@Summary		Forgot Password
+//	@Description	Send mail to reset password.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			email	body		interfaces.Email	true	"request body to send mail"
+//	@Success		200		{object}	utils.ErrorResponse
+//	@Router			/users/forgot-password [put]
+func (h userHandler) SendMailForResetPassword(c echo.Context) error {
+
+	request := new(svInter.Email)
+
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+	errrr := utils.CustomValidator(*request)
+
+	if errrr != nil {
+		return c.JSON(http.StatusBadRequest, utils.ValidateResponse{
+			Message: errrr,
+		})
+	}
+	message, err := h.userService.ForgotPassword(*request)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, message)
+}
+
+// ChangePassword godoc
+//
+//	@Summary		Reset Password
+//	@Description	Change password.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			email	body		interfaces.Password	true	"request body to change password"
+//	@Success		200		{object}	utils.ErrorResponse
+//	@Router			/users/reset-password [put]
+//
+// @Security BearerAuth
+func (h userHandler) ChangePassword(c echo.Context) error {
+
+	request := new(svInter.Password)
+	token := c.Request().Header.Get("Authorization")
+
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+	errrr := utils.CustomValidator(*request)
+
+	if errrr != nil {
+		return c.JSON(http.StatusBadRequest, utils.ValidateResponse{
+			Message: errrr,
+		})
+	}
+	message, err := h.userService.ResetPassword(token, *request)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, message)
+}
+
+// GetCoins godoc
+//
+//	@Summary		Get Coin.
+//	@Description	Get coin by token.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	utils.ErrorResponse
+//	@Router			/users/coins [get]
+//
+// @Security BearerAuth
+func (h userHandler) GetCoins(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.userService.GetCoin(token)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)
