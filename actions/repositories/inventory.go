@@ -46,3 +46,35 @@ func (r InventoryRepository) GetByUserId(userId primitive.ObjectID) ([]interface
 
 	return inventory, nil
 }
+
+func (r InventoryRepository) Create(userId primitive.ObjectID, itemId primitive.ObjectID, itemType string) (*interfaces.Inventory, error) {
+	newInventory := interfaces.Inventory{
+		User: userId,
+		Item: itemId,
+		Type: itemType,
+	}
+	_, err := r.db.Collection("inventories").InsertOne(context.TODO(), newInventory)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &newInventory, nil
+}
+
+func (r InventoryRepository) GetByUserIdAndItemId(userId primitive.ObjectID, itemId primitive.ObjectID) (*interfaces.InventoryResponse, error) {
+	var inventory interfaces.InventoryResponse
+
+	filter := bson.D{{"user_id", userId}, {"item_id", itemId}}
+	coll := r.db.Collection("inventories")
+	err := coll.FindOne(context.TODO(), filter).Decode(&inventory)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// This error means your query did not match any documents.
+			return nil, err
+		}
+		panic(err)
+	}
+
+	return &inventory, nil
+}

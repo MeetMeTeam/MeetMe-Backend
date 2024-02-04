@@ -31,5 +31,6 @@ type UserRepository interface {
 	AddFriend() (*User, error)
 	GetByUsername(string) (*UserResponse, error)
 	UpdatePasswordByEmail(string, string) (*User, error)
+	UpdateCoinById(primitive.ObjectID, int) (*User, error)
 	// UpdateTotalPoint(int, string) (*User, error)
 }

@@ -79,6 +79,7 @@ func main() {
 	userApi.GET("/coins", userHandler.GetCoins)
 	userApi.GET("/avatars/:userId", userHandler.GetAvatarsByUserId)
 	userApi.GET("/inventories", inventoryHandler.GetInventory)
+	userApi.POST("/inventories", inventoryHandler.AddItem)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)

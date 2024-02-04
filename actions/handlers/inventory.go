@@ -46,3 +46,39 @@ func (h inventoryHandler) GetInventory(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, inventory)
 }
+
+// AddItem godoc
+//
+//	@Summary		Add item to inventories
+//	@Description	Add item to user inventories
+//	@Tags			inventories
+//	@Accept			json
+//	@Produce		json
+//	@Param			item_id	query	string	true	"item id that you want to add"
+//	@Param			item_type	query	string	true	"item type that you want to add [avatar]"
+//
+// @Success		200		{object}	utils.DataResponse
+// @Router			/users/inventories [post]
+func (h inventoryHandler) AddItem(c echo.Context) error {
+	//id := c.Param("itemId")
+	id := c.QueryParam("item_id")
+	itemType := c.QueryParam("item_type")
+
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.inventoryService.AddItem(token, id, itemType)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}

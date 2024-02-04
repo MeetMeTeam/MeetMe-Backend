@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
@@ -66,5 +67,63 @@ func (s inventoryService) GetInventory(token string) (interface{}, error) {
 	return utils.DataResponse{
 		Data:    response,
 		Message: "Get inventory list of " + user.Username + " success.",
+	}, nil
+}
+
+func (s inventoryService) AddItem(token string, id string, itemType string) (interface{}, error) {
+	if id == "" {
+		return nil, errs.NewBadRequestError("Please attach item_id to parameter path.")
+	}
+	if itemType == "" {
+		return nil, errs.NewBadRequestError("Please attach item_type to parameter path.")
+	}
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+	itemId, err := primitive.ObjectIDFromHex(id)
+
+	updateCoin := 0
+	if itemType == "avatar" {
+		items, err := s.avatarRepo.GetById(itemId)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError("Avatar not found.")
+			}
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		isExist, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, itemId)
+		if isExist != nil {
+			return nil, errs.NewBadRequestError(id + " is exist in your inventory.")
+		}
+		if items.Price > user.Coin {
+			return nil, errs.NewBadRequestError("Your coin not enough.")
+		}
+		updateCoin = user.Coin - items.Price
+	} else {
+		return nil, errs.NewBadRequestError("Check item type again.")
+	}
+
+	result, err := s.inventoryRepo.Create(user.ID, itemId, itemType)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	_, err = s.userRepo.UpdateCoinById(user.ID, updateCoin)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	return utils.DataResponse{
+		Data:    result,
+		Message: "Add item: " + result.Item.Hex() + " to inventory success.",
 	}, nil
 }
