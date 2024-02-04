@@ -311,7 +311,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get avatar by token.
+      description: Get avatar by user Id.
       parameters:
       - description: User ID
         in: path
@@ -369,6 +369,23 @@ paths:
       summary: Forgot Password
       tags:
       - users
+  /users/inventories:
+    get:
+      consumes:
+      - application/json
+      description: Get inventory by token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user's inventory.
+      tags:
+      - inventories
   /users/reset-password:
     put:
       consumes:

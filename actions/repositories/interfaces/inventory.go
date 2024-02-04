@@ -10,4 +10,5 @@ type InventoryResponse struct {
 }
 type InventoryRepository interface {
 	GetById(primitive.ObjectID) (*InventoryResponse, error)
+	GetByUserId(primitive.ObjectID) ([]InventoryResponse, error)
 }

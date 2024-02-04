@@ -282,10 +282,10 @@ func (h userHandler) GetCoins(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
-// GetAvatars godoc
+// GetAvatarsByUserId godoc
 //
 //	@Summary		Get Avatar.
-//	@Description	Get avatar by token.
+//	@Description	Get avatar by user Id.
 //	@Tags			users
 //	@Accept			json
 //	@Produce		json
@@ -294,7 +294,7 @@ func (h userHandler) GetCoins(c echo.Context) error {
 //	@Router			/users/avatars/{id} [get]
 //
 // @Security BearerAuth
-func (h userHandler) GetAvatars(c echo.Context) error {
+func (h userHandler) GetAvatarsByUserId(c echo.Context) error {
 	id := c.Param("userId")
 	token := c.Request().Header.Get("Authorization")
 

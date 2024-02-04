@@ -31,3 +31,18 @@ func (r InventoryRepository) GetById(id primitive.ObjectID) (*interfaces.Invento
 
 	return &inventory, nil
 }
+func (r InventoryRepository) GetByUserId(userId primitive.ObjectID) ([]interfaces.InventoryResponse, error) {
+	var inventory []interfaces.InventoryResponse
+	filter := bson.D{{"user_id", userId}}
+	coll := r.db.Collection("inventories")
+	cursor, err := coll.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cursor.All(context.TODO(), &inventory); err != nil {
+		return nil, err
+	}
+
+	return inventory, nil
+}
