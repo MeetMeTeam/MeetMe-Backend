@@ -349,3 +349,44 @@ func (s userService) GetAvatars(token string, id string) (interface{}, error) {
 		Message: "Get avatar of " + user.Username + " success.",
 	}, nil
 }
+
+func (s userService) ChangeAvatar(token string, itemId string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	id, err := primitive.ObjectIDFromHex(itemId)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	inventory, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Inventory not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	if inventory == nil {
+		return nil, errs.NewBadRequestError("This item is not exist in inventory.")
+	} else if inventory.ID == user.Inventory {
+		return nil, errs.NewBadRequestError("This item is current avatar.")
+	}
+
+	updateUser, err := s.userRepo.UpdateAvatarById(user.ID, inventory.ID)
+
+	return utils.DataResponse{
+		Data:    updateUser,
+		Message: "Change avatar from " + user.Inventory.Hex() + " to " + updateUser.Inventory.Hex() + " success.",
+	}, nil
+
+}

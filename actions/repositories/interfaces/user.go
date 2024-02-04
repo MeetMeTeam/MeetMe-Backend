@@ -3,13 +3,14 @@ package interfaces
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type User struct {
-	DisplayName string `bson:"displayName"`
-	Birthday    string `bson:"birthday"`
-	Email       string `bson:"email"`
-	Password    string `bson:"password"`
-	Image       string `bson:"image"`
-	Username    string `bson:"username"`
-	Coin        int    `bson:"coin"`
+	DisplayName string             `bson:"displayName"`
+	Birthday    string             `bson:"birthday"`
+	Email       string             `bson:"email"`
+	Password    string             `bson:"password"`
+	Image       string             `bson:"image"`
+	Username    string             `bson:"username"`
+	Coin        int                `bson:"coin"`
+	Inventory   primitive.ObjectID `bson:"inventory_id"`
 }
 
 type UserResponse struct {
@@ -32,5 +33,6 @@ type UserRepository interface {
 	GetByUsername(string) (*UserResponse, error)
 	UpdatePasswordByEmail(string, string) (*User, error)
 	UpdateCoinById(primitive.ObjectID, int) (*User, error)
+	UpdateAvatarById(primitive.ObjectID, primitive.ObjectID) (*UserResponse, error)
 	// UpdateTotalPoint(int, string) (*User, error)
 }

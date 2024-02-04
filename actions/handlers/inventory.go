@@ -24,7 +24,7 @@ func NewInventoryHandler(inventoryService svInter.InventoryService) inventoryHan
 //	@Accept			json
 //	@Produce		json
 //	@Success		200		{object}	utils.DataResponse
-//	@Router			/users/inventories [get]
+//	@Router			/inventories [get]
 //
 // @Security BearerAuth
 func (h inventoryHandler) GetInventory(c echo.Context) error {
@@ -58,7 +58,7 @@ func (h inventoryHandler) GetInventory(c echo.Context) error {
 //	@Param			item_type	query	string	true	"item type that you want to add [avatar]"
 //
 // @Success		200		{object}	utils.DataResponse
-// @Router			/users/inventories [post]
+// @Router			/inventories [post]
 func (h inventoryHandler) AddItem(c echo.Context) error {
 	//id := c.Param("itemId")
 	id := c.QueryParam("item_id")

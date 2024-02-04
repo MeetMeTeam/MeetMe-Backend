@@ -69,8 +69,9 @@ func main() {
 	api.POST("/login", userHandler.Login)
 	api.POST("/refresh", userHandler.RefreshToken)
 
-	_ = api.Group("/inventories")
-	//inventoryApi.GET("/users", inventoryHandler)
+	inventoryApi := api.Group("/inventories")
+	inventoryApi.GET("", inventoryHandler.GetInventory)
+	inventoryApi.POST("", inventoryHandler.AddItem)
 
 	userApi := api.Group("/users")
 	userApi.GET("", userHandler.GetAllUser)
@@ -78,8 +79,7 @@ func main() {
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
 	userApi.GET("/coins", userHandler.GetCoins)
 	userApi.GET("/avatars/:userId", userHandler.GetAvatarsByUserId)
-	userApi.GET("/inventories", inventoryHandler.GetInventory)
-	userApi.POST("/inventories", inventoryHandler.AddItem)
+	userApi.PUT("/avatars/:itemId", userHandler.ChangeAvatar)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)

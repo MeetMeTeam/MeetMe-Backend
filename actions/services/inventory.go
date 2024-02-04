@@ -56,6 +56,7 @@ func (s inventoryService) GetInventory(token string) (interface{}, error) {
 			}
 
 			avatarResponse := interfaces.AvatarResponse{
+				ID:      avatar.ID.Hex(),
 				Name:    avatar.Name,
 				Assets:  avatar.Assets,
 				Preview: avatar.Preview,
@@ -89,7 +90,9 @@ func (s inventoryService) AddItem(token string, id string, itemType string) (int
 		return nil, errs.NewInternalError(err.Error())
 	}
 	itemId, err := primitive.ObjectIDFromHex(id)
-
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
 	updateCoin := 0
 	if itemType == "avatar" {
 		items, err := s.avatarRepo.GetById(itemId)
