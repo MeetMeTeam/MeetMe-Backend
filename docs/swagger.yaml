@@ -307,11 +307,17 @@ paths:
       summary: Get all users
       tags:
       - users
-  /users/avatars:
+  /users/avatars/{id}:
     get:
       consumes:
       - application/json
       description: Get avatar by token.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:

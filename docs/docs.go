@@ -388,7 +388,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/avatars": {
+        "/users/avatars/{id}": {
             "get": {
                 "security": [
                     {
@@ -406,6 +406,15 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get Avatar.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

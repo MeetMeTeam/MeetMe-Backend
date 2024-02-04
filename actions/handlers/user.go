@@ -289,15 +289,16 @@ func (h userHandler) GetCoins(c echo.Context) error {
 //	@Tags			users
 //	@Accept			json
 //	@Produce		json
+//	@Param        	id   path      string  true  "User ID"
 //	@Success		200		{object}	utils.DataResponse
-//	@Router			/users/avatars [get]
+//	@Router			/users/avatars/{id} [get]
 //
 // @Security BearerAuth
 func (h userHandler) GetAvatars(c echo.Context) error {
-
+	id := c.Param("userId")
 	token := c.Request().Header.Get("Authorization")
 
-	users, err := h.userService.GetAvatars(token)
+	users, err := h.userService.GetAvatars(token, id)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)

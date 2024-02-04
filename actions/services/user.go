@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"log"
@@ -305,12 +306,17 @@ func (s userService) GetCoin(token string) (interface{}, error) {
 	}, nil
 }
 
-func (s userService) GetAvatars(token string) (interface{}, error) {
-	email, err := utils.IsTokenValid(token)
+func (s userService) GetAvatars(token string, id string) (interface{}, error) {
+	_, err := utils.IsTokenValid(token)
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.userRepo.GetByEmail(email.Email)
+	userId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+	user, err := s.userRepo.GetById(userId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewBadRequestError("User not found.")

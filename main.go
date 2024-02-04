@@ -50,7 +50,10 @@ func main() {
 	db := initDB()
 
 	avatarRepo := repositories.NewAvatarRepositoryDB(db)
+
 	inventoryRepo := repositories.NewInventoryRepositoryDB(db)
+	inventoryService := services.NewInventoryService(inventoryRepo)
+	_ = handlers.NewInventoryHandler(inventoryService)
 
 	userRepository := repositories.NewUserRepositoryDB(db)
 	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo)
@@ -66,12 +69,15 @@ func main() {
 	api.POST("/login", userHandler.Login)
 	api.POST("/refresh", userHandler.RefreshToken)
 
+	_ = api.Group("/inventories")
+	//inventoryApi.GET("/users", inventoryHandler)
+
 	userApi := api.Group("/users")
 	userApi.GET("", userHandler.GetAllUser)
 	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
 	userApi.GET("/coins", userHandler.GetCoins)
-	userApi.GET("/avatars", userHandler.GetAvatars)
+	userApi.GET("/avatars/:userId", userHandler.GetAvatars)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)
