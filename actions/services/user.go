@@ -23,7 +23,9 @@ import (
 )
 
 type userService struct {
-	userRepo repositories.UserRepository
+	userRepo      repositories.UserRepository
+	inventoryRepo repositories.InventoryRepository
+	avatarRepo    repositories.AvatarRepository
 }
 
 type jwtCustomClaims struct {
@@ -33,8 +35,8 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewUserService(userRepo repositories.UserRepository) userService {
-	return userService{userRepo: userRepo}
+func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository) interfaces.UserService {
+	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo}
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
@@ -300,5 +302,44 @@ func (s userService) GetCoin(token string) (interface{}, error) {
 			Coin: user.Coin,
 		},
 		Message: "Get Coin of " + user.Email + " success.",
+	}, nil
+}
+
+func (s userService) GetAvatars(token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	inventory, err := s.inventoryRepo.GetById(user.Inventory)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Inventory not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	avatar, err := s.avatarRepo.GetById(inventory.Item)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Avatar not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	return utils.DataResponse{
+		Data: interfaces.AvatarResponse{
+			Name:    avatar.Name,
+			Assets:  avatar.Assets,
+			Preview: avatar.Preview,
+		},
+		Message: "Get avatar of " + user.Username + " success.",
 	}, nil
 }

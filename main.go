@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	header "github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
-	gosocketio "github.com/graarh/golang-socketio"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -18,21 +16,10 @@ import (
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services"
 
-	//"meetme/be/actions/handlers"
-	//"meetme/be/actions/repositories"
-	//"meetme/be/actions/services"
 	_ "meetme/be/docs"
-	"net/smtp"
 	"os"
 	"time"
 )
-
-var (
-	router *mux.Router
-	Server *gosocketio.Server
-)
-
-var auth smtp.Auth
 
 //	@title			Meet Me API
 //	@version		1.0
@@ -62,8 +49,11 @@ func main() {
 	initTimeZone()
 	db := initDB()
 
+	avatarRepo := repositories.NewAvatarRepositoryDB(db)
+	inventoryRepo := repositories.NewInventoryRepositoryDB(db)
+
 	userRepository := repositories.NewUserRepositoryDB(db)
-	userService := services.NewUserService(userRepository)
+	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
 	friendRepository := repositories.NewFriendRepositoryDB(db)
@@ -81,6 +71,7 @@ func main() {
 	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
 	userApi.GET("/coins", userHandler.GetCoins)
+	userApi.GET("/avatars", userHandler.GetAvatars)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)

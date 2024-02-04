@@ -307,6 +307,23 @@ paths:
       summary: Get all users
       tags:
       - users
+  /users/avatars:
+    get:
+      consumes:
+      - application/json
+      description: Get avatar by token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Avatar.
+      tags:
+      - users
   /users/coins:
     get:
       consumes:

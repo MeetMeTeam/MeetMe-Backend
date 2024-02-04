@@ -21,6 +21,7 @@ type UserResponse struct {
 	Image       string             `bson:"image"`
 	Username    string             `bson:"username"`
 	Coin        int                `bson:"coin"`
+	Inventory   primitive.ObjectID `bson:"inventory_id"`
 }
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)
