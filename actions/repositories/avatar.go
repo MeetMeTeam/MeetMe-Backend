@@ -31,3 +31,18 @@ func (r AvatarRepository) GetById(id primitive.ObjectID) (*interfaces.AvatarResp
 
 	return &avatar, nil
 }
+
+func (r AvatarRepository) GetAll() ([]interfaces.AvatarResponse, error) {
+	filter := bson.D{}
+	coll := r.db.Collection("avatar_shops")
+	cursor, err := coll.Find(context.TODO(), filter)
+	if err != nil {
+		panic(err)
+	}
+	var avatars []interfaces.AvatarResponse
+	if err = cursor.All(context.TODO(), &avatars); err != nil {
+		panic(err)
+	}
+
+	return avatars, nil
+}

@@ -54,13 +54,14 @@ func main() {
 	userRepository := repositories.NewUserRepositoryDB(db)
 	friendRepository := repositories.NewFriendRepositoryDB(db)
 
+	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo)
-	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
-
 	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo)
-	userHandler := handlers.NewUserHandler(userService)
-
 	friendService := services.NewFriendService(friendRepository, userRepository)
+
+	avatarHandler := handlers.NewAvatarShopHandler(avatarService)
+	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
+	userHandler := handlers.NewUserHandler(userService)
 	friendHandler := handlers.NewFriendHandler(friendService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -68,6 +69,9 @@ func main() {
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
 	api.POST("/refresh", userHandler.RefreshToken)
+
+	avatarApi := api.Group("/avatars")
+	avatarApi.GET("", avatarHandler.GetAvatarShop)
 
 	inventoryApi := api.Group("/inventories")
 	inventoryApi.GET("", inventoryHandler.GetInventory)

@@ -74,6 +74,21 @@ info:
   title: Meet Me API
   version: "1.0"
 paths:
+  /avatars:
+    get:
+      consumes:
+      - application/json
+      description: Get avatar's shop.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Get avatar's shop.
+      tags:
+      - avatar shop
   /friends:
     get:
       consumes:

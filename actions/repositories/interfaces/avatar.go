@@ -13,4 +13,5 @@ type AvatarResponse struct {
 }
 type AvatarRepository interface {
 	GetById(primitive.ObjectID) (*AvatarResponse, error)
+	GetAll() ([]AvatarResponse, error)
 }
