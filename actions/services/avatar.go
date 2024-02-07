@@ -58,7 +58,7 @@ func (s avatarService) GetAvatarShops(token string) (interface{}, error) {
 			isOwner = true
 		}
 		avatarResponse := interfaces.AvatarShopResponse{
-			ID:      user.ID.Hex(),
+			ID:      avatar.ID.Hex(),
 			Name:    avatar.Name,
 			Assets:  avatar.Assets,
 			Preview: avatar.Preview,
