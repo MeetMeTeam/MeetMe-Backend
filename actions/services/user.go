@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
@@ -223,8 +222,17 @@ func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
 
 func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) {
 
+	user, err := s.userRepo.GetByEmail(mail.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("This email address is not registered yet.")
+		}
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
 	claims := &jwtCustomClaims{
-		mail.Email,
+		user.Email,
 		false,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
@@ -242,7 +250,6 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		URL: os.Getenv("APP_URL") + "reset-password/" + t,
 	}
 
-	fmt.Println(mail.Email)
 	r := config.NewRequest([]string{mail.Email}, "Hello Junk!", "")
 	err = r.ParseTemplate("forgotPassword.html", templateData)
 	if err != nil {
