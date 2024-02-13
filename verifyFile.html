@@ -46,7 +46,7 @@
 
         .title {
             color: black;
-            font-family: 'IBM Plex Sans', cursive;
+            font-family: 'IBM Plex Sans',sans-serif;
             font-size: 40px;
             font-style: normal;
             font-weight: 700;
@@ -56,7 +56,7 @@
 
         .sub-title {
             color: #333333;
-            font-family: 'Inter', cursive;
+            font-family: 'Inter', sans-serif;
             font-size: 32px;
             font-style: normal;
             font-weight: 700;
@@ -65,7 +65,7 @@
 
         .content {
             color: #4D4D4D;
-            font-family: 'Inter', cursive;
+            font-family: 'Inter', sans-serif;
             font-size: 20px;
             font-style: normal;
             font-weight: 700;
@@ -74,39 +74,38 @@
         }
 
         .button {
-            display: flex;
-            width: 266px;
-            height: 73px;
-            justify-content: center;
-            align-items: center;
+           padding: 10px 20px 10px 20px;
             gap: 8px;
             border-radius: 16px;
             background: var(--purple-60, #985BD7);
+            text-align: center;
         }
 
         .button-text {
-            color: #FFF;
-            font-family: Inter;
+            color: white;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
             font-size: 24px;
             font-style: normal;
             font-weight: 700;
             line-height: normal;
         }
+
     </style>
 </head>
 <body class="eiei">
 <div class="container">
     <div class="container-title">
-        <img src="image/logo.png" width="69" height="auto">
+<!--        <img src="image/logo.png" width="69" height="auto">-->
         <p class="title">MeetMe</p>
     </div>
 
-    <div class="sub-title">Verify and sign in</div>
+    <div class="sub-title">{{.Title}}</div>
     <pre class="content">
-Hi [Firstname],
-Verify yourself below to sign in to your <a href="http://dev-meetme.com"
-            style="color: #7E32CD; text-decoration: underline">dev-meetme.com</a>
-account for [email] or [username].
+Hi {{.Username}},
+Verify yourself below to sign in to your <a href="https://meetmeplay.com/"
+            style="color: #7E32CD; text-decoration: underline">meetmeplay.com</a>
+account for {{.Email}} or {{.Username}}.
 The link can only be used once and expires in 10 minutes if you
 don’t use it.
         </pre>
@@ -120,18 +119,8 @@ don’t use it.
                 <path d="M16.2511 26.7524C17.0322 27.5335 18.2985 27.5335 19.0796 26.7524L28.2487 17.5833C28.893 16.939 28.893 15.8943 28.2487 15.25C27.6044 14.6057 26.5597 14.6057 25.9154 15.25L19.0796 22.0858C18.2985 22.8668 17.0322 22.8668 16.2512 22.0858L14.082 19.9167C13.4377 19.2723 12.393 19.2723 11.7487 19.9167C11.1044 20.561 11.1044 21.6057 11.7487 22.25L16.2511 26.7524ZM19.9987 37.1667C17.6931 37.1667 15.5265 36.7292 13.4987 35.8542C11.4709 34.9792 9.70703 33.7917 8.20703 32.2917C6.70703 30.7917 5.51953 29.0278 4.64453 27C3.76953 24.9722 3.33203 22.8055 3.33203 20.5C3.33203 18.1944 3.76953 16.0278 4.64453 14C5.51953 11.9722 6.70703 10.2083 8.20703 8.70833C9.70703 7.20833 11.4709 6.02083 13.4987 5.14583C15.5265 4.27083 17.6931 3.83333 19.9987 3.83333C22.3043 3.83333 24.4709 4.27083 26.4987 5.14583C28.5265 6.02083 30.2904 7.20833 31.7904 8.70833C33.2904 10.2083 34.4779 11.9722 35.3529 14C36.2279 16.0278 36.6654 18.1944 36.6654 20.5C36.6654 22.8055 36.2279 24.9722 35.3529 27C34.4779 29.0278 33.2904 30.7917 31.7904 32.2917C30.2904 33.7917 28.5265 34.9792 26.4987 35.8542C24.4709 36.7292 22.3043 37.1667 19.9987 37.1667ZM19.9987 33.8333C23.7209 33.8333 26.8737 32.5417 29.457 29.9583C32.0404 27.375 33.332 24.2222 33.332 20.5C33.332 16.7778 32.0404 13.625 29.457 11.0417C26.8737 8.45833 23.7209 7.16666 19.9987 7.16666C16.2765 7.16666 13.1237 8.45833 10.5404 11.0417C7.95703 13.625 6.66536 16.7778 6.66536 20.5C6.66536 24.2222 7.95703 27.375 10.5404 29.9583C13.1237 32.5417 16.2765 33.8333 19.9987 33.8333Z"
                       fill="white"/>
             </g>
-            <p class="button-text">Verify email</p>
+            <a href="{{.URL}}" class="button-text" style="color: white;">{{.Button}}</a>
         </svg>
-    </div>
-    <div class="content">
-        How does this work?<br><br>
-
-        This secure, one-time URL lets you confirm your identity without a password. If you already have a password,
-        this won’t replace it, so you can still sign in with it later. If you didn't request this verification link,
-        you can safely ignore this email.
-    </div>
-    <div class="content">
-        Don’t see a button above? <span style="color: #7E32CD;">Verify yourself here</span>
     </div>
 </div>
 <!--<div>-->

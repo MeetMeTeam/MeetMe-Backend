@@ -47,7 +47,7 @@ func (r InventoryRepository) GetByUserId(userId primitive.ObjectID) ([]interface
 	return inventory, nil
 }
 
-func (r InventoryRepository) Create(userId primitive.ObjectID, itemId primitive.ObjectID, itemType string) (*interfaces.Inventory, error) {
+func (r InventoryRepository) Create(userId primitive.ObjectID, itemId primitive.ObjectID, itemType string) (*interfaces.InventoryResponse, error) {
 	newInventory := interfaces.Inventory{
 		User: userId,
 		Item: itemId,
@@ -59,7 +59,11 @@ func (r InventoryRepository) Create(userId primitive.ObjectID, itemId primitive.
 		return nil, err
 	}
 
-	return &newInventory, nil
+	resultInvent, err := r.GetByUserIdAndItemId(userId, itemId)
+	if err != nil {
+		return nil, err
+	}
+	return resultInvent, nil
 }
 
 func (r InventoryRepository) GetByUserIdAndItemId(userId primitive.ObjectID, itemId primitive.ObjectID) (*interfaces.InventoryResponse, error) {

@@ -81,7 +81,6 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 			DisplayName: user.DisplayName,
 			Birthday:    user.Birthday,
 			Email:       user.Email,
-			Image:       user.Image,
 		},
 		Message: "Invite friend success",
 	}
@@ -134,7 +133,6 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 			InviteId: result.ID,
 			Username: user.Username,
 			Email:    user.Email,
-			Image:    user.Image,
 		}
 		userResponses = append(userResponses, userResponse)
 	}
@@ -380,7 +378,6 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 			DisplayName: user.DisplayName,
 			Birthday:    user.Birthday,
 			Email:       user.Email,
-			Image:       user.Image,
 		}
 		userResponses = append(userResponses, userResponse)
 	}

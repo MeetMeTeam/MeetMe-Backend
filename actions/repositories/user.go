@@ -64,14 +64,13 @@ func (r UserRepository) GetById(id primitive.ObjectID) (*interfaces.UserResponse
 
 	return &users, nil
 }
-func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
+func (r UserRepository) Create(user interfaces.User) (*interfaces.UserResponse, error) {
 
 	newUser := interfaces.User{
 		DisplayName: user.DisplayName,
 		Email:       user.Email,
 		Birthday:    user.Birthday,
 		Password:    user.Password,
-		Image:       user.Image,
 		Username:    user.Username,
 	}
 	_, err := r.db.Collection("users").InsertOne(context.TODO(), newUser)
@@ -80,7 +79,11 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.User, error) {
 		return nil, err
 	}
 
-	return &newUser, nil
+	resultUser, err := r.GetByEmail(user.Email)
+	if err != nil {
+		return nil, err
+	}
+	return resultUser, nil
 }
 
 func (r UserRepository) GetAll() ([]interfaces.UserResponse, error) {

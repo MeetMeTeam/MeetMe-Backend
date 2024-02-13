@@ -2,7 +2,6 @@ package config
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"log"
 	"net/smtp"
@@ -32,7 +31,6 @@ func (r *Request) SendEmail() (bool, error) {
 	msg := []byte(subject + mime + "\n" + r.body)
 	addr := os.Getenv("MAILER_HOST") + ":" + os.Getenv("MAILER_PORT")
 
-	fmt.Println(r.to)
 	if err := smtp.SendMail(addr, auth, os.Getenv("MAILER_USERNAME"), r.to, msg); err != nil {
 		log.Print(err)
 		return false, err
