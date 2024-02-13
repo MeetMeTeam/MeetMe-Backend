@@ -281,3 +281,69 @@ func (h userHandler) GetCoins(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, users)
 }
+
+// GetAvatarsByUserId godoc
+//
+//	@Summary		Get Avatar.
+//	@Description	Get avatar by user Id.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param        	id   path      string  true  "User ID"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/users/avatars/{id} [get]
+//
+// @Security BearerAuth
+func (h userHandler) GetAvatarsByUserId(c echo.Context) error {
+	id := c.Param("userId")
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.userService.GetAvatars(token, id)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}
+
+// ChangeAvatar godoc
+//
+//	@Summary		Change Avatar.
+//	@Description	User change avatar.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param        	id   path      string  true  "Item ID"
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/users/avatars/{id} [put]
+//
+// @Security BearerAuth
+func (h userHandler) ChangeAvatar(c echo.Context) error {
+	id := c.Param("itemId")
+	token := c.Request().Header.Get("Authorization")
+
+	users, err := h.userService.ChangeAvatar(token, id)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}

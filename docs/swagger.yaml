@@ -74,6 +74,21 @@ info:
   title: Meet Me API
   version: "1.0"
 paths:
+  /avatars:
+    get:
+      consumes:
+      - application/json
+      description: Get avatar's shop.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Get avatar's shop.
+      tags:
+      - avatar shop
   /friends:
     get:
       consumes:
@@ -114,6 +129,48 @@ paths:
       summary: Remove Friend
       tags:
       - friends
+  /inventories:
+    get:
+      consumes:
+      - application/json
+      description: Get inventory by token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user's inventory.
+      tags:
+      - inventories
+    post:
+      consumes:
+      - application/json
+      description: Add item to user inventories
+      parameters:
+      - description: item id that you want to add
+        in: query
+        name: item_id
+        required: true
+        type: string
+      - description: item type that you want to add [avatar]
+        in: query
+        name: item_type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Add item to inventories
+      tags:
+      - inventories
   /invitations:
     delete:
       consumes:
@@ -305,6 +362,51 @@ paths:
           schema:
             $ref: '#/definitions/utils.DataResponse'
       summary: Get all users
+      tags:
+      - users
+  /users/avatars/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get avatar by user Id.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Avatar.
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: User change avatar.
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Change Avatar.
       tags:
       - users
   /users/coins:

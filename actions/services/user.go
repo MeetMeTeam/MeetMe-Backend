@@ -2,7 +2,7 @@ package services
 
 import (
 	"errors"
-	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"log"
@@ -23,7 +23,9 @@ import (
 )
 
 type userService struct {
-	userRepo repositories.UserRepository
+	userRepo      repositories.UserRepository
+	inventoryRepo repositories.InventoryRepository
+	avatarRepo    repositories.AvatarRepository
 }
 
 type jwtCustomClaims struct {
@@ -33,8 +35,8 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewUserService(userRepo repositories.UserRepository) userService {
-	return userService{userRepo: userRepo}
+func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository) interfaces.UserService {
+	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo}
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
@@ -220,8 +222,17 @@ func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
 
 func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) {
 
+	user, err := s.userRepo.GetByEmail(mail.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("This email address is not registered yet.")
+		}
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
 	claims := &jwtCustomClaims{
-		mail.Email,
+		user.Email,
 		false,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
@@ -239,7 +250,6 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		URL: os.Getenv("APP_URL") + "reset-password/" + t,
 	}
 
-	fmt.Println(mail.Email)
 	r := config.NewRequest([]string{mail.Email}, "Hello Junk!", "")
 	err = r.ParseTemplate("forgotPassword.html", templateData)
 	if err != nil {
@@ -301,4 +311,89 @@ func (s userService) GetCoin(token string) (interface{}, error) {
 		},
 		Message: "Get Coin of " + user.Email + " success.",
 	}, nil
+}
+
+func (s userService) GetAvatars(token string, id string) (interface{}, error) {
+	_, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	userId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+	user, err := s.userRepo.GetById(userId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	inventory, err := s.inventoryRepo.GetById(user.Inventory)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Inventory not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	avatar, err := s.avatarRepo.GetById(inventory.Item)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Avatar not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	return utils.DataResponse{
+		Data: interfaces.AvatarResponse{
+			Name:    avatar.Name,
+			Assets:  avatar.Assets,
+			Preview: avatar.Preview,
+		},
+		Message: "Get avatar of " + user.Username + " success.",
+	}, nil
+}
+
+func (s userService) ChangeAvatar(token string, itemId string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	id, err := primitive.ObjectIDFromHex(itemId)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	inventory, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Inventory not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	if inventory == nil {
+		return nil, errs.NewBadRequestError("This item is not exist in inventory.")
+	} else if inventory.ID == user.Inventory {
+		return nil, errs.NewBadRequestError("This item is current avatar.")
+	}
+
+	updateUser, err := s.userRepo.UpdateAvatarById(user.ID, inventory.ID)
+
+	return utils.DataResponse{
+		Data:    updateUser,
+		Message: "Change avatar from " + user.Inventory.Hex() + " to " + updateUser.Inventory.Hex() + " success.",
+	}, nil
+
 }

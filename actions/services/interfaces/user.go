@@ -67,4 +67,6 @@ type UserService interface {
 	ForgotPassword(Email) (interface{}, error)
 	ResetPassword(string, Password) (interface{}, error)
 	GetCoin(string) (interface{}, error)
+	GetAvatars(string, string) (interface{}, error)
+	ChangeAvatar(string, string) (interface{}, error)
 }

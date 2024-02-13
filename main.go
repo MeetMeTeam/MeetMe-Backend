@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	header "github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
-	gosocketio "github.com/graarh/golang-socketio"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -18,21 +16,10 @@ import (
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services"
 
-	//"meetme/be/actions/handlers"
-	//"meetme/be/actions/repositories"
-	//"meetme/be/actions/services"
 	_ "meetme/be/docs"
-	"net/smtp"
 	"os"
 	"time"
 )
-
-var (
-	router *mux.Router
-	Server *gosocketio.Server
-)
-
-var auth smtp.Auth
 
 //	@title			Meet Me API
 //	@version		1.0
@@ -62,12 +49,19 @@ func main() {
 	initTimeZone()
 	db := initDB()
 
+	avatarRepo := repositories.NewAvatarRepositoryDB(db)
+	inventoryRepo := repositories.NewInventoryRepositoryDB(db)
 	userRepository := repositories.NewUserRepositoryDB(db)
-	userService := services.NewUserService(userRepository)
-	userHandler := handlers.NewUserHandler(userService)
-
 	friendRepository := repositories.NewFriendRepositoryDB(db)
+
+	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
+	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo)
+	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo)
 	friendService := services.NewFriendService(friendRepository, userRepository)
+
+	avatarHandler := handlers.NewAvatarShopHandler(avatarService)
+	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
+	userHandler := handlers.NewUserHandler(userService)
 	friendHandler := handlers.NewFriendHandler(friendService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -76,11 +70,20 @@ func main() {
 	api.POST("/login", userHandler.Login)
 	api.POST("/refresh", userHandler.RefreshToken)
 
+	avatarApi := api.Group("/avatars")
+	avatarApi.GET("", avatarHandler.GetAvatarShop)
+
+	inventoryApi := api.Group("/inventories")
+	inventoryApi.GET("", inventoryHandler.GetInventory)
+	inventoryApi.POST("", inventoryHandler.AddItem)
+
 	userApi := api.Group("/users")
 	userApi.GET("", userHandler.GetAllUser)
 	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
 	userApi.GET("/coins", userHandler.GetCoins)
+	userApi.GET("/avatars/:userId", userHandler.GetAvatarsByUserId)
+	userApi.PUT("/avatars/:itemId", userHandler.ChangeAvatar)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)
