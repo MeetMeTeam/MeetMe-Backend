@@ -87,6 +87,7 @@ func IsTokenValid(authHeader string) (*Claims, error) {
 				Email:     claims["email"].(string),
 				IsRefresh: claims["isRefresh"].(bool),
 				ExpiredAt: claims["exp"].(float64),
+				IsAdmin:   claims["admin"].(bool),
 			}
 
 			return &claimsRes, nil

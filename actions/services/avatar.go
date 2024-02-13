@@ -78,9 +78,12 @@ func (s avatarService) GetAvatarShops(token string) (interface{}, error) {
 }
 
 func (s avatarService) AddAvatarShop(token string, request interfaces.AvatarRequest) (interface{}, error) {
-	_, err := utils.IsTokenValid(token)
+	result, err := utils.IsTokenValid(token)
 	if err != nil {
 		return nil, err
+	}
+	if result.IsAdmin == false {
+		return nil, errs.NewForbiddenError("You don't have permission.")
 	}
 	newAvatar := repoInt.Avatar{
 		Name:    request.Name,
