@@ -44,3 +44,37 @@ func (h avatarShopHandler) GetAvatarShop(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, avatars)
 }
+
+func (h avatarShopHandler) AddAvatarToShop(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+	request := new(svInter.AvatarRequest)
+
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+	errrr := utils.CustomValidator(*request)
+
+	if errrr != nil {
+		return c.JSON(http.StatusBadRequest, utils.ValidateResponse{
+			Message: errrr,
+		})
+	}
+
+	avatars, err := h.avatarService.AddAvatarShop(token, *request)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, avatars)
+}

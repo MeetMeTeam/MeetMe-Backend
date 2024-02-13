@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"meetme/be/actions/repositories"
+	repoInt "meetme/be/actions/repositories/interfaces"
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/errs"
 	"meetme/be/utils"
@@ -74,4 +75,31 @@ func (s avatarService) GetAvatarShops(token string) (interface{}, error) {
 	}
 
 	return response, nil
+}
+
+func (s avatarService) AddAvatarShop(token string, request interfaces.AvatarRequest) (interface{}, error) {
+	_, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	newAvatar := repoInt.Avatar{
+		Name:    request.Name,
+		Preview: request.Preview,
+		Price:   request.Price,
+		Assets:  request.Assets,
+	}
+	resultAvatar, err := s.avatarRepo.Create(newAvatar)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	return utils.DataResponse{
+		Data: interfaces.CreateResponse{
+			Name:    request.Name,
+			Preview: request.Preview,
+			Assets:  request.Assets,
+			Price:   request.Price,
+		},
+		Message: "Create " + resultAvatar.Name + " success.",
+	}, nil
 }

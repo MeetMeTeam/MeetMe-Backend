@@ -32,7 +32,7 @@ func (h userHandler) Register(c echo.Context) error {
 
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
-			Message: "Something wrong.",
+			Message: err.Error(),
 		})
 	}
 	errrr := utils.CustomValidator(*request)

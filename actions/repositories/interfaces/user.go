@@ -10,6 +10,7 @@ type User struct {
 	Username    string             `bson:"username"`
 	Coin        int                `bson:"coin"`
 	Inventory   primitive.ObjectID `bson:"inventory_id"`
+	IsAdmin     bool               `bson:"isAdmin"`
 }
 
 type UserResponse struct {
@@ -21,6 +22,7 @@ type UserResponse struct {
 	Username    string             `bson:"username"`
 	Coin        int                `bson:"coin"`
 	Inventory   primitive.ObjectID `bson:"inventory_id"`
+	IsAdmin     bool               `bson:"isAdmin"`
 }
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)

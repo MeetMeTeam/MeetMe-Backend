@@ -31,7 +31,7 @@ type userService struct {
 type jwtCustomClaims struct {
 	Email     string `json:"email"`
 	IsRefresh bool   `json:"isRefresh"`
-	// Admin bool   `json:"admin"`
+	Admin     bool   `json:"admin"`
 	jwt.RegisteredClaims
 }
 
@@ -53,12 +53,14 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
+
 	newUser := repoInt.User{
 		DisplayName: request.DisplayName,
 		Birthday:    request.Birthday,
 		Email:       request.Email,
 		Password:    string(bytes),
 		Username:    request.Username,
+		IsAdmin:     request.IsAdmin,
 	}
 	userResult, err := s.userRepo.Create(newUser)
 	if err != nil {
@@ -118,15 +120,17 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	if err == nil {
 
 		claims := &jwtCustomClaims{
-			request.Email,
+			user.Email,
 			false,
+			user.IsAdmin,
 			jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
 			},
 		}
 		refreshClaims := &jwtCustomClaims{
-			request.Email,
+			user.Email,
 			true,
+			user.IsAdmin,
 			jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			},
@@ -208,6 +212,7 @@ func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
 	claims := &jwtCustomClaims{
 		refreshClaims.Email,
 		false,
+		refreshClaims.IsAdmin,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
 		},
@@ -243,6 +248,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 	claims := &jwtCustomClaims{
 		user.Email,
 		false,
+		user.IsAdmin,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
 		},
@@ -361,6 +367,7 @@ func (s userService) GetAvatars(token string, id string) (interface{}, error) {
 
 	return utils.DataResponse{
 		Data: interfaces.AvatarResponse{
+			ID:      avatar.ID.Hex(),
 			Name:    avatar.Name,
 			Assets:  avatar.Assets,
 			Preview: avatar.Preview,

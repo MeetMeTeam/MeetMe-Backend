@@ -14,6 +14,22 @@ type AvatarShopResponse struct {
 	Price   int      `json:"price"`
 	IsOwner bool     `json:"isOwner"`
 }
+
+type AvatarRequest struct {
+	Name    string   `json:"name"`
+	Assets  []string `json:"assets"`
+	Preview string   `json:"preview"`
+	Price   int      `json:"price"`
+}
+
+type CreateResponse struct {
+	Name    string   `json:"name"`
+	Assets  []string `json:"assets"`
+	Preview string   `json:"preview"`
+	Price   int      `json:"price"`
+}
+
 type AvatarService interface {
 	GetAvatarShops(string) (interface{}, error)
+	AddAvatarShop(string, AvatarRequest) (interface{}, error)
 }

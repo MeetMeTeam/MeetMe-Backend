@@ -72,6 +72,7 @@ func main() {
 
 	avatarApi := api.Group("/avatars")
 	avatarApi.GET("", avatarHandler.GetAvatarShop)
+	avatarApi.POST("", avatarHandler.AddAvatarToShop)
 
 	inventoryApi := api.Group("/inventories")
 	inventoryApi.GET("", inventoryHandler.GetInventory)

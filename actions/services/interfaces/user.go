@@ -7,6 +7,7 @@ type RegisterRequest struct {
 	Birthday    string `json:"birthday" example:"2023-08-12"`
 	Password    string `json:"password" example:"winner" validate:"required"`
 	CharacterId string `json:"characterId" validate:"required"`
+	IsAdmin     bool   `json:"isAdmin"`
 }
 
 type RegisterResponse struct {

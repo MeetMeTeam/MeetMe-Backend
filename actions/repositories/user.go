@@ -72,6 +72,7 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.UserResponse, 
 		Birthday:    user.Birthday,
 		Password:    user.Password,
 		Username:    user.Username,
+		IsAdmin:     user.IsAdmin,
 	}
 	_, err := r.db.Collection("users").InsertOne(context.TODO(), newUser)
 

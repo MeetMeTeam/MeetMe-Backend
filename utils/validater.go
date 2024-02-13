@@ -17,6 +17,7 @@ type ValidateResponse struct {
 type Claims struct {
 	Email     string  `json:"email"`
 	IsRefresh bool    `json:"isRefresh"`
+	IsAdmin   bool    `json:"isAdmin"`
 	ExpiredAt float64 `json:"expiredAt"`
 }
 
