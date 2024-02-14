@@ -31,7 +31,7 @@ type userService struct {
 type jwtCustomClaims struct {
 	Email     string `json:"email"`
 	IsRefresh bool   `json:"isRefresh"`
-	// Admin bool   `json:"admin"`
+	Admin     bool   `json:"admin"`
 	jwt.RegisteredClaims
 }
 
@@ -41,7 +41,6 @@ func NewUserService(userRepo repositories.UserRepository, inventoryRepo reposito
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
 	isUsernameExist, _ := s.userRepo.GetByUsername(request.Username)
-
 	if isUsernameExist != nil {
 		return nil, errs.NewBadRequestError(request.Username + " is already exist.")
 	}
@@ -54,43 +53,56 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
+
 	newUser := repoInt.User{
 		DisplayName: request.DisplayName,
 		Birthday:    request.Birthday,
 		Email:       request.Email,
 		Password:    string(bytes),
-		Image:       request.Image,
 		Username:    request.Username,
+		IsAdmin:     request.IsAdmin,
 	}
-	result, err := s.userRepo.Create(newUser)
+	userResult, err := s.userRepo.Create(newUser)
 	if err != nil {
-		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 
+	itemId, err := primitive.ObjectIDFromHex(request.CharacterId)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	inventResult, err := s.inventoryRepo.Create(userResult.ID, itemId, "avatar")
+	userResult, err = s.userRepo.UpdateAvatarById(userResult.ID, inventResult.ID)
 	response := utils.DataResponse{
 		Data: &interfaces.RegisterResponse{
-			Birthday: result.Birthday,
-			Email:    result.Email,
-			Username: result.Username,
+			Birthday: userResult.Birthday,
+			Email:    userResult.Email,
+			Username: userResult.Username,
 		},
 		Message: "Create user success.",
 	}
 
 	//send verify email
-	//templateData := struct {
-	//	DisplayName string
-	//	URL         string
-	//}{
-	//	DisplayName: request.DisplayName,
-	//	URL:         "www.google.com",
-	//}
-	//r := config.NewRequest([]string{result.Email}, "Hello Junk!", "Hello, World!")
-	//err = r.ParseTemplate("verifyFile.html", templateData)
-	//if err == nil {
-	//	ok, _ := r.SendEmail()
-	//	fmt.Println(ok)
-	//}
+	templateData := interfaces.TemplateEmailData{
+		Username: userResult.Username,
+		Email:    userResult.Email,
+		Title:    "Verify Email",
+		Button:   "Verify Your Email",
+		URL:      os.Getenv("APP_URL"),
+	}
+	r := config.NewRequest([]string{userResult.Email}, "Verify Your Account (meetmeplay)", "")
+	err = r.ParseTemplate("verifyFile.html", templateData)
+
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	ok, err := r.SendEmail()
+	if err != nil || !ok {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
 	return response, nil
 }
 
@@ -108,15 +120,17 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	if err == nil {
 
 		claims := &jwtCustomClaims{
-			request.Email,
+			user.Email,
 			false,
+			user.IsAdmin,
 			jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
 			},
 		}
 		refreshClaims := &jwtCustomClaims{
-			request.Email,
+			user.Email,
 			true,
+			user.IsAdmin,
 			jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			},
@@ -144,7 +158,6 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Mail:     user.Email,
 				Username: user.Username,
 				Id:       user.ID.Hex(),
-				Image:    user.Image,
 				Coin:     user.Coin,
 			},
 		}
@@ -199,6 +212,7 @@ func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
 	claims := &jwtCustomClaims{
 		refreshClaims.Email,
 		false,
+		refreshClaims.IsAdmin,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
 		},
@@ -234,6 +248,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 	claims := &jwtCustomClaims{
 		user.Email,
 		false,
+		user.IsAdmin,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
 		},
@@ -244,14 +259,17 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	templateData := struct {
-		URL string
-	}{
-		URL: os.Getenv("APP_URL") + "reset-password/" + t,
+	//send reset email
+	templateData := interfaces.TemplateEmailData{
+		Username: user.Username,
+		Email:    user.Email,
+		Title:    "Reset Password",
+		Button:   "Reset Your Password",
+		URL:      os.Getenv("APP_URL") + "reset-password/" + t,
 	}
+	r := config.NewRequest([]string{user.Email}, "Reset Your Password (meetmeplay)", "")
+	err = r.ParseTemplate("verifyFile.html", templateData)
 
-	r := config.NewRequest([]string{mail.Email}, "Hello Junk!", "")
-	err = r.ParseTemplate("forgotPassword.html", templateData)
 	if err != nil {
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -349,6 +367,7 @@ func (s userService) GetAvatars(token string, id string) (interface{}, error) {
 
 	return utils.DataResponse{
 		Data: interfaces.AvatarResponse{
+			ID:      avatar.ID.Hex(),
 			Name:    avatar.Name,
 			Assets:  avatar.Assets,
 			Preview: avatar.Preview,

@@ -46,3 +46,14 @@ func (r AvatarRepository) GetAll() ([]interfaces.AvatarResponse, error) {
 
 	return avatars, nil
 }
+
+func (r AvatarRepository) Create(request interfaces.Avatar) (*interfaces.Avatar, error) {
+
+	_, err := r.db.Collection("avatar_shops").InsertOne(context.TODO(), request)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &request, nil
+}

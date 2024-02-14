@@ -6,7 +6,8 @@ type RegisterRequest struct {
 	Email       string `json:"email" validate:"required,email" example:"winner@mail.com"`
 	Birthday    string `json:"birthday" example:"2023-08-12"`
 	Password    string `json:"password" example:"winner" validate:"required"`
-	Image       string `json:"image" validate:"required"`
+	CharacterId string `json:"characterId" validate:"required"`
+	IsAdmin     bool   `json:"isAdmin"`
 }
 
 type RegisterResponse struct {
@@ -41,7 +42,6 @@ type UserDetails struct {
 	Mail     string `json:"mail"`
 	Username string `json:"username"`
 	Id       string `json:"_id"`
-	Image    string `json:"image"`
 	Coin     int    `json:"coin"`
 }
 
@@ -56,6 +56,14 @@ type Email struct {
 
 type Password struct {
 	Password string `json:"password" validate:"required"`
+}
+
+type TemplateEmailData struct {
+	Username string
+	Email    string
+	URL      string
+	Title    string
+	Button   string
 }
 
 type UserService interface {

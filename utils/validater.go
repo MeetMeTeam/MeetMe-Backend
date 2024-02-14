@@ -17,6 +17,7 @@ type ValidateResponse struct {
 type Claims struct {
 	Email     string  `json:"email"`
 	IsRefresh bool    `json:"isRefresh"`
+	IsAdmin   bool    `json:"isAdmin"`
 	ExpiredAt float64 `json:"expiredAt"`
 }
 
@@ -86,6 +87,7 @@ func IsTokenValid(authHeader string) (*Claims, error) {
 				Email:     claims["email"].(string),
 				IsRefresh: claims["isRefresh"].(bool),
 				ExpiredAt: claims["exp"].(float64),
+				IsAdmin:   claims["admin"].(bool),
 			}
 
 			return &claimsRes, nil

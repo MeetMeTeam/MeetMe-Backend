@@ -7,10 +7,10 @@ type User struct {
 	Birthday    string             `bson:"birthday"`
 	Email       string             `bson:"email"`
 	Password    string             `bson:"password"`
-	Image       string             `bson:"image"`
 	Username    string             `bson:"username"`
 	Coin        int                `bson:"coin"`
 	Inventory   primitive.ObjectID `bson:"inventory_id"`
+	IsAdmin     bool               `bson:"isAdmin"`
 }
 
 type UserResponse struct {
@@ -19,10 +19,10 @@ type UserResponse struct {
 	Birthday    string             `bson:"birthday"`
 	Email       string             `bson:"email"`
 	Password    string             `bson:"password"`
-	Image       string             `bson:"image"`
 	Username    string             `bson:"username"`
 	Coin        int                `bson:"coin"`
 	Inventory   primitive.ObjectID `bson:"inventory_id"`
+	IsAdmin     bool               `bson:"isAdmin"`
 }
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)
