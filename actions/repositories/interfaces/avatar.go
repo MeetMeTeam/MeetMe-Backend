@@ -23,4 +23,5 @@ type AvatarRepository interface {
 	GetById(primitive.ObjectID) (*AvatarResponse, error)
 	GetAll() ([]AvatarResponse, error)
 	Create(Avatar) (*Avatar, error)
+	GetByType(string) ([]AvatarResponse, error)
 }

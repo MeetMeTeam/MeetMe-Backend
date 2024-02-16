@@ -34,6 +34,6 @@ type CreateResponse struct {
 }
 
 type AvatarService interface {
-	GetAvatarShops(string) (interface{}, error)
+	GetAvatarShops(string, string) (interface{}, error)
 	AddAvatarShop(string, AvatarRequest) (interface{}, error)
 }
