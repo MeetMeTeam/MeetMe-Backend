@@ -22,7 +22,29 @@ func NewAvatarService(avatarRepo repositories.AvatarRepository, userRepo reposit
 	return avatarService{avatarRepo: avatarRepo, userRepo: userRepo, inventoryRepo: inventoryRepo}
 }
 
-func (s avatarService) GetAvatarShops(token string) (interface{}, error) {
+func (s avatarService) GetAvatarShops(token string, itemType string) (interface{}, error) {
+
+	if itemType == "C" {
+
+		avatar, err := s.avatarRepo.GetByType(itemType)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return utils.DataResponse{
+					Data:    []int{},
+					Message: "Get avatar shop success.",
+				}, nil
+			}
+			log.Println(err)
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		return utils.DataResponse{
+			Data:    avatar,
+			Message: "Get avatar shop success.",
+		}, nil
+
+	}
+
 	email, err := utils.IsTokenValid(token)
 	if err != nil {
 		return nil, err
@@ -65,6 +87,7 @@ func (s avatarService) GetAvatarShops(token string) (interface{}, error) {
 			Preview: avatar.Preview,
 			Price:   avatar.Price,
 			IsOwner: isOwner,
+			Type:    avatar.Type,
 		}
 		avatarResponses = append(avatarResponses, avatarResponse)
 	}
@@ -90,6 +113,7 @@ func (s avatarService) AddAvatarShop(token string, request interfaces.AvatarRequ
 		Preview: request.Preview,
 		Price:   request.Price,
 		Assets:  request.Assets,
+		Type:    request.Type,
 	}
 	resultAvatar, err := s.avatarRepo.Create(newAvatar)
 	if err != nil {
@@ -102,6 +126,7 @@ func (s avatarService) AddAvatarShop(token string, request interfaces.AvatarRequ
 			Preview: request.Preview,
 			Assets:  request.Assets,
 			Price:   request.Price,
+			Type:    request.Type,
 		},
 		Message: "Create " + resultAvatar.Name + " success.",
 	}, nil

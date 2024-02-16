@@ -27,8 +27,8 @@ func NewAvatarShopHandler(avatarService svInter.AvatarService) avatarShopHandler
 //	@Router			/avatars [get]
 func (h avatarShopHandler) GetAvatarShop(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
-
-	avatars, err := h.avatarService.GetAvatarShops(token)
+	itemType := c.QueryParam("type")
+	avatars, err := h.avatarService.GetAvatarShops(token, itemType)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)
