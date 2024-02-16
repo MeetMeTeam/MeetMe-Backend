@@ -83,25 +83,25 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		Message: "Create user success.",
 	}
 
-	//send verify email
-	templateData := interfaces.TemplateEmailData{
-		Username: userResult.Username,
-		Email:    userResult.Email,
-		Title:    "Verify Email",
-		Button:   "Verify Your Email",
-		URL:      os.Getenv("APP_URL"),
-	}
-	r := config.NewRequest([]string{userResult.Email}, "[meetmeplay] Verify Your Account", "")
-	err = r.ParseTemplate("verifyFile.html", templateData)
-
-	if err != nil {
-		return nil, errs.NewInternalError(err.Error())
-	}
-
-	ok, err := r.SendEmail()
-	if err != nil || !ok {
-		return nil, errs.NewInternalError(err.Error())
-	}
+	////send verify email
+	//templateData := interfaces.TemplateEmailData{
+	//	Username: userResult.Username,
+	//	Email:    userResult.Email,
+	//	Title:    "Verify Email",
+	//	Button:   "Verify Your Email",
+	//	URL:      os.Getenv("APP_URL"),
+	//}
+	//r := config.NewRequest([]string{userResult.Email}, "[meetmeplay] Verify Your Account", "")
+	//err = r.ParseTemplate("verifyFile.html", templateData)
+	//
+	//if err != nil {
+	//	return nil, errs.NewInternalError(err.Error())
+	//}
+	//
+	//ok, err := r.SendEmail()
+	//if err != nil || !ok {
+	//	return nil, errs.NewInternalError(err.Error())
+	//}
 
 	return response, nil
 }
