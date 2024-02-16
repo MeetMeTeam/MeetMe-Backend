@@ -91,7 +91,7 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		Button:   "Verify Your Email",
 		URL:      os.Getenv("APP_URL"),
 	}
-	r := config.NewRequest([]string{userResult.Email}, "Verify Your Account (meetmeplay)", "")
+	r := config.NewRequest([]string{userResult.Email}, "[meetmeplay] Verify Your Account", "")
 	err = r.ParseTemplate("verifyFile.html", templateData)
 
 	if err != nil {
@@ -267,7 +267,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		Button:   "Reset Your Password",
 		URL:      os.Getenv("APP_URL") + "reset-password/" + t,
 	}
-	r := config.NewRequest([]string{user.Email}, "Reset Your Password (meetmeplay)", "")
+	r := config.NewRequest([]string{user.Email}, "[meetmeplay] Reset Your Password", "")
 	err = r.ParseTemplate("verifyFile.html", templateData)
 
 	if err != nil {

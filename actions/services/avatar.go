@@ -65,6 +65,7 @@ func (s avatarService) GetAvatarShops(token string) (interface{}, error) {
 			Preview: avatar.Preview,
 			Price:   avatar.Price,
 			IsOwner: isOwner,
+			Type:    avatar.Type,
 		}
 		avatarResponses = append(avatarResponses, avatarResponse)
 	}
@@ -90,6 +91,7 @@ func (s avatarService) AddAvatarShop(token string, request interfaces.AvatarRequ
 		Preview: request.Preview,
 		Price:   request.Price,
 		Assets:  request.Assets,
+		Type:    request.Type,
 	}
 	resultAvatar, err := s.avatarRepo.Create(newAvatar)
 	if err != nil {
@@ -102,6 +104,7 @@ func (s avatarService) AddAvatarShop(token string, request interfaces.AvatarRequ
 			Preview: request.Preview,
 			Assets:  request.Assets,
 			Price:   request.Price,
+			Type:    request.Type,
 		},
 		Message: "Create " + resultAvatar.Name + " success.",
 	}, nil

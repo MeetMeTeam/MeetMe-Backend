@@ -27,8 +27,10 @@ func NewRequest(to []string, subject, body string) *Request {
 func (r *Request) SendEmail() (bool, error) {
 	auth := smtp.PlainAuth("", os.Getenv("MAILER_USERNAME"), os.Getenv("MAILER_PASSWORD"), os.Getenv("MAILER_HOST"))
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	from := "From: meetme play <" + os.Getenv("MAILER_USERNAME") + ">\r\n"
+	to := "To: " + os.Getenv("MAILER_USERNAME") + "\r\n"
 	subject := "Subject: " + r.subject + "!\n"
-	msg := []byte(subject + mime + "\n" + r.body)
+	msg := []byte(subject + from + to + mime + "\n" + r.body)
 	addr := os.Getenv("MAILER_HOST") + ":" + os.Getenv("MAILER_PORT")
 
 	if err := smtp.SendMail(addr, auth, os.Getenv("MAILER_USERNAME"), r.to, msg); err != nil {
