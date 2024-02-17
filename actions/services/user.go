@@ -266,7 +266,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		Email:    user.Email,
 		Title:    "Reset Password",
 		Button:   "Reset Your Password",
-		URL:      os.Getenv("APP_URL") + "reset-password/" + t,
+		URL:      os.Getenv("APP_URL") + "/reset-password/" + t,
 	}
 	r := config.NewRequest([]string{user.Email}, "[meetmeplay] Reset Your Password", "")
 	err = r.ParseTemplate("verifyFile.html", templateData)
