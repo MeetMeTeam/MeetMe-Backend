@@ -43,6 +43,7 @@ type UserDetails struct {
 	Username string `json:"username"`
 	Id       string `json:"_id"`
 	Coin     int    `json:"coin"`
+	IsAdmin  bool   `json:"isAdmin"`
 }
 
 type TokenResponse struct {

@@ -159,6 +159,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Username: user.Username,
 				Id:       user.ID.Hex(),
 				Coin:     user.Coin,
+				IsAdmin:  user.IsAdmin,
 			},
 		}
 		return response, nil
