@@ -68,6 +68,11 @@ type TemplateEmailData struct {
 	Button   string
 }
 
+type EditUserRequest struct {
+	Username    *string `json:"username"`
+	DisplayName *string `json:"displayName"`
+}
+
 type UserService interface {
 	GetUsers() (interface{}, error)
 	//GetUserById(int) (interface{}, error)
@@ -79,4 +84,5 @@ type UserService interface {
 	GetCoin(string) (interface{}, error)
 	GetAvatars(string, string) (interface{}, error)
 	ChangeAvatar(string, string) (interface{}, error)
+	EditUser(EditUserRequest, string) (interface{}, error)
 }

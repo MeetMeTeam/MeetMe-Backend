@@ -156,3 +156,38 @@ func (r UserRepository) UpdateAvatarById(userId primitive.ObjectID, inventoryId 
 	}
 	return users, nil
 }
+
+func (r UserRepository) UpdateUsernameByEmail(email string, username string) (*interfaces.UserResponse, error) {
+	filter := bson.D{{"email", email}}
+
+	update := bson.D{{"$set", bson.D{{"username", username}}}}
+	coll := r.db.Collection("users")
+	_, err := coll.UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	var users *interfaces.UserResponse
+	err = coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+func (r UserRepository) UpdateDisplayNameByEmail(email string, displayName string) (*interfaces.UserResponse, error) {
+	filter := bson.D{{"email", email}}
+
+	update := bson.D{{"$set", bson.D{{"displayName", displayName}}}}
+	coll := r.db.Collection("users")
+	_, err := coll.UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	var users *interfaces.UserResponse
+	err = coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}

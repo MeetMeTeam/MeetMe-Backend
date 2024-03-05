@@ -34,5 +34,6 @@ type UserRepository interface {
 	UpdatePasswordByEmail(string, string) (*User, error)
 	UpdateCoinById(primitive.ObjectID, int) (*User, error)
 	UpdateAvatarById(primitive.ObjectID, primitive.ObjectID) (*UserResponse, error)
-	// UpdateTotalPoint(int, string) (*User, error)
+	UpdateUsernameByEmail(string, string) (*UserResponse, error)
+	UpdateDisplayNameByEmail(string, string) (*UserResponse, error)
 }

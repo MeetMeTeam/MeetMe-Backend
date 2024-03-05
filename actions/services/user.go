@@ -425,3 +425,52 @@ func (s userService) ChangeAvatar(token string, itemId string) (interface{}, err
 	}, nil
 
 }
+
+func (s userService) EditUser(request interfaces.EditUserRequest, token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+
+	if request == (interfaces.EditUserRequest{}) {
+		return utils.ErrorResponse{Message: "Not enough data to update information."}, nil
+	}
+
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	if *request.DisplayName == user.DisplayName && *request.Username == user.Username {
+		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	}
+
+	var updateUser *repoInt.UserResponse
+	if request.DisplayName != nil {
+		if *request.DisplayName != user.DisplayName {
+			updateUser, err = s.userRepo.UpdateDisplayNameByEmail(user.Email, *request.DisplayName)
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+		}
+
+	}
+
+	if request.Username != nil {
+		if *request.Username != user.Username {
+			updateUser, err = s.userRepo.UpdateUsernameByEmail(user.Email, *request.Username)
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+		}
+
+	}
+
+	return utils.DataResponse{
+		Data:    updateUser,
+		Message: "Edit user information success.",
+	}, nil
+}
