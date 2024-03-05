@@ -160,13 +160,14 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 		response := interfaces.LoginResponse{
 
 			UserDetails: interfaces.UserDetails{
-				Token:    t,
-				Refresh:  r,
-				Mail:     user.Email,
-				Username: user.Username,
-				Id:       user.ID.Hex(),
-				Coin:     user.Coin,
-				IsAdmin:  user.IsAdmin,
+				Token:       t,
+				Refresh:     r,
+				Mail:        user.Email,
+				Username:    user.Username,
+				DisplayName: user.DisplayName,
+				Id:          user.ID.Hex(),
+				Coin:        user.Coin,
+				IsAdmin:     user.IsAdmin,
 			},
 		}
 		return response, nil

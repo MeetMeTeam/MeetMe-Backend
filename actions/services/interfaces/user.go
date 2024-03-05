@@ -37,13 +37,14 @@ type LoginResponse struct {
 }
 
 type UserDetails struct {
-	Token    string `json:"token"`
-	Refresh  string `json:"refreshToken"`
-	Mail     string `json:"mail"`
-	Username string `json:"username"`
-	Id       string `json:"_id"`
-	Coin     int    `json:"coin"`
-	IsAdmin  bool   `json:"isAdmin"`
+	Token       string `json:"token"`
+	Refresh     string `json:"refreshToken"`
+	Mail        string `json:"mail"`
+	Username    string `json:"username"`
+	DisplayName string `json:"displayName"`
+	Id          string `json:"_id"`
+	Coin        int    `json:"coin"`
+	IsAdmin     bool   `json:"isAdmin"`
 }
 
 type TokenResponse struct {
