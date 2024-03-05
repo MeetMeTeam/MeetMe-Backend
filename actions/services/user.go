@@ -107,7 +107,14 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 }
 
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
-	user, err := s.userRepo.GetByEmail(request.Email)
+	var user *repoInt.UserResponse
+	var err error
+	if strings.Contains(request.Email, "@") {
+		user, err = s.userRepo.GetByEmail(request.Email)
+	} else {
+		user, err = s.userRepo.GetByUsername(request.Email)
+	}
+
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewUnauthorizedError("Email or password incorrect.")

@@ -28,7 +28,7 @@ type ListUserResponse struct {
 }
 
 type Login struct {
-	Email    string `json:"email" validate:"required,email" example:"winner@mail.com"`
+	Email    string `json:"email" validate:"required" example:"winner@mail.com"`
 	Password string `json:"password" validate:"required" example:"winner"`
 }
 
