@@ -108,6 +108,9 @@ func (s avatarService) AddAvatarShop(token string, request interfaces.AvatarRequ
 	if result.IsAdmin == false {
 		return nil, errs.NewForbiddenError("You don't have permission.")
 	}
+	if request.Price < 0 {
+		return nil, errs.NewForbiddenError("The price must not be negative.")
+	}
 	newAvatar := repoInt.Avatar{
 		Name:    request.Name,
 		Preview: request.Preview,
