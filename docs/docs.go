@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/avatars": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get avatar's shop.",
                 "consumes": [
                     "application/json"
@@ -491,6 +496,32 @@ const docTemplate = `{
             }
         },
         "/themes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get theme's shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "theme shop"
+                ],
+                "summary": "Get theme's shop.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {

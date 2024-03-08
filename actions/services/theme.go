@@ -1,6 +1,10 @@
 package services
 
 import (
+	"errors"
+	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
+	"log"
 	"meetme/be/actions/repositories"
 	repoInt "meetme/be/actions/repositories/interfaces"
 	"meetme/be/actions/services/interfaces"
@@ -49,4 +53,59 @@ func (s themeService) AddThemeShop(token string, request interfaces.ThemeCreateR
 		},
 		Message: "Create " + resultTheme.Name + " success.",
 	}, nil
+}
+
+func (s themeService) GetThemeShops(token string) (interface{}, error) {
+
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	themes, err := s.themeRepo.GetAllTheme()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return utils.DataResponse{
+				Data:    []int{},
+				Message: "Get theme shop success.",
+			}, nil
+		}
+		log.Println(err)
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	themeResponses := []interfaces.ThemeResponse{}
+	for _, theme := range themes {
+		_, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, theme.ID)
+		isOwner := false
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				isOwner = false
+			}
+		} else {
+			isOwner = true
+		}
+		themeResponse := interfaces.ThemeResponse{
+			ID:      theme.ID.Hex(),
+			Name:    theme.Name,
+			Assets:  theme.Assets,
+			Price:   theme.Price,
+			IsOwner: isOwner,
+		}
+		themeResponses = append(themeResponses, themeResponse)
+	}
+
+	response := utils.DataResponse{
+		Data:    themeResponses,
+		Message: "Get theme shop success.",
+	}
+
+	return response, nil
 }

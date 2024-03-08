@@ -79,6 +79,7 @@ func main() {
 
 	themeApi := api.Group("/themes")
 	themeApi.POST("", themeHandler.AddThemeToShop)
+	themeApi.GET("", themeHandler.GetThemeShop)
 
 	inventoryApi := api.Group("/inventories")
 	inventoryApi.GET("", inventoryHandler.GetInventory)

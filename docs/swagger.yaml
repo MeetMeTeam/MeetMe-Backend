@@ -130,6 +130,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
       summary: Get avatar's shop.
       tags:
       - avatar shop
@@ -417,6 +419,22 @@ paths:
       tags:
       - users
   /themes:
+    get:
+      consumes:
+      - application/json
+      description: Get theme's shop.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get theme's shop.
+      tags:
+      - theme shop
     post:
       consumes:
       - application/json

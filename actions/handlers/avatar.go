@@ -25,6 +25,8 @@ func NewAvatarShopHandler(avatarService svInter.AvatarService) avatarShopHandler
 //	@Produce		json
 //	@Success		200		{object}	utils.DataResponse
 //	@Router			/avatars [get]
+//
+// @Security BearerAuth
 func (h avatarShopHandler) GetAvatarShop(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
 	itemType := c.QueryParam("type")

@@ -61,3 +61,34 @@ func (h themeShopHandler) AddThemeToShop(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, avatars)
 }
+
+// GetThemeShop godoc
+//
+//	@Summary		Get theme's shop.
+//	@Description	Get theme's shop.
+//	@Tags			theme shop
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/themes [get]
+//
+// @Security BearerAuth
+func (h themeShopHandler) GetThemeShop(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+
+	themes, err := h.themeService.GetThemeShops(token)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, themes)
+}

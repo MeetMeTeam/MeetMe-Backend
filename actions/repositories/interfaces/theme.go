@@ -19,7 +19,7 @@ type Theme struct {
 }
 type ThemeRepository interface {
 	//GetById(primitive.ObjectID) (*AvatarResponse, error)
-	//GetAll() ([]AvatarResponse, error)
+	GetAllTheme() ([]ThemeResponse, error)
 	CreateTheme(Theme) (*Theme, error)
 	//GetByType(string) ([]AvatarResponse, error)
 }

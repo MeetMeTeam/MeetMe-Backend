@@ -1,11 +1,12 @@
 package interfaces
 
-type ThemeCreateResponse struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Assets string `json:"assets"`
-	Price  int    `json:"price"`
-	Song   string `json:"song"`
+type ThemeResponse struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Assets  string `json:"assets"`
+	Price   int    `json:"price"`
+	Song    string `json:"song"`
+	IsOwner bool   `json:"isOwner"`
 }
 
 type ThemeCreateRequest struct {
@@ -16,6 +17,6 @@ type ThemeCreateRequest struct {
 }
 
 type ThemeService interface {
-	//GetAvatarShops(string, string) (interface{}, error)
+	GetThemeShops(string) (interface{}, error)
 	AddThemeShop(string, ThemeCreateRequest) (interface{}, error)
 }
