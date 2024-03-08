@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"meetme/be/actions/repositories/interfaces"
 )
@@ -39,4 +40,20 @@ func (r ThemeRepository) GetAllTheme() ([]interfaces.ThemeResponse, error) {
 	}
 
 	return themes, nil
+}
+
+func (r ThemeRepository) GetThemeById(id primitive.ObjectID) (*interfaces.ThemeResponse, error) {
+	var theme interfaces.ThemeResponse
+	filter := bson.D{{"_id", id}}
+	coll := r.db.Collection("theme_shops")
+	err := coll.FindOne(context.TODO(), filter).Decode(&theme)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// This error means your query did not match any documents.
+			return nil, err
+		}
+		panic(err)
+	}
+
+	return &theme, nil
 }

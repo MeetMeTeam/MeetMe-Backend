@@ -18,7 +18,7 @@ type Theme struct {
 	Song   string `bson:"song"`
 }
 type ThemeRepository interface {
-	//GetById(primitive.ObjectID) (*AvatarResponse, error)
+	GetThemeById(primitive.ObjectID) (*ThemeResponse, error)
 	GetAllTheme() ([]ThemeResponse, error)
 	CreateTheme(Theme) (*Theme, error)
 	//GetByType(string) ([]AvatarResponse, error)

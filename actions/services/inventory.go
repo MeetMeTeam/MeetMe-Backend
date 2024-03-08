@@ -14,10 +14,11 @@ type inventoryService struct {
 	inventoryRepo repositories.InventoryRepository
 	userRepo      repositories.UserRepository
 	avatarRepo    repositories.AvatarRepository
+	themeRepo     repositories.ThemeRepository
 }
 
-func NewInventoryService(inventoryRepo repositories.InventoryRepository, userRepo repositories.UserRepository, avatarRepo repositories.AvatarRepository) interfaces.InventoryService {
-	return inventoryService{inventoryRepo: inventoryRepo, userRepo: userRepo, avatarRepo: avatarRepo}
+func NewInventoryService(inventoryRepo repositories.InventoryRepository, userRepo repositories.UserRepository, avatarRepo repositories.AvatarRepository, themeRepo repositories.ThemeRepository) interfaces.InventoryService {
+	return inventoryService{inventoryRepo: inventoryRepo, userRepo: userRepo, avatarRepo: avatarRepo, themeRepo: themeRepo}
 }
 
 func (s inventoryService) GetInventory(token string) (interface{}, error) {
@@ -105,7 +106,24 @@ func (s inventoryService) AddItem(token string, id string, itemType string) (int
 
 		isExist, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, itemId)
 		if isExist != nil {
-			return nil, errs.NewBadRequestError(id + " is exist in your inventory.")
+			return nil, errs.NewBadRequestError(items.Name + " is exist in your inventory.")
+		}
+		if items.Price > user.Coin {
+			return nil, errs.NewBadRequestError("Your coin not enough.")
+		}
+		updateCoin = user.Coin - items.Price
+	} else if itemType == "theme" {
+		items, err := s.themeRepo.GetThemeById(itemId)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError("Theme not found.")
+			}
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		isExist, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, itemId)
+		if isExist != nil {
+			return nil, errs.NewBadRequestError(items.Name + " is exist in your inventory.")
 		}
 		if items.Price > user.Coin {
 			return nil, errs.NewBadRequestError("Your coin not enough.")
