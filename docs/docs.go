@@ -36,6 +36,43 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Only admin qdd avatar to shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "avatar shop"
+                ],
+                "summary": "Add avatar to shop",
+                "parameters": [
+                    {
+                        "description": "request body for adding avatar to shop",
+                        "name": "avatars",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.AvatarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
             }
         },
         "/friends": {
@@ -453,6 +490,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/themes": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Only admin add theme to shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "theme shop"
+                ],
+                "summary": "Add theme to shop",
+                "parameters": [
+                    {
+                        "description": "request body for adding theme to shop",
+                        "name": "avatars",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.ThemeCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "return list users.",
@@ -466,6 +542,43 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "User change profile information.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Edit profile.",
+                "parameters": [
+                    {
+                        "description": "request body for editing user's profile",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.EditUserRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -651,6 +764,46 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "interfaces.AvatarRequest": {
+            "type": "object",
+            "required": [
+                "assets",
+                "name",
+                "preview",
+                "price"
+            ],
+            "properties": {
+                "assets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "preview": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "interfaces.EditUserRequest": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "interfaces.Email": {
             "type": "object",
             "required": [
@@ -702,14 +855,17 @@ const docTemplate = `{
         "interfaces.RegisterRequest": {
             "type": "object",
             "required": [
+                "characterId",
                 "email",
-                "image",
                 "password"
             ],
             "properties": {
                 "birthday": {
                     "type": "string",
                     "example": "2023-08-12"
+                },
+                "characterId": {
+                    "type": "string"
                 },
                 "displayName": {
                     "type": "string",
@@ -719,8 +875,8 @@ const docTemplate = `{
                     "type": "string",
                     "example": "winner@mail.com"
                 },
-                "image": {
-                    "type": "string"
+                "isAdmin": {
+                    "type": "boolean"
                 },
                 "password": {
                     "type": "string",
@@ -729,6 +885,28 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "winnerkypt"
+                }
+            }
+        },
+        "interfaces.ThemeCreateRequest": {
+            "type": "object",
+            "required": [
+                "assets",
+                "name",
+                "price"
+            ],
+            "properties": {
+                "assets": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "song": {
+                    "type": "string"
                 }
             }
         },

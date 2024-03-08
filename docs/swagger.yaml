@@ -1,5 +1,32 @@
 basePath: /api
 definitions:
+  interfaces.AvatarRequest:
+    properties:
+      assets:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      preview:
+        type: string
+      price:
+        type: integer
+      type:
+        type: string
+    required:
+    - assets
+    - name
+    - preview
+    - price
+    type: object
+  interfaces.EditUserRequest:
+    properties:
+      displayName:
+        type: string
+      username:
+        type: string
+    type: object
   interfaces.Email:
     properties:
       email:
@@ -37,14 +64,16 @@ definitions:
       birthday:
         example: "2023-08-12"
         type: string
+      characterId:
+        type: string
       displayName:
         example: winnerkypt
         type: string
       email:
         example: winner@mail.com
         type: string
-      image:
-        type: string
+      isAdmin:
+        type: boolean
       password:
         example: winner
         type: string
@@ -52,9 +81,24 @@ definitions:
         example: winnerkypt
         type: string
     required:
+    - characterId
     - email
-    - image
     - password
+    type: object
+  interfaces.ThemeCreateRequest:
+    properties:
+      assets:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      song:
+        type: string
+    required:
+    - assets
+    - name
+    - price
     type: object
   utils.DataResponse:
     properties:
@@ -87,6 +131,29 @@ paths:
           schema:
             $ref: '#/definitions/utils.DataResponse'
       summary: Get avatar's shop.
+      tags:
+      - avatar shop
+    post:
+      consumes:
+      - application/json
+      description: Only admin qdd avatar to shop.
+      parameters:
+      - description: request body for adding avatar to shop
+        in: body
+        name: avatars
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.AvatarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Add avatar to shop
       tags:
       - avatar shop
   /friends:
@@ -349,6 +416,30 @@ paths:
       summary: Register user
       tags:
       - users
+  /themes:
+    post:
+      consumes:
+      - application/json
+      description: Only admin add theme to shop.
+      parameters:
+      - description: request body for adding theme to shop
+        in: body
+        name: avatars
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.ThemeCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Add theme to shop
+      tags:
+      - theme shop
   /users:
     get:
       consumes:
@@ -362,6 +453,29 @@ paths:
           schema:
             $ref: '#/definitions/utils.DataResponse'
       summary: Get all users
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: User change profile information.
+      parameters:
+      - description: request body for editing user's profile
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.EditUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Edit profile.
       tags:
       - users
   /users/avatars/{id}:

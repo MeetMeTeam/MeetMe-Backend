@@ -50,16 +50,19 @@ func main() {
 	db := initDB()
 
 	avatarRepo := repositories.NewAvatarRepositoryDB(db)
+	themeRepo := repositories.NewThemeRepositoryDB(db)
 	inventoryRepo := repositories.NewInventoryRepositoryDB(db)
 	userRepository := repositories.NewUserRepositoryDB(db)
 	friendRepository := repositories.NewFriendRepositoryDB(db)
 
 	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
+	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo)
 	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo)
 	friendService := services.NewFriendService(friendRepository, userRepository)
 
 	avatarHandler := handlers.NewAvatarShopHandler(avatarService)
+	themeHandler := handlers.NewThemeShopHandler(themeService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
 	userHandler := handlers.NewUserHandler(userService)
 	friendHandler := handlers.NewFriendHandler(friendService)
@@ -73,6 +76,9 @@ func main() {
 	avatarApi := api.Group("/avatars")
 	avatarApi.GET("", avatarHandler.GetAvatarShop)
 	avatarApi.POST("", avatarHandler.AddAvatarToShop)
+
+	themeApi := api.Group("/themes")
+	themeApi.POST("", themeHandler.AddThemeToShop)
 
 	inventoryApi := api.Group("/inventories")
 	inventoryApi.GET("", inventoryHandler.GetInventory)

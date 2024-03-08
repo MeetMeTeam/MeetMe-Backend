@@ -125,11 +125,11 @@ func (s avatarService) AddAvatarShop(token string, request interfaces.AvatarRequ
 
 	return utils.DataResponse{
 		Data: interfaces.CreateResponse{
-			Name:    request.Name,
-			Preview: request.Preview,
-			Assets:  request.Assets,
-			Price:   request.Price,
-			Type:    request.Type,
+			Name:    resultAvatar.Name,
+			Preview: resultAvatar.Preview,
+			Assets:  resultAvatar.Assets,
+			Price:   resultAvatar.Price,
+			Type:    resultAvatar.Type,
 		},
 		Message: "Create " + resultAvatar.Name + " success.",
 	}, nil

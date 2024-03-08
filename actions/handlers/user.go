@@ -348,6 +348,19 @@ func (h userHandler) ChangeAvatar(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// EditUserInfo godoc
+//
+//	@Summary		Edit profile.
+//	@Description	User change profile information.
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			users	body		interfaces.EditUserRequest	true	"request body for editing user's profile"
+//
+// @Success		200		{object}	utils.DataResponse
+// @Router			/users [put]
+//
+// @Security BearerAuth
 func (h userHandler) EditUserInfo(c echo.Context) error {
 	request := new(svInter.EditUserRequest)
 	token := c.Request().Header.Get("Authorization")
