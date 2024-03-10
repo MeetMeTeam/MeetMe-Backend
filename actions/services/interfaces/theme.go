@@ -3,7 +3,7 @@ package interfaces
 type ThemeResponse struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
-	Assets  string `json:"assets"`
+	Assets  string `json:"img"`
 	Price   int    `json:"price"`
 	Song    string `json:"song"`
 	IsOwner bool   `json:"isOwner"`

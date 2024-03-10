@@ -61,6 +61,7 @@ func (s inventoryService) GetInventory(token string) (interface{}, error) {
 				Name:    avatar.Name,
 				Assets:  avatar.Assets,
 				Preview: avatar.Preview,
+				Type:    avatar.Type,
 			}
 			response = append(response, avatarResponse)
 		}
