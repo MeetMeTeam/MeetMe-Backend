@@ -824,11 +824,34 @@ const docTemplate = `{
                 }
             }
         },
+        "interfaces.EditSocial": {
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "interfaces.EditUserRequest": {
             "type": "object",
             "properties": {
+                "bio": {
+                    "type": "string"
+                },
                 "displayName": {
                     "type": "string"
+                },
+                "social": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interfaces.EditSocial"
+                    }
                 },
                 "username": {
                     "type": "string"

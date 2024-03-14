@@ -20,10 +20,25 @@ definitions:
     - preview
     - price
     type: object
+  interfaces.EditSocial:
+    properties:
+      link:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+    type: object
   interfaces.EditUserRequest:
     properties:
+      bio:
+        type: string
       displayName:
         type: string
+      social:
+        items:
+          $ref: '#/definitions/interfaces.EditSocial'
+        type: array
       username:
         type: string
     type: object

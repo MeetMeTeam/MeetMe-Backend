@@ -19,13 +19,13 @@ type RegisterResponse struct {
 }
 
 type ListUserResponse struct {
-	ID          string `json:"id"`
-	Username    string `json:"username"`
-	DisplayName string `json:"displayName"`
-	Birthday    string `json:"birthday"`
-	Email       string `json:"email"`
-	Image       string `json:"image"`
-	Bio         string `json:"bio"`
+	ID          string       `json:"id"`
+	Username    string       `json:"username"`
+	DisplayName string       `json:"displayName"`
+	Birthday    string       `json:"birthday"`
+	Email       string       `json:"email"`
+	Bio         string       `json:"bio"`
+	Social      []EditSocial `json:"social"`
 }
 
 type Login struct {
@@ -70,9 +70,15 @@ type TemplateEmailData struct {
 }
 
 type EditUserRequest struct {
-	Username    *string `json:"username"`
-	DisplayName *string `json:"displayName"`
-	Bio         *string `json:"bio"`
+	Username    *string      `json:"username"`
+	DisplayName *string      `json:"displayName"`
+	Bio         *string      `json:"bio"`
+	Social      []EditSocial `json:"social"`
+}
+type EditSocial struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+	Link string `json:"link"`
 }
 
 type UserService interface {

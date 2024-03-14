@@ -11,6 +11,7 @@ import (
 	"meetme/be/config"
 	"meetme/be/errs"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -432,7 +433,7 @@ func (s userService) EditUser(request interfaces.EditUserRequest, token string) 
 		return nil, err
 	}
 
-	if request == (interfaces.EditUserRequest{}) {
+	if reflect.DeepEqual(request, interfaces.EditUserRequest{}) {
 		return utils.ErrorResponse{Message: "Not enough data to update information."}, nil
 	}
 
@@ -499,6 +500,19 @@ func (s userService) EditUser(request interfaces.EditUserRequest, token string) 
 		}
 	}
 
+	if request.Social != nil {
+		//if user.Social == nil {
+		updateUser, err = s.userRepo.AddSocial(user.Email, request.Social)
+		//} else {
+		//	updateUser, err = s.userRepo.UpdateSocialByEmail(user.Email, request.Social)
+		//}
+
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+	}
+
 	//
 	//if user.Bio == "" {
 	//	if request.Bio != nil {
@@ -542,8 +556,17 @@ func (s userService) EditUser(request interfaces.EditUserRequest, token string) 
 	//
 	//}
 
+	result := interfaces.ListUserResponse{
+		ID:          updateUser.ID.Hex(),
+		Username:    updateUser.Username,
+		DisplayName: updateUser.DisplayName,
+		Email:       updateUser.Email,
+		Bio:         updateUser.Bio,
+		Birthday:    updateUser.Birthday,
+		Social:      updateUser.Social,
+	}
 	return utils.DataResponse{
-		Data:    updateUser,
+		Data:    result,
 		Message: "Edit user information success.",
 	}, nil
 }

@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"meetme/be/actions/repositories/interfaces"
+	interfaces2 "meetme/be/actions/services/interfaces"
 )
 
 type UserRepository struct {
@@ -210,6 +211,30 @@ func (r UserRepository) UpdateBioByEmail(email string, bio string) (*interfaces.
 	return users, nil
 }
 
+func (r UserRepository) AddSocial(email string, social []interfaces2.EditSocial) (*interfaces.UserResponse, error) {
+	filter := bson.D{{"email", email}}
+
+	update := bson.D{{"$set",
+		bson.D{{"social",
+			social}}}}
+
+	coll := r.db.Collection("users")
+	_, err := coll.UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	var users *interfaces.UserResponse
+	err = coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (r UserRepository) UpdateSocialByEmail(email string, social []interfaces2.EditSocial) (*interfaces.UserResponse, error) {
+	return nil, nil
+}
 func (r UserRepository) UpdateBioUsernameDisplayNameByEmail(email string, bio string, username string, display string) (*interfaces.UserResponse, error) {
 	filter := bson.D{{"email", email}}
 
