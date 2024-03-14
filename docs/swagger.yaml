@@ -218,6 +218,12 @@ paths:
       consumes:
       - application/json
       description: Get inventory by token.
+      parameters:
+      - description: item type that you want to get inventory [avatar/theme]
+        in: query
+        name: item_type
+        required: true
+        type: string
       produces:
       - application/json
       responses:

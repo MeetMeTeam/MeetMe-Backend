@@ -163,6 +163,15 @@ const docTemplate = `{
                     "inventories"
                 ],
                 "summary": "Get user's inventory.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "item type that you want to get inventory [avatar/theme]",
+                        "name": "item_type",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

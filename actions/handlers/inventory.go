@@ -23,14 +23,16 @@ func NewInventoryHandler(inventoryService svInter.InventoryService) inventoryHan
 //	@Tags			inventories
 //	@Accept			json
 //	@Produce		json
+//	@Param			item_type	query	string	true	"item type that you want to get inventory [avatar/theme]"
 //	@Success		200		{object}	utils.DataResponse
 //	@Router			/inventories [get]
 //
 // @Security BearerAuth
 func (h inventoryHandler) GetInventory(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
+	itemType := c.QueryParam("item_type")
 
-	inventory, err := h.inventoryService.GetInventory(token)
+	inventory, err := h.inventoryService.GetInventory(token, itemType)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)

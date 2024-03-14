@@ -81,7 +81,7 @@ func (s themeService) GetThemeShops(token string) (interface{}, error) {
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	themeResponses := []interfaces.ThemeResponse{}
+	themeResponses := []interfaces.ThemeShopResponse{}
 	for _, theme := range themes {
 		_, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, theme.ID)
 		isOwner := false
@@ -92,7 +92,7 @@ func (s themeService) GetThemeShops(token string) (interface{}, error) {
 		} else {
 			isOwner = true
 		}
-		themeResponse := interfaces.ThemeResponse{
+		themeResponse := interfaces.ThemeShopResponse{
 			ID:      theme.ID.Hex(),
 			Name:    theme.Name,
 			Assets:  theme.Assets,

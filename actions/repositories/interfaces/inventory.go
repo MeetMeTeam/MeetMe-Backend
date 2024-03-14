@@ -16,6 +16,7 @@ type Inventory struct {
 type InventoryRepository interface {
 	GetById(primitive.ObjectID) (*InventoryResponse, error)
 	GetByUserId(primitive.ObjectID) ([]InventoryResponse, error)
+	GetByUserIdAndItemType(primitive.ObjectID, string) ([]InventoryResponse, error)
 	Create(primitive.ObjectID, primitive.ObjectID, string) (*InventoryResponse, error)
 	GetByUserIdAndItemId(primitive.ObjectID, primitive.ObjectID) (*InventoryResponse, error)
 }
