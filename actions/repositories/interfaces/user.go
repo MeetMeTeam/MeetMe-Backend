@@ -11,6 +11,7 @@ type User struct {
 	Coin        int                `bson:"coin"`
 	Inventory   primitive.ObjectID `bson:"inventory_id"`
 	IsAdmin     bool               `bson:"isAdmin"`
+	Bio         string             `bson:"bio"`
 }
 
 type UserResponse struct {
@@ -23,6 +24,7 @@ type UserResponse struct {
 	Coin        int                `bson:"coin"`
 	Inventory   primitive.ObjectID `bson:"inventory_id"`
 	IsAdmin     bool               `bson:"isAdmin"`
+	Bio         string             `bson:"bio"`
 }
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)
@@ -31,9 +33,13 @@ type UserRepository interface {
 	Create(User) (*User, error)
 	AddFriend() (*User, error)
 	GetByUsername(string) (*UserResponse, error)
+	//AddBio(string, string) (*UserResponse, error)
 	UpdatePasswordByEmail(string, string) (*User, error)
 	UpdateCoinById(primitive.ObjectID, int) (*User, error)
 	UpdateAvatarById(primitive.ObjectID, primitive.ObjectID) (*UserResponse, error)
 	UpdateUsernameByEmail(string, string) (*UserResponse, error)
 	UpdateDisplayNameByEmail(string, string) (*UserResponse, error)
+	UpdateBioByEmail(string, string) (*UserResponse, error)
+
+	UpdateBioUsernameDisplayNameByEmail(string, string, string, string) (*UserResponse, error)
 }

@@ -444,30 +444,103 @@ func (s userService) EditUser(request interfaces.EditUserRequest, token string) 
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	if *request.DisplayName == user.DisplayName && *request.Username == user.Username {
-		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//if *request.DisplayName == user.DisplayName && *request.Username == user.Username && *request.Bio == user.Bio {
+	//	return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//}
+	var updateUser *repoInt.UserResponse
+
+	//if (request.Username != nil && user.Username != "") || (request.Bio != nil && user.Bio != "") || (request.DisplayName != nil && user.DisplayName != "") {
+	//	fmt.Println(*request.Bio == user.Bio)
+	//	if *request.DisplayName == user.DisplayName && *request.Username == user.Username && *request.Bio == user.Bio {
+	//		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//	} else {
+	//		if request.Bio != nil {
+	//			updateUser, err = s.userRepo.UpdateBioByEmail(user.Email, *request.Bio)
+	//			if err != nil {
+	//				return nil, errs.NewInternalError(err.Error())
+	//			}
+	//		}
+	//
+	//		if request.DisplayName != nil {
+	//			updateUser, err = s.userRepo.UpdateDisplayNameByEmail(user.Email, *request.DisplayName)
+	//			if err != nil {
+	//				return nil, errs.NewInternalError(err.Error())
+	//			}
+	//		}
+	//
+	//		if request.Username != nil {
+	//			updateUser, err = s.userRepo.UpdateUsernameByEmail(user.Email, *request.Username)
+	//			if err != nil {
+	//				return nil, errs.NewInternalError(err.Error())
+	//			}
+	//		}
+	//
+	//	}
+	//}
+
+	if request.Bio != nil {
+		updateUser, err = s.userRepo.UpdateBioByEmail(user.Email, *request.Bio)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
 	}
 
-	var updateUser *repoInt.UserResponse
 	if request.DisplayName != nil {
-		if *request.DisplayName != user.DisplayName {
-			updateUser, err = s.userRepo.UpdateDisplayNameByEmail(user.Email, *request.DisplayName)
-			if err != nil {
-				return nil, errs.NewInternalError(err.Error())
-			}
+		updateUser, err = s.userRepo.UpdateDisplayNameByEmail(user.Email, *request.DisplayName)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
 		}
-
 	}
 
 	if request.Username != nil {
-		if *request.Username != user.Username {
-			updateUser, err = s.userRepo.UpdateUsernameByEmail(user.Email, *request.Username)
-			if err != nil {
-				return nil, errs.NewInternalError(err.Error())
-			}
+		updateUser, err = s.userRepo.UpdateUsernameByEmail(user.Email, *request.Username)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
 		}
-
 	}
+
+	//
+	//if user.Bio == "" {
+	//	if request.Bio != nil {
+	//		updateUser, err = s.userRepo.UpdateBioByEmail(user.Email, *request.Bio)
+	//		if err != nil {
+	//			return nil, errs.NewInternalError(err.Error())
+	//		}
+	//	}
+	//} else {
+	//	if *request.Bio == user.Bio {
+	//		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//	} else {
+	//		updateUser, err = s.userRepo.UpdateBioByEmail(user.Email, *request.Bio)
+	//		if err != nil {
+	//			return nil, errs.NewInternalError(err.Error())
+	//		}
+	//	}
+	//}
+	//
+	//if request.DisplayName != nil {
+	//	if *request.DisplayName != user.DisplayName {
+	//		updateUser, err = s.userRepo.UpdateDisplayNameByEmail(user.Email, *request.DisplayName)
+	//		if err != nil {
+	//			return nil, errs.NewInternalError(err.Error())
+	//		}
+	//	} else {
+	//		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//	}
+	//
+	//}
+	//
+	//if request.Username != nil {
+	//	if *request.Username != user.Username {
+	//		updateUser, err = s.userRepo.UpdateUsernameByEmail(user.Email, *request.Username)
+	//		if err != nil {
+	//			return nil, errs.NewInternalError(err.Error())
+	//		}
+	//	} else {
+	//		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//	}
+	//
+	//}
 
 	return utils.DataResponse{
 		Data:    updateUser,

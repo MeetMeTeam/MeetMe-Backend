@@ -191,3 +191,39 @@ func (r UserRepository) UpdateDisplayNameByEmail(email string, displayName strin
 	}
 	return users, nil
 }
+
+func (r UserRepository) UpdateBioByEmail(email string, bio string) (*interfaces.UserResponse, error) {
+	filter := bson.D{{"email", email}}
+
+	update := bson.D{{"$set", bson.D{{"bio", bio}}}}
+	coll := r.db.Collection("users")
+	_, err := coll.UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	var users *interfaces.UserResponse
+	err = coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (r UserRepository) UpdateBioUsernameDisplayNameByEmail(email string, bio string, username string, display string) (*interfaces.UserResponse, error) {
+	filter := bson.D{{"email", email}}
+
+	update := bson.D{{"$set", bson.D{{"bio", bio}, {"username", username}, {"displayName", display}}}}
+	coll := r.db.Collection("users")
+	_, err := coll.UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	var users *interfaces.UserResponse
+	err = coll.FindOne(context.TODO(), filter).Decode(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}

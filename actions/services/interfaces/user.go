@@ -25,6 +25,7 @@ type ListUserResponse struct {
 	Birthday    string `json:"birthday"`
 	Email       string `json:"email"`
 	Image       string `json:"image"`
+	Bio         string `json:"bio"`
 }
 
 type Login struct {
@@ -71,6 +72,7 @@ type TemplateEmailData struct {
 type EditUserRequest struct {
 	Username    *string `json:"username"`
 	DisplayName *string `json:"displayName"`
+	Bio         *string `json:"bio"`
 }
 
 type UserService interface {
