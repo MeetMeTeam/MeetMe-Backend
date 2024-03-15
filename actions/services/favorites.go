@@ -58,6 +58,45 @@ func (s favoriteService) FavUser(token string, userId string) (interface{}, erro
 	}
 
 	return utils.ErrorResponse{
-		Message: "You fav " + receiverId.Hex() + " success.",
+		Message: "You press like " + receiverId.Hex() + " success.",
+	}, nil
+}
+
+func (s favoriteService) UnFavUser(token string, userId string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	giver, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	receiverId, err := primitive.ObjectIDFromHex(userId)
+
+	if giver.ID == receiverId {
+		return nil, errs.NewBadRequestError("You cannot unlike yourself.")
+	} else {
+
+		_, err = s.favRepo.GetByGiverAndReceiver(giver.ID, receiverId)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError("You have not like yet!")
+			}
+			return nil, errs.NewInternalError(err.Error())
+		} else {
+			err = s.favRepo.DeleteFav(giver.ID, receiverId)
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+		}
+
+	}
+
+	return utils.ErrorResponse{
+		Message: "You remove like " + receiverId.Hex() + " success.",
 	}, nil
 }

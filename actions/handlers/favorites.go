@@ -48,3 +48,36 @@ func (h favoriteHandler) FavUser(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, avatars)
 }
+
+// UnFavUser godoc
+//
+//	@Summary		UnFavorite user
+//	@Description	Remove Favorite other user.
+//	@Tags			favorites
+//	@Accept			json
+//	@Produce		json
+//	@Param        	receiverId   path      string  true  "user id that you want to like."
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/users/favorites/{receiverId} [delete]
+//
+// @Security BearerAuth
+func (h favoriteHandler) UnFavUser(c echo.Context) error {
+	id := c.Param("userId")
+	token := c.Request().Header.Get("Authorization")
+
+	avatars, err := h.favoriteService.UnFavUser(token, id)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, avatars)
+}

@@ -580,6 +580,28 @@ paths:
       tags:
       - users
   /users/favorites/{receiverId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove Favorite other user.
+      parameters:
+      - description: user id that you want to like.
+        in: path
+        name: receiverId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: UnFavorite user
+      tags:
+      - favorites
     post:
       consumes:
       - application/json

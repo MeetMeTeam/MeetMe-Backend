@@ -111,6 +111,7 @@ func main() {
 
 	favApi := userApi.Group("/favorites")
 	favApi.POST("/:userId", favoriteHandler.FavUser)
+	favApi.DELETE("/:userId", favoriteHandler.UnFavUser)
 
 	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))
 }

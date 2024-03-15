@@ -45,3 +45,18 @@ func (r FavoriteRepository) GetByGiverAndReceiver(giver primitive.ObjectID, rece
 
 	return &fav, nil
 }
+
+func (r FavoriteRepository) DeleteFav(giver primitive.ObjectID, receiver primitive.ObjectID) error {
+	filter := bson.D{}
+
+	filter = bson.D{{"giver_id", giver}, {"receiver_id", receiver}}
+
+	coll := r.db.Collection("favorites")
+
+	_, err := coll.DeleteMany(context.TODO(), filter)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

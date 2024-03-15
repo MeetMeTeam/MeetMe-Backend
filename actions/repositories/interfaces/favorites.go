@@ -15,6 +15,7 @@ type FavoriteResponse struct {
 
 type FavoriteRepository interface {
 	AddFav(primitive.ObjectID, primitive.ObjectID) (*Favorite, error)
+	DeleteFav(primitive.ObjectID, primitive.ObjectID) error
 	GetByGiverAndReceiver(primitive.ObjectID, primitive.ObjectID) (*FavoriteResponse, error)
 	//DeleteFav()
 }
