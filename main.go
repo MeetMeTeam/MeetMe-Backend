@@ -54,18 +54,21 @@ func main() {
 	inventoryRepo := repositories.NewInventoryRepositoryDB(db)
 	userRepository := repositories.NewUserRepositoryDB(db)
 	friendRepository := repositories.NewFriendRepositoryDB(db)
+	favoriteRepository := repositories.NewFavoriteRepositoryDB(db)
 
 	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
 	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo)
 	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo)
 	friendService := services.NewFriendService(friendRepository, userRepository)
+	favoriteService := services.NewFavoriteService(userRepository, favoriteRepository)
 
 	avatarHandler := handlers.NewAvatarShopHandler(avatarService)
 	themeHandler := handlers.NewThemeShopHandler(themeService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
 	userHandler := handlers.NewUserHandler(userService)
 	friendHandler := handlers.NewFriendHandler(friendService)
+	favoriteHandler := handlers.NewFavoriteHandler(favoriteService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	api := e.Group("/api")
@@ -105,6 +108,9 @@ func main() {
 	friendApi := api.Group("/friends")
 	friendApi.GET("", friendHandler.FriendList)
 	friendApi.DELETE("/:friendId", friendHandler.RemoveFriend)
+
+	favApi := userApi.Group("/favorites")
+	favApi.POST("/:userId", favoriteHandler.FavUser)
 
 	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))
 }

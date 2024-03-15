@@ -729,6 +729,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/favorites/{receiverId}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Favorite other user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Favorite user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id that you want to like.",
+                        "name": "receiverId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/forgot-password": {
             "put": {
                 "description": "Send mail to reset password.",
