@@ -5,7 +5,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
-	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/config"
@@ -27,6 +26,7 @@ type userService struct {
 	userRepo      repositories.UserRepository
 	inventoryRepo repositories.InventoryRepository
 	avatarRepo    repositories.AvatarRepository
+	favRepo       repositories.FavoriteRepository
 }
 
 type jwtCustomClaims struct {
@@ -36,8 +36,8 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository) interfaces.UserService {
-	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo}
+func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository, favRepo repositories.FavoriteRepository) interfaces.UserService {
+	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo, favRepo: favRepo}
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
@@ -51,7 +51,7 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 	}
 	bytes, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -120,7 +120,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewUnauthorizedError("Email or password incorrect.")
 		}
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -149,13 +149,18 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 
 		t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
 		if err != nil {
-			log.Println(err)
+
 			return nil, errs.NewInternalError(err.Error())
 		}
 		r, err := refreshToken.SignedString([]byte(os.Getenv("APP_SECRET")))
 
 		if err != nil {
-			log.Println(err)
+
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		num, err := s.favRepo.CountFav(user.ID)
+		if err != nil {
 			return nil, errs.NewInternalError(err.Error())
 		}
 		response := interfaces.LoginResponse{
@@ -169,6 +174,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Id:          user.ID.Hex(),
 				Coin:        user.Coin,
 				IsAdmin:     user.IsAdmin,
+				CountFav:    num,
 			},
 		}
 		return response, nil
@@ -187,7 +193,7 @@ func (s userService) GetUsers() (interface{}, error) {
 				Message: "Get users success.",
 			}, nil
 		}
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -232,7 +238,7 @@ func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
 
 	t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -251,7 +257,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewBadRequestError("This email address is not registered yet.")
 		}
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -298,7 +304,7 @@ func (s userService) ResetPassword(token string, password interfaces.Password) (
 	}
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password.Password), 14)
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -307,7 +313,7 @@ func (s userService) ResetPassword(token string, password interfaces.Password) (
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewUnauthorizedError("User not found")
 		}
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -348,7 +354,7 @@ func (s userService) GetAvatars(token string, id string) (interface{}, error) {
 	}
 	userId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 	user, err := s.userRepo.GetById(userId)

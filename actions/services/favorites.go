@@ -100,3 +100,32 @@ func (s favoriteService) UnFavUser(token string, userId string) (interface{}, er
 		Message: "You remove like " + receiverId.Hex() + " success.",
 	}, nil
 }
+
+func (s favoriteService) GetCountFav(token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	num, err := s.favRepo.CountFav(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	type Fav struct {
+		CountFav int `json:"countFav"`
+	}
+	return utils.DataResponse{
+		Data: Fav{
+			CountFav: num,
+		},
+		Message: "Count favorite of " + user.Username + " success.",
+	}, nil
+}

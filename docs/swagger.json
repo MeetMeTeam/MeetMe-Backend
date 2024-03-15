@@ -723,6 +723,34 @@
                 }
             }
         },
+        "/users/favorites": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Count Favorite of user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Count Fav",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/favorites/{receiverId}": {
             "post": {
                 "security": [

@@ -45,6 +45,7 @@ type UserDetails struct {
 	DisplayName string `json:"displayName"`
 	Id          string `json:"_id"`
 	Coin        int    `json:"coin"`
+	CountFav    int    `json:"countFav"`
 	IsAdmin     bool   `json:"isAdmin"`
 }
 

@@ -81,3 +81,34 @@ func (h favoriteHandler) UnFavUser(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, avatars)
 }
+
+// CountFavUser godoc
+//
+//	@Summary		Count Fav
+//	@Description	Count Favorite of user.
+//	@Tags			favorites
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/users/favorites [get]
+//
+// @Security BearerAuth
+func (h favoriteHandler) CountFavUser(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+
+	avatars, err := h.favoriteService.GetCountFav(token)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, avatars)
+}

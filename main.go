@@ -59,7 +59,7 @@ func main() {
 	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
 	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo)
-	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo)
+	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository)
 	friendService := services.NewFriendService(friendRepository, userRepository)
 	favoriteService := services.NewFavoriteService(userRepository, favoriteRepository)
 
@@ -112,6 +112,7 @@ func main() {
 	favApi := userApi.Group("/favorites")
 	favApi.POST("/:userId", favoriteHandler.FavUser)
 	favApi.DELETE("/:userId", favoriteHandler.UnFavUser)
+	favApi.GET("", favoriteHandler.CountFavUser)
 
 	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))
 }

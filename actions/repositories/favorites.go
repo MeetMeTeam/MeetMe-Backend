@@ -47,9 +47,8 @@ func (r FavoriteRepository) GetByGiverAndReceiver(giver primitive.ObjectID, rece
 }
 
 func (r FavoriteRepository) DeleteFav(giver primitive.ObjectID, receiver primitive.ObjectID) error {
-	filter := bson.D{}
 
-	filter = bson.D{{"giver_id", giver}, {"receiver_id", receiver}}
+	filter := bson.D{{"giver_id", giver}, {"receiver_id", receiver}}
 
 	coll := r.db.Collection("favorites")
 
@@ -59,4 +58,14 @@ func (r FavoriteRepository) DeleteFav(giver primitive.ObjectID, receiver primiti
 	}
 
 	return nil
+}
+
+func (r FavoriteRepository) CountFav(receiver primitive.ObjectID) (int, error) {
+	filter := bson.D{{"receiver_id", receiver}}
+	coll := r.db.Collection("favorites")
+	count, err := coll.CountDocuments(context.TODO(), filter)
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
 }
