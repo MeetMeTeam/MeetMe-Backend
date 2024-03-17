@@ -394,3 +394,35 @@ func (h userHandler) EditUserInfo(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, users)
 }
+
+func (h userHandler) SendVerifyMail(c echo.Context) error {
+	request := new(svInter.Email)
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+	errrr := utils.CustomValidator(*request)
+
+	if errrr != nil {
+		return c.JSON(http.StatusBadRequest, utils.ValidateResponse{
+			Message: errrr,
+		})
+	}
+
+	users, err := h.userService.VerifyEmail(*request)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}

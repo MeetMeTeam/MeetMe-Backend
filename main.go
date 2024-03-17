@@ -75,6 +75,7 @@ func main() {
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
 	api.POST("/refresh", userHandler.RefreshToken)
+	api.POST("/verify-mail", userHandler.SendVerifyMail)
 
 	avatarApi := api.Group("/avatars")
 	avatarApi.GET("", avatarHandler.GetAvatarShop)

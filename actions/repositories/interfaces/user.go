@@ -3,6 +3,7 @@ package interfaces
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"meetme/be/actions/services/interfaces"
+	"time"
 )
 
 type User struct {
@@ -15,6 +16,7 @@ type User struct {
 	Inventory   primitive.ObjectID `bson:"inventory_id"`
 	IsAdmin     bool               `bson:"isAdmin"`
 	Bio         string             `bson:"bio"`
+	IsVerify    bool               `bson:"isVerify"`
 }
 
 type UserResponse struct {
@@ -29,10 +31,22 @@ type UserResponse struct {
 	IsAdmin     bool                    `bson:"isAdmin"`
 	Bio         string                  `bson:"bio"`
 	Social      []interfaces.EditSocial `bson:"social"`
+	Code        string                  `bson:"code"`
+	ExpiredAt   time.Time               `bson:"expiredAt"`
+	IsVerify    bool                    `bson:"isVerify"`
 }
+
+type Mail struct {
+	Email     string    `bson:"email"`
+	Code      string    `bson:"code"`
+	IsVerify  bool      `bson:"isVerify"`
+	ExpiredAt time.Time `bson:"expiredAt"`
+}
+
 type UserRepository interface {
 	GetAll() ([]UserResponse, error)
 	GetByEmail(string) (*UserResponse, error)
+	//GetByEmailAndIsVerify(string, bool) (*UserResponse, error)
 	GetById(int) (*UserResponse, error)
 	Create(User) (*User, error)
 	AddFriend() (*User, error)
@@ -46,4 +60,6 @@ type UserRepository interface {
 	UpdateBioByEmail(string, string) (*UserResponse, error)
 	UpdateSocialByEmail(string, interfaces.EditSocial) (*UserResponse, error)
 	UpdateBioUsernameDisplayNameByEmail(string, string, string, string) (*UserResponse, error)
+	CreateVerifyMail(string, string, time.Time) (*Mail, error)
+	UpdateVerifyMailCode(string, string, time.Time) (*Mail, error)
 }

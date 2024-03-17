@@ -8,6 +8,7 @@ type RegisterRequest struct {
 	Password    string `json:"password" example:"winner" validate:"required"`
 	CharacterId string `json:"characterId" validate:"required"`
 	IsAdmin     bool   `json:"isAdmin"`
+	OTP         string `json:"otp"`
 }
 
 type RegisterResponse struct {
@@ -47,6 +48,7 @@ type UserDetails struct {
 	Coin        int    `json:"coin"`
 	CountFav    int    `json:"countFav"`
 	IsAdmin     bool   `json:"isAdmin"`
+	Bio         string `json:"bio"`
 }
 
 type TokenResponse struct {
@@ -94,4 +96,5 @@ type UserService interface {
 	GetAvatars(string, string) (interface{}, error)
 	ChangeAvatar(string, string) (interface{}, error)
 	EditUser(EditUserRequest, string) (interface{}, error)
+	VerifyEmail(Email) (interface{}, error)
 }

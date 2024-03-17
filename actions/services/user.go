@@ -36,52 +36,73 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+//type verificationData struct {
+//	Email     string    `json:"email"`
+//	Code      string    `json:"code"`
+//	ExpiredAt time.Time `json:"expiredAt"`
+//}
+
 func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository, favRepo repositories.FavoriteRepository) interfaces.UserService {
 	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo, favRepo: favRepo}
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
-	isUsernameExist, _ := s.userRepo.GetByUsername(request.Username)
-	if isUsernameExist != nil {
-		return nil, errs.NewBadRequestError(request.Username + " is already exist.")
-	}
+
 	isEmailExist, _ := s.userRepo.GetByEmail(request.Email)
-	if isEmailExist != nil {
-		return nil, errs.NewBadRequestError(request.Email + " is already exist.")
-	}
-	bytes, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
-	if err != nil {
 
-		return nil, errs.NewInternalError(err.Error())
-	}
+	if request.OTP == isEmailExist.Code {
+		if isEmailExist.IsVerify == true {
+			return nil, errs.NewBadRequestError("This email is already verified.")
+		} else {
+			if isEmailExist.ExpiredAt.Before(time.Now()) {
+				return nil, errs.NewBadRequestError("OTP expired, request it again")
+			}
+		}
 
-	newUser := repoInt.User{
-		DisplayName: request.DisplayName,
-		Birthday:    request.Birthday,
-		Email:       request.Email,
-		Password:    string(bytes),
-		Username:    request.Username,
-		IsAdmin:     request.IsAdmin,
-	}
-	userResult, err := s.userRepo.Create(newUser)
-	if err != nil {
-		return nil, errs.NewInternalError(err.Error())
-	}
+		isUsernameExist, _ := s.userRepo.GetByUsername(request.Username)
+		if isUsernameExist != nil {
+			return nil, errs.NewBadRequestError(request.Username + " is already exist.")
+		}
 
-	itemId, err := primitive.ObjectIDFromHex(request.CharacterId)
-	if err != nil {
-		return nil, errs.NewInternalError(err.Error())
-	}
+		bytes, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
+		if err != nil {
 
-	inventResult, err := s.inventoryRepo.Create(userResult.ID, itemId, "avatar")
-	userResult, err = s.userRepo.UpdateAvatarById(userResult.ID, inventResult.ID)
-	response := utils.DataResponse{
-		Data: &interfaces.RegisterResponse{
-			Birthday: userResult.Birthday,
-			Email:    userResult.Email,
-			Username: userResult.Username,
-		},
-		Message: "Create user success.",
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		newUser := repoInt.User{
+			DisplayName: request.DisplayName,
+			Birthday:    request.Birthday,
+			Email:       request.Email,
+			Password:    string(bytes),
+			Username:    request.Username,
+			IsAdmin:     request.IsAdmin,
+			IsVerify:    true,
+		}
+		userResult, err := s.userRepo.Create(newUser)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		itemId, err := primitive.ObjectIDFromHex(request.CharacterId)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		inventResult, err := s.inventoryRepo.Create(userResult.ID, itemId, "avatar")
+		userResult, err = s.userRepo.UpdateAvatarById(userResult.ID, inventResult.ID)
+		response := utils.DataResponse{
+			Data: &interfaces.RegisterResponse{
+				Birthday: userResult.Birthday,
+				Email:    userResult.Email,
+				Username: userResult.Username,
+			},
+			Message: "Create user success.",
+		}
+
+		return response, nil
+	} else {
+		return nil, errs.NewBadRequestError("OTP is incorrect!")
 	}
 
 	////send verify email
@@ -104,7 +125,6 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 	//	return nil, errs.NewInternalError(err.Error())
 	//}
 
-	return response, nil
 }
 
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
@@ -175,6 +195,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 				Coin:        user.Coin,
 				IsAdmin:     user.IsAdmin,
 				CountFav:    num,
+				Bio:         user.Bio,
 			},
 		}
 		return response, nil
@@ -575,4 +596,27 @@ func (s userService) EditUser(request interfaces.EditUserRequest, token string) 
 		Data:    result,
 		Message: "Edit user information success.",
 	}, nil
+}
+
+func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
+
+	isEmailExist, _ := s.userRepo.GetByEmail(email.Email)
+	if isEmailExist == nil {
+		verifyData, err := s.userRepo.CreateVerifyMail(email.Email, utils.EncodeToString(6), time.Now().Add(time.Minute*10))
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+		return verifyData, nil
+	} else {
+		if isEmailExist.IsVerify == true {
+			return nil, errs.NewBadRequestError(email.Email + " is already exist.")
+		} else {
+			updateVerifyData, err := s.userRepo.UpdateVerifyMailCode(email.Email, utils.EncodeToString(6), time.Now().Add(time.Minute*10))
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+			return updateVerifyData, nil
+		}
+	}
+
 }
