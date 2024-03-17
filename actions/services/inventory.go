@@ -65,9 +65,10 @@ func (s inventoryService) GetInventory(token string, itemType string) (interface
 				Preview: avatar.Preview,
 				Type:    avatar.Type,
 			}
-			response = append(avatarRes, avatarResponse)
+			avatarRes = append(avatarRes, avatarResponse)
 
 		}
+		response = avatarRes
 	} else if itemType == "theme" {
 		themeRes := []interfaces.ThemeResponse{}
 		for _, inventory := range inventories {
@@ -87,10 +88,11 @@ func (s inventoryService) GetInventory(token string, itemType string) (interface
 				Price:  theme.Price,
 				Song:   theme.Song,
 			}
-			response = append(themeRes, themeResponse)
+			themeRes = append(themeRes, themeResponse)
 
 		}
 
+		response = themeRes
 	}
 
 	return utils.DataResponse{
