@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
     <title>Title</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,117 +11,112 @@
           rel="stylesheet">
     <style>
 
-        body {
-            background: #E5D6F5;
+        .body {
             height: 100%;
-            min-height: 100vh;
-            /*display: flex;*/
-            /*justify-content: center;*/
-        }
+            background-size: cover;
 
-        /*.eiei {*/
-        /*    height: 100%;*/
-        /*    min-height: 100vh;*/
-        /*}*/
-
-        .container {
-            width: 691px;
-            height: 100%;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.70);
-            box-shadow: 0px 4px 36.9px 0px rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(2px);
             padding: 24px;
-            margin: auto;
+            /*background: #E5D6F5;*/
+
+            background-image: url("https://firebasestorage.googleapis.com/v0/b/meetme-1815f.appspot.com/o/web-image%2Femail-verify.png?alt=media&token=033d0dda-7705-4df3-b968-5e28b20ebbd5");
 
         }
-
+         .container{
+             border-radius: 16px;
+             box-shadow: 0px 4px 36.9px 0px rgba(0, 0, 0, 0.25);
+             opacity: 0.8;
+             padding: 24px;
+             height: 100%;
+             width: 550px;
+             margin: auto;
+             background: white;
+             
+         }
         .container-title {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            align-self: stretch;
-            gap: 24px;
+            text-align: center;
         }
 
         .title {
             color: black;
             font-family: 'IBM Plex Sans',sans-serif;
             font-size: 40px;
-            font-style: normal;
             font-weight: 700;
-            line-height: normal;
-
         }
 
         .sub-title {
-            color: #333333;
+            color: black;
             font-family: 'Inter', sans-serif;
-            font-size: 32px;
+            font-size: 30px;
             font-style: normal;
             font-weight: 700;
-            line-height: normal;
+            padding: 24px 0;
         }
 
         .content {
-            color: #4D4D4D;
+            color: black;
             font-family: 'Inter', sans-serif;
-            font-size: 20px;
+            font-size: 14px;
             font-style: normal;
-            font-weight: 700;
-            line-height: 150%; /* 30px */
-            padding-top: 24px;
+            font-weight: 600;
+            line-height: 24px;
         }
 
         .button {
            padding: 10px 20px 10px 20px;
             gap: 8px;
             border-radius: 16px;
-            background: var(--purple-60, #985BD7);
+            background:  #985BD7;
             text-align: center;
+            width: 50%;
+            margin: 24px 0;
         }
 
         .button-text {
             color: white;
             text-decoration: none;
             font-family: 'Inter', sans-serif;
-            font-size: 24px;
+            font-size: 16px;
             font-style: normal;
             font-weight: 700;
             line-height: normal;
         }
 
+
     </style>
 </head>
-<body class="eiei">
-<div class="container">
-    <div class="container-title">
-<!--        <img src="image/logo.png" width="69" height="auto">-->
-        <p class="title">MeetMe</p>
+<body >
+<div class="body">
+    <div class="container">
+
+        <div class="container-title">
+<!--            <img  src="https://firebasestorage.googleapis.com/v0/b/meetme-1815f.appspot.com/o/web-image%2Fmeetme-shadow-circle_1.png?alt=media&token=eac5c7ac-43f6-4be8-a35b-c5084ec00c5e" width="10%" />-->
+
+            <span class="title">MeetMe</span>
+        </div>
+
+        <div class="sub-title">{{.Title}}</div>
+        <p class="content">Hi {{.Username}},</p>
+        <p class="content">
+            Verify yourself below to sign in to your
+            <a href="https://meetmeplay.com/" style="color: #7E32CD; text-decoration: underline">meetmeplay.com</a>
+            account for <a href="mailto:{{.Email}}" target="_blank" style="color: black; text-decoration: none">{{.Email}}</a> or {{.Username}}.
+        </p>
+        <p class="content">The link can only be used once and expires in 10 minutes if you
+            don’t use it.</p>
+        <div class="button">
+            <a href="{{.URL}}" class="button-text" style="color: white;">{{.Button}}</a>
+        </div>
+        <p class="content">How does this work?</p>
+
+        <p class="content">
+            This secure, one-time URL lets you confirm your identity without
+            a password. If you already have a password, this won’t replace it,
+            so you can still sign in with it later. If you didn't request this
+            verification link, you can safely ignore this email.
+        </p>
+
     </div>
 
-    <div class="sub-title">{{.Title}}</div>
-    <pre class="content">
-Hi {{.Username}},
-Verify yourself below to sign in to your <a href="https://meetmeplay.com/"
-            style="color: #7E32CD; text-decoration: underline">meetmeplay.com</a>
-account for {{.Email}} or {{.Username}}.
-The link can only be used once and expires in 10 minutes if you
-don’t use it.
-        </pre>
-    <div class="button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="41" viewBox="0 0 40 41" fill="none">
-            <mask id="mask0_366_3371" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="40"
-                  height="41">
-                <rect y="0.5" width="40" height="40" rx="2" fill="#D9D9D9"/>
-            </mask>
-            <g mask="url(#mask0_366_3371)">
-                <path d="M16.2511 26.7524C17.0322 27.5335 18.2985 27.5335 19.0796 26.7524L28.2487 17.5833C28.893 16.939 28.893 15.8943 28.2487 15.25C27.6044 14.6057 26.5597 14.6057 25.9154 15.25L19.0796 22.0858C18.2985 22.8668 17.0322 22.8668 16.2512 22.0858L14.082 19.9167C13.4377 19.2723 12.393 19.2723 11.7487 19.9167C11.1044 20.561 11.1044 21.6057 11.7487 22.25L16.2511 26.7524ZM19.9987 37.1667C17.6931 37.1667 15.5265 36.7292 13.4987 35.8542C11.4709 34.9792 9.70703 33.7917 8.20703 32.2917C6.70703 30.7917 5.51953 29.0278 4.64453 27C3.76953 24.9722 3.33203 22.8055 3.33203 20.5C3.33203 18.1944 3.76953 16.0278 4.64453 14C5.51953 11.9722 6.70703 10.2083 8.20703 8.70833C9.70703 7.20833 11.4709 6.02083 13.4987 5.14583C15.5265 4.27083 17.6931 3.83333 19.9987 3.83333C22.3043 3.83333 24.4709 4.27083 26.4987 5.14583C28.5265 6.02083 30.2904 7.20833 31.7904 8.70833C33.2904 10.2083 34.4779 11.9722 35.3529 14C36.2279 16.0278 36.6654 18.1944 36.6654 20.5C36.6654 22.8055 36.2279 24.9722 35.3529 27C34.4779 29.0278 33.2904 30.7917 31.7904 32.2917C30.2904 33.7917 28.5265 34.9792 26.4987 35.8542C24.4709 36.7292 22.3043 37.1667 19.9987 37.1667ZM19.9987 33.8333C23.7209 33.8333 26.8737 32.5417 29.457 29.9583C32.0404 27.375 33.332 24.2222 33.332 20.5C33.332 16.7778 32.0404 13.625 29.457 11.0417C26.8737 8.45833 23.7209 7.16666 19.9987 7.16666C16.2765 7.16666 13.1237 8.45833 10.5404 11.0417C7.95703 13.625 6.66536 16.7778 6.66536 20.5C6.66536 24.2222 7.95703 27.375 10.5404 29.9583C13.1237 32.5417 16.2765 33.8333 19.9987 33.8333Z"
-                      fill="white"/>
-            </g>
-            <a href="{{.URL}}" class="button-text" style="color: white;">{{.Button}}</a>
-        </svg>
-    </div>
 </div>
 <!--<div>-->
 <!--    <img src="image/bg.png" style="transform: rotate(-10.119deg);">-->
