@@ -9,6 +9,7 @@ type RegisterRequest struct {
 	CharacterId string `json:"characterId" validate:"required"`
 	IsAdmin     bool   `json:"isAdmin"`
 	OTP         string `json:"otp"`
+	RefCode     string `json:"refCode"`
 }
 
 type RegisterResponse struct {

@@ -259,12 +259,13 @@ func (r UserRepository) UpdateBioUsernameDisplayNameByEmail(email string, bio st
 	return users, nil
 }
 
-func (r UserRepository) CreateVerifyMail(email string, code string, expiredAt time.Time) (*interfaces.Mail, error) {
+func (r UserRepository) CreateVerifyMail(email string, code string, refCode string, expiredAt time.Time) (*interfaces.Mail, error) {
 	newMail := interfaces.Mail{
 		Email:     email,
 		Code:      code,
 		ExpiredAt: expiredAt,
 		IsVerify:  false,
+		RefCode:   refCode,
 	}
 	_, err := r.db.Collection("users").InsertOne(context.TODO(), newMail)
 
@@ -275,10 +276,10 @@ func (r UserRepository) CreateVerifyMail(email string, code string, expiredAt ti
 	return &newMail, nil
 }
 
-func (r UserRepository) UpdateVerifyMailCode(email string, code string, expiredAt time.Time) (*interfaces.Mail, error) {
+func (r UserRepository) UpdateVerifyMailCode(email string, code string, refCode string, expiredAt time.Time) (*interfaces.Mail, error) {
 	filter := bson.D{{"email", email}}
 
-	update := bson.D{{"$set", bson.D{{"code", code}, {"expiredAt", expiredAt}}}}
+	update := bson.D{{"$set", bson.D{{"code", code}, {"refCode", refCode}, {"expiredAt", expiredAt}}}}
 	coll := r.db.Collection("users")
 	_, err := coll.UpdateMany(context.TODO(), filter, update)
 	if err != nil {

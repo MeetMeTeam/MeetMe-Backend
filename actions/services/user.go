@@ -50,7 +50,7 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 
 	isEmailExist, _ := s.userRepo.GetByEmail(request.Email)
 
-	if request.OTP == isEmailExist.Code {
+	if request.OTP == isEmailExist.Code && request.RefCode == isEmailExist.RefCode {
 		if isEmailExist.IsVerify == true {
 			return nil, errs.NewBadRequestError("This email is already verified.")
 		} else {
@@ -599,10 +599,9 @@ func (s userService) EditUser(request interfaces.EditUserRequest, token string) 
 }
 
 func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
-
 	isEmailExist, _ := s.userRepo.GetByEmail(email.Email)
 	if isEmailExist == nil {
-		verifyData, err := s.userRepo.CreateVerifyMail(email.Email, utils.EncodeToString(6), time.Now().Add(time.Minute*10))
+		verifyData, err := s.userRepo.CreateVerifyMail(email.Email, utils.EncodeToString(6, "int"), utils.EncodeToString(6, "string"), time.Now().Add(time.Minute*10))
 		if err != nil {
 			return nil, errs.NewInternalError(err.Error())
 		}
@@ -611,7 +610,7 @@ func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
 		if isEmailExist.IsVerify == true {
 			return nil, errs.NewBadRequestError(email.Email + " is already exist.")
 		} else {
-			updateVerifyData, err := s.userRepo.UpdateVerifyMailCode(email.Email, utils.EncodeToString(6), time.Now().Add(time.Minute*10))
+			updateVerifyData, err := s.userRepo.UpdateVerifyMailCode(email.Email, utils.EncodeToString(6, "int"), utils.EncodeToString(6, "string"), time.Now().Add(time.Minute*10))
 			if err != nil {
 				return nil, errs.NewInternalError(err.Error())
 			}

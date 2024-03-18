@@ -32,6 +32,7 @@ type UserResponse struct {
 	Bio         string                  `bson:"bio"`
 	Social      []interfaces.EditSocial `bson:"social"`
 	Code        string                  `bson:"code"`
+	RefCode     string                  `bson:"refCode"`
 	ExpiredAt   time.Time               `bson:"expiredAt"`
 	IsVerify    bool                    `bson:"isVerify"`
 }
@@ -39,6 +40,7 @@ type UserResponse struct {
 type Mail struct {
 	Email     string    `bson:"email"`
 	Code      string    `bson:"code"`
+	RefCode   string    `bson:"refCode"`
 	IsVerify  bool      `bson:"isVerify"`
 	ExpiredAt time.Time `bson:"expiredAt"`
 }
@@ -60,6 +62,6 @@ type UserRepository interface {
 	UpdateBioByEmail(string, string) (*UserResponse, error)
 	UpdateSocialByEmail(string, interfaces.EditSocial) (*UserResponse, error)
 	UpdateBioUsernameDisplayNameByEmail(string, string, string, string) (*UserResponse, error)
-	CreateVerifyMail(string, string, time.Time) (*Mail, error)
-	UpdateVerifyMailCode(string, string, time.Time) (*Mail, error)
+	CreateVerifyMail(string, string, string, time.Time) (*Mail, error)
+	UpdateVerifyMailCode(string, string, string, time.Time) (*Mail, error)
 }
