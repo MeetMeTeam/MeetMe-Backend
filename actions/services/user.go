@@ -105,26 +105,6 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 		return nil, errs.NewBadRequestError("OTP is incorrect!")
 	}
 
-	////send verify email
-	//templateData := interfaces.TemplateEmailData{
-	//	Username: userResult.Username,
-	//	Email:    userResult.Email,
-	//	Title:    "Verify Email",
-	//	Button:   "Verify Your Email",
-	//	URL:      os.Getenv("APP_URL"),
-	//}
-	//r := config.NewRequest([]string{userResult.Email}, "[meetmeplay] Verify Your Account", "")
-	//err = r.ParseTemplate("verifyFile.html", templateData)
-	//
-	//if err != nil {
-	//	return nil, errs.NewInternalError(err.Error())
-	//}
-	//
-	//ok, err := r.SendEmail()
-	//if err != nil || !ok {
-	//	return nil, errs.NewInternalError(err.Error())
-	//}
-
 }
 
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
@@ -305,7 +285,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		URL:      os.Getenv("APP_URL") + "/reset-password/" + t,
 	}
 	r := config.NewRequest([]string{user.Email}, "[meetmeplay] Reset Your Password", "")
-	err = r.ParseTemplate("verifyFile.html", templateData)
+	err = r.ParseTemplate("reset-password.html", templateData)
 
 	if err != nil {
 		return nil, errs.NewInternalError(err.Error())
@@ -599,23 +579,55 @@ func (s userService) EditUser(request interfaces.EditUserRequest, token string) 
 }
 
 func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
+	var verifyData *repoInt.Mail
+	var err error
 	isEmailExist, _ := s.userRepo.GetByEmail(email.Email)
+
 	if isEmailExist == nil {
-		verifyData, err := s.userRepo.CreateVerifyMail(email.Email, utils.EncodeToString(6, "int"), utils.EncodeToString(6, "string"), time.Now().Add(time.Minute*10))
+		verifyData, err = s.userRepo.CreateVerifyMail(email.Email, utils.EncodeToString(6, "int"), utils.EncodeToString(6, "string"), time.Now().Add(time.Minute*10))
 		if err != nil {
 			return nil, errs.NewInternalError(err.Error())
 		}
-		return verifyData, nil
+
 	} else {
 		if isEmailExist.IsVerify == true {
 			return nil, errs.NewBadRequestError(email.Email + " is already exist.")
 		} else {
-			updateVerifyData, err := s.userRepo.UpdateVerifyMailCode(email.Email, utils.EncodeToString(6, "int"), utils.EncodeToString(6, "string"), time.Now().Add(time.Minute*10))
+			verifyData, err = s.userRepo.UpdateVerifyMailCode(email.Email, utils.EncodeToString(6, "int"), utils.EncodeToString(6, "string"), time.Now().Add(time.Minute*10))
 			if err != nil {
 				return nil, errs.NewInternalError(err.Error())
 			}
-			return updateVerifyData, nil
 		}
 	}
+
+	//send verify email
+	templateData := interfaces.TemplateEmailData{
+		Username: email.Email,
+		Email:    email.Email,
+		Title:    "Verify and SignIn",
+		Button:   "Verify Your Email",
+		OTP:      verifyData.Code,
+		RefCode:  verifyData.RefCode,
+	}
+	r := config.NewRequest([]string{email.Email}, "[meetmeplay] Verify Your Account", "")
+	err = r.ParseTemplate("verify-mail.html", templateData)
+
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	ok, err := r.SendEmail()
+	if err != nil || !ok {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	return utils.DataResponse{
+		Data: interfaces.OTPResponse{
+			Email:     verifyData.Email,
+			RefCode:   verifyData.RefCode,
+			ExpiredAt: verifyData.ExpiredAt,
+		},
+		Message: "Send mail to verify success.",
+	}, nil
 
 }

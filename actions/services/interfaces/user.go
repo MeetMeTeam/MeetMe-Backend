@@ -1,5 +1,7 @@
 package interfaces
 
+import "time"
+
 type RegisterRequest struct {
 	Username    string `json:"username" example:"winnerkypt"`
 	DisplayName string `json:"displayName" example:"winnerkypt"`
@@ -71,6 +73,8 @@ type TemplateEmailData struct {
 	URL      string
 	Title    string
 	Button   string
+	OTP      string
+	RefCode  string
 }
 
 type EditUserRequest struct {
@@ -83,6 +87,11 @@ type EditSocial struct {
 	Type string `json:"type"`
 	Name string `json:"name"`
 	Link string `json:"link"`
+}
+type OTPResponse struct {
+	Email     string    `json:"email"`
+	RefCode   string    `json:"refCode"`
+	ExpiredAt time.Time `json:"expiredAt"`
 }
 
 type UserService interface {
