@@ -36,8 +36,6 @@ jobs:
   deploy:
     runs-on:
       - self-hosted
-      - label-1
-
     needs: build
 
     steps:
