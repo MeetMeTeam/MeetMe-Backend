@@ -50,4 +50,6 @@ jobs:
             cd MeetMe-Backend/
             docker pull winnerkypt/meetme-backend:latest
             docker rm -f api-docker
+            echo finit
             docker compose up -d 
+            echo end
