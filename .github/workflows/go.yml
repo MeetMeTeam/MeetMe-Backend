@@ -46,8 +46,6 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            pwd
             cd MeetMe-Backend/
-            pwd
             docker pull winnerkypt/meetme-backend:latest
-            docker compose up -d
+            docker compose -f up -d --build
