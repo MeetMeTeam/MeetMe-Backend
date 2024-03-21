@@ -48,4 +48,5 @@ jobs:
           script: |
             cd MeetMe-Backend/
             docker pull winnerkypt/meetme-backend:latest
+            docker rm -f api-docker
             docker compose -f up -d --build
