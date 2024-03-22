@@ -180,7 +180,7 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 		}
 		return response, nil
 	} else {
-		return nil, errs.NewUnauthorizedError("Email or password incorrect [test].")
+		return nil, errs.NewUnauthorizedError("Email or password incorrect.")
 	}
 
 }
@@ -212,7 +212,7 @@ func (s userService) GetUsers() (interface{}, error) {
 
 	response := utils.DataResponse{
 		Data:    userResponses,
-		Message: "Get users success.",
+		Message: "Get users success. [test]",
 	}
 
 	return response, nil
