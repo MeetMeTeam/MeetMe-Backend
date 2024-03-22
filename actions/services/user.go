@@ -212,7 +212,7 @@ func (s userService) GetUsers() (interface{}, error) {
 
 	response := utils.DataResponse{
 		Data:    userResponses,
-		Message: "Get users success.[test automated deploy]",
+		Message: "Get users success.",
 	}
 
 	return response, nil
