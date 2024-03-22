@@ -9,7 +9,6 @@ jobs:
   build:
     runs-on: 
       - self-hosted
-      - label-1
     steps:
       - uses: actions/checkout@v3
 
@@ -38,7 +37,6 @@ jobs:
   deploy:
     runs-on:
       - self-hosted
-      - label-1
     needs: build
 
     steps:
