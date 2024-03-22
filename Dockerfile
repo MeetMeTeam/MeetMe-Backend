@@ -1,3 +1,4 @@
+# Builder stage
 FROM golang:1.18-alpine as builder
 
 WORKDIR /builder
@@ -17,8 +18,8 @@ RUN go mod download
 COPY . .
 
 # Build the Go application with UPX compression
-RUN go build -ldflags "-s -w" -o /builder/main /builder/main.go \
-    && upx -9 /builder/main
+RUN go build -ldflags "-s -w" -o main main.go \
+    && upx -9 main
 
 
 # Runner stage
@@ -28,8 +29,8 @@ WORKDIR /app
 
 # Copy the binary and HTML templates from the builder stage
 COPY --from=builder /builder/main .
-COPY reset-password.html .
-COPY verify-mail.html .
+COPY --from=builder /builder/reset-password.html .
+COPY --from=builder /builder/verify-mail.html .
 
 # Expose the port
 EXPOSE 8080
