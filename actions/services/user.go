@@ -48,7 +48,15 @@ func NewUserService(userRepo repositories.UserRepository, inventoryRepo reposito
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
 
-	isEmailExist, _ := s.userRepo.GetByEmail(request.Email)
+	isEmailExist, err := s.userRepo.GetByEmail(request.Email)
+
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewUnauthorizedError("Please verify email.")
+		}
+
+		return nil, errs.NewInternalError(err.Error())
+	}
 
 	if request.OTP == isEmailExist.Code && request.RefCode == isEmailExist.RefCode {
 		if isEmailExist.IsVerify == true {
