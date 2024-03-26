@@ -1,5 +1,10 @@
 package interfaces
 
+type QuestionRequest struct {
+	Thai     string `json:"thai"`
+	Eng      string `json:"eng"`
+	Category string `json:"category"`
+}
 type QuestionsResponse struct {
 	ID       string `json:"id"`
 	Thai     string `json:"thai"`
@@ -24,4 +29,5 @@ type CategoryResponse struct {
 type QuestionService interface {
 	GetQuestions(string, string) (interface{}, error)
 	GetCategories() interface{}
+	CreateQuestion(string, QuestionRequest) (interface{}, error)
 }

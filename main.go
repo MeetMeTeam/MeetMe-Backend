@@ -120,6 +120,7 @@ func main() {
 
 	quesApi := api.Group("/questions")
 	quesApi.GET("", questionHandler.GetQuestions)
+	quesApi.POST("", questionHandler.CreateQuestion)
 	quesApi.GET("/categories", questionHandler.GetCategories)
 
 	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))

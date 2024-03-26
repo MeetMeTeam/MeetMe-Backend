@@ -22,4 +22,5 @@ type QuestionRepository interface {
 	GetCategoryAll() ([]CategoryResponse, error)
 	GetByCategory(primitive.ObjectID) ([]QuestionResponse, error)
 	GetCateById(primitive.ObjectID) (*CategoryResponse, error)
+	CreateQuestions(string, Question) (*Question, error)
 }

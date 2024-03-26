@@ -63,3 +63,27 @@ func (h QuestionHandler) GetCategories(c echo.Context) error {
 	themes := h.questionService.GetCategories()
 	return c.JSON(http.StatusOK, themes)
 }
+
+func (h QuestionHandler) CreateQuestion(c echo.Context) error {
+	request := new(svInter.QuestionRequest)
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+	token := c.Request().Header.Get("Authorization")
+	themes, err := h.questionService.CreateQuestion(token, *request)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, themes)
+}

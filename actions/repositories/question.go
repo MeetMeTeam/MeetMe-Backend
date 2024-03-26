@@ -75,3 +75,14 @@ func (r QuestionRepository) GetCateById(id primitive.ObjectID) (*interfaces.Cate
 
 	return &cate, nil
 }
+
+func (r QuestionRepository) CreateQuestions(question interfaces.Question) (*interfaces.Question, error) {
+
+	_, err := r.db.Collection("questions").InsertOne(context.TODO(), question)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &question, nil
+}

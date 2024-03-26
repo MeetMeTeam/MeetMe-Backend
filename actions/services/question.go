@@ -132,3 +132,29 @@ func (s questionService) GetCategories() interface{} {
 		Message: "Get categories success.",
 	}
 }
+
+func (s questionService) CreateQuestion(token string, question interfaces.QuestionRequest) (interface{}, error) {
+	result, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	if result.IsAdmin == false {
+		return nil, errs.NewForbiddenError("You don't have permission.")
+	}
+
+	cateId, err := primitive.ObjectIDFromHex(question.Category)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	newQuestion := repoInt.Question{
+		Eng:      question.Eng,
+		Thai:     question.Thai,
+		Category: cateId,
+	}
+	questions, err := s.questionRepo.CreateQuestions(newQuestion)
+	if err != nil {
+		return nil, err
+	}
+	return utils.DataResponse{Data: questions, Message: "Create question success"}, nil
+}
