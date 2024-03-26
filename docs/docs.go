@@ -442,6 +442,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/questions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get questions by category or language .",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Get Questions.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Question's language [thai/eng]",
+                        "name": "lang",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Category of question",
+                        "name": "category",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/categories": {
+            "get": {
+                "description": "Get question's categories.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Get categories.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/refresh": {
             "post": {
                 "security": [
@@ -1041,9 +1106,15 @@ const docTemplate = `{
                 "isAdmin": {
                     "type": "boolean"
                 },
+                "otp": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string",
                     "example": "winner"
+                },
+                "refCode": {
+                    "type": "string"
                 },
                 "username": {
                     "type": "string",

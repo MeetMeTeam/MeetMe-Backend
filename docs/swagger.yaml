@@ -89,8 +89,12 @@ definitions:
         type: string
       isAdmin:
         type: boolean
+      otp:
+        type: string
       password:
         example: winner
+        type: string
+      refCode:
         type: string
       username:
         example: winnerkypt
@@ -400,6 +404,47 @@ paths:
       summary: Login
       tags:
       - users
+  /questions:
+    get:
+      consumes:
+      - application/json
+      description: Get questions by category or language .
+      parameters:
+      - description: Question's language [thai/eng]
+        in: query
+        name: lang
+        type: string
+      - description: ID Category of question
+        in: query
+        name: category
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Questions.
+      tags:
+      - questions
+  /questions/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get question's categories.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Get categories.
+      tags:
+      - questions
   /refresh:
     post:
       consumes:

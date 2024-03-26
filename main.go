@@ -55,6 +55,7 @@ func main() {
 	userRepository := repositories.NewUserRepositoryDB(db)
 	friendRepository := repositories.NewFriendRepositoryDB(db)
 	favoriteRepository := repositories.NewFavoriteRepositoryDB(db)
+	questionRepository := repositories.NewQuestionRepositoryDB(db)
 
 	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
 	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
@@ -62,6 +63,7 @@ func main() {
 	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository)
 	friendService := services.NewFriendService(friendRepository, userRepository)
 	favoriteService := services.NewFavoriteService(userRepository, favoriteRepository)
+	questionService := services.NewQuestionService(questionRepository)
 
 	avatarHandler := handlers.NewAvatarShopHandler(avatarService)
 	themeHandler := handlers.NewThemeShopHandler(themeService)
@@ -69,6 +71,7 @@ func main() {
 	userHandler := handlers.NewUserHandler(userService)
 	friendHandler := handlers.NewFriendHandler(friendService)
 	favoriteHandler := handlers.NewFavoriteHandler(favoriteService)
+	questionHandler := handlers.NewQuestionHandler(questionService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	api := e.Group("/api")
@@ -114,6 +117,10 @@ func main() {
 	favApi.POST("/:userId", favoriteHandler.FavUser)
 	favApi.DELETE("/:userId", favoriteHandler.UnFavUser)
 	favApi.GET("", favoriteHandler.CountFavUser)
+
+	quesApi := api.Group("/questions")
+	quesApi.GET("", questionHandler.GetQuestions)
+	quesApi.GET("/categories", questionHandler.GetCategories)
 
 	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))
 }
