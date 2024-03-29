@@ -78,6 +78,7 @@ func (r UserRepository) Create(user interfaces.User) (*interfaces.UserResponse, 
 			{"username", user.Username},
 			{"isAdmin", user.IsAdmin},
 			{"isVerify", user.IsVerify},
+			{"coin", 0},
 		}}}
 	coll := r.db.Collection("users")
 	_, err := coll.UpdateMany(context.TODO(), filter, update)
