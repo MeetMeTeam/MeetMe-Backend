@@ -29,6 +29,7 @@ type ListUserResponse struct {
 	Birthday    string       `json:"birthday"`
 	Email       string       `json:"email"`
 	Bio         string       `json:"bio"`
+	Image       string       `json:"image"`
 	Social      []EditSocial `json:"social"`
 }
 
