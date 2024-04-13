@@ -76,6 +76,7 @@ type TemplateEmailData struct {
 	Button   string
 	OTP      string
 	RefCode  string
+	Web 	 string
 }
 
 type EditUserRequest struct {
