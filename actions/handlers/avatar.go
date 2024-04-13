@@ -25,6 +25,8 @@ func NewAvatarShopHandler(avatarService svInter.AvatarService) avatarShopHandler
 //	@Produce		json
 //	@Success		200		{object}	utils.DataResponse
 //	@Router			/avatars [get]
+//
+// @Security BearerAuth
 func (h avatarShopHandler) GetAvatarShop(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
 	itemType := c.QueryParam("type")
@@ -45,6 +47,18 @@ func (h avatarShopHandler) GetAvatarShop(c echo.Context) error {
 	return c.JSON(http.StatusOK, avatars)
 }
 
+// AddAvatarToShop godoc
+//
+//	@Summary		Add avatar to shop
+//	@Description	Only admin qdd avatar to shop.
+//	@Tags			avatar shop
+//	@Accept			json
+//	@Produce		json
+//	@Param			avatars	body		interfaces.AvatarRequest	true	"request body for adding avatar to shop"
+//
+// @Success		200		{object}	utils.DataResponse
+// @Router			/avatars [post]
+// @Security BearerAuth
 func (h avatarShopHandler) AddAvatarToShop(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
 	request := new(svInter.AvatarRequest)

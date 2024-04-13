@@ -14,13 +14,14 @@ type inventoryService struct {
 	inventoryRepo repositories.InventoryRepository
 	userRepo      repositories.UserRepository
 	avatarRepo    repositories.AvatarRepository
+	themeRepo     repositories.ThemeRepository
 }
 
-func NewInventoryService(inventoryRepo repositories.InventoryRepository, userRepo repositories.UserRepository, avatarRepo repositories.AvatarRepository) interfaces.InventoryService {
-	return inventoryService{inventoryRepo: inventoryRepo, userRepo: userRepo, avatarRepo: avatarRepo}
+func NewInventoryService(inventoryRepo repositories.InventoryRepository, userRepo repositories.UserRepository, avatarRepo repositories.AvatarRepository, themeRepo repositories.ThemeRepository) interfaces.InventoryService {
+	return inventoryService{inventoryRepo: inventoryRepo, userRepo: userRepo, avatarRepo: avatarRepo, themeRepo: themeRepo}
 }
 
-func (s inventoryService) GetInventory(token string) (interface{}, error) {
+func (s inventoryService) GetInventory(token string, itemType string) (interface{}, error) {
 	email, err := utils.IsTokenValid(token)
 	if err != nil {
 		return nil, err
@@ -33,7 +34,7 @@ func (s inventoryService) GetInventory(token string) (interface{}, error) {
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	inventories, err := s.inventoryRepo.GetByUserId(user.ID)
+	inventories, err := s.inventoryRepo.GetByUserIdAndItemType(user.ID, itemType)
 	if err != nil {
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -44,9 +45,11 @@ func (s inventoryService) GetInventory(token string) (interface{}, error) {
 		}, nil
 	}
 
-	response := []interfaces.AvatarResponse{}
-	for _, inventory := range inventories {
-		if inventory.Type == "avatar" {
+	var response interface{}
+	if itemType == "avatar" {
+		avatarRes := []interfaces.AvatarResponse{}
+		for _, inventory := range inventories {
+
 			avatar, err := s.avatarRepo.GetById(inventory.Item)
 			if err != nil {
 				if errors.Is(err, mongo.ErrNoDocuments) {
@@ -60,14 +63,41 @@ func (s inventoryService) GetInventory(token string) (interface{}, error) {
 				Name:    avatar.Name,
 				Assets:  avatar.Assets,
 				Preview: avatar.Preview,
+				Type:    avatar.Type,
 			}
-			response = append(response, avatarResponse)
+			avatarRes = append(avatarRes, avatarResponse)
+
+		}
+		response = avatarRes
+	} else if itemType == "theme" {
+		themeRes := []interfaces.ThemeResponse{}
+		for _, inventory := range inventories {
+
+			theme, err := s.themeRepo.GetThemeById(inventory.Item)
+			if err != nil {
+				if errors.Is(err, mongo.ErrNoDocuments) {
+					return nil, errs.NewBadRequestError("Avatar not found.")
+				}
+				return nil, errs.NewInternalError(err.Error())
+			}
+
+			themeResponse := interfaces.ThemeResponse{
+				ID:     theme.ID.Hex(),
+				Name:   theme.Name,
+				Assets: theme.Assets,
+				Price:  theme.Price,
+				Song:   theme.Song,
+			}
+			themeRes = append(themeRes, themeResponse)
+
 		}
 
+		response = themeRes
 	}
+
 	return utils.DataResponse{
 		Data:    response,
-		Message: "Get inventory list of " + user.Username + " success.",
+		Message: "Get " + itemType + " inventory list of " + user.Username + " success.",
 	}, nil
 }
 
@@ -105,7 +135,24 @@ func (s inventoryService) AddItem(token string, id string, itemType string) (int
 
 		isExist, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, itemId)
 		if isExist != nil {
-			return nil, errs.NewBadRequestError(id + " is exist in your inventory.")
+			return nil, errs.NewBadRequestError(items.Name + " is exist in your inventory.")
+		}
+		if items.Price > user.Coin {
+			return nil, errs.NewBadRequestError("Your coin not enough.")
+		}
+		updateCoin = user.Coin - items.Price
+	} else if itemType == "theme" {
+		items, err := s.themeRepo.GetThemeById(itemId)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError("Theme not found.")
+			}
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		isExist, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, itemId)
+		if isExist != nil {
+			return nil, errs.NewBadRequestError(items.Name + " is exist in your inventory.")
 		}
 		if items.Price > user.Coin {
 			return nil, errs.NewBadRequestError("Your coin not enough.")

@@ -50,36 +50,52 @@ func main() {
 	db := initDB()
 
 	avatarRepo := repositories.NewAvatarRepositoryDB(db)
+	themeRepo := repositories.NewThemeRepositoryDB(db)
 	inventoryRepo := repositories.NewInventoryRepositoryDB(db)
 	userRepository := repositories.NewUserRepositoryDB(db)
 	friendRepository := repositories.NewFriendRepositoryDB(db)
+	favoriteRepository := repositories.NewFavoriteRepositoryDB(db)
+	questionRepository := repositories.NewQuestionRepositoryDB(db)
 
 	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
-	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo)
-	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo)
-	friendService := services.NewFriendService(friendRepository, userRepository)
+	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
+	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo)
+	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository)
+	friendService := services.NewFriendService(friendRepository, userRepository, avatarRepo, inventoryRepo)
+	favoriteService := services.NewFavoriteService(userRepository, favoriteRepository)
+	questionService := services.NewQuestionService(questionRepository)
 
 	avatarHandler := handlers.NewAvatarShopHandler(avatarService)
+	themeHandler := handlers.NewThemeShopHandler(themeService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
 	userHandler := handlers.NewUserHandler(userService)
 	friendHandler := handlers.NewFriendHandler(friendService)
+	favoriteHandler := handlers.NewFavoriteHandler(favoriteService)
+	questionHandler := handlers.NewQuestionHandler(questionService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	api := e.Group("/api")
 	api.POST("/register", userHandler.Register)
 	api.POST("/login", userHandler.Login)
 	api.POST("/refresh", userHandler.RefreshToken)
+	api.POST("/verify-mail", userHandler.SendVerifyMail)
 
 	avatarApi := api.Group("/avatars")
 	avatarApi.GET("", avatarHandler.GetAvatarShop)
 	avatarApi.POST("", avatarHandler.AddAvatarToShop)
+
+	themeApi := api.Group("/themes")
+	themeApi.POST("", themeHandler.AddThemeToShop)
+	themeApi.GET("", themeHandler.GetThemeShop)
 
 	inventoryApi := api.Group("/inventories")
 	inventoryApi.GET("", inventoryHandler.GetInventory)
 	inventoryApi.POST("", inventoryHandler.AddItem)
 
 	userApi := api.Group("/users")
-	// userApi.GET("", userHandler.GetAllUser)
+
+	userApi.PUT("", userHandler.EditUserInfo)
+  
 	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
 	userApi.GET("/coins", userHandler.GetCoins)
@@ -97,6 +113,16 @@ func main() {
 	friendApi := api.Group("/friends")
 	friendApi.GET("", friendHandler.FriendList)
 	friendApi.DELETE("/:friendId", friendHandler.RemoveFriend)
+
+	favApi := userApi.Group("/favorites")
+	favApi.POST("/:userId", favoriteHandler.FavUser)
+	favApi.DELETE("/:userId", favoriteHandler.UnFavUser)
+	favApi.GET("", favoriteHandler.CountFavUser)
+
+	quesApi := api.Group("/questions")
+	quesApi.GET("", questionHandler.GetQuestions)
+	quesApi.POST("", questionHandler.CreateQuestion)
+	quesApi.GET("/categories", questionHandler.GetCategories)
 
 	e.Logger.Fatal(e.Start(":"+os.Getenv("APP_PORT")), header.CORS(headers, methods, origins)(e))
 }

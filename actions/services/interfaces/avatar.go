@@ -18,10 +18,10 @@ type AvatarShopResponse struct {
 }
 
 type AvatarRequest struct {
-	Name    string   `json:"name"`
-	Assets  []string `json:"assets"`
-	Preview string   `json:"preview"`
-	Price   int      `json:"price"`
+	Name    string   `json:"name" validate:"required"`
+	Assets  []string `json:"assets" validate:"required"`
+	Preview string   `json:"preview" validate:"required"`
+	Price   int      `json:"price" validate:"required"`
 	Type    string   `json:"type"`
 }
 

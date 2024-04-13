@@ -1,5 +1,7 @@
 package interfaces
 
+import "time"
+
 type RegisterRequest struct {
 	Username    string `json:"username" example:"winnerkypt"`
 	DisplayName string `json:"displayName" example:"winnerkypt"`
@@ -8,6 +10,8 @@ type RegisterRequest struct {
 	Password    string `json:"password" example:"winner" validate:"required"`
 	CharacterId string `json:"characterId" validate:"required"`
 	IsAdmin     bool   `json:"isAdmin"`
+	OTP         string `json:"otp"`
+	RefCode     string `json:"refCode"`
 }
 
 type RegisterResponse struct {
@@ -19,16 +23,18 @@ type RegisterResponse struct {
 }
 
 type ListUserResponse struct {
-	ID          string `json:"id"`
-	Username    string `json:"username"`
-	DisplayName string `json:"displayName"`
-	Birthday    string `json:"birthday"`
-	Email       string `json:"email"`
-	Image       string `json:"image"`
+	ID          string       `json:"id"`
+	Username    string       `json:"username"`
+	DisplayName string       `json:"displayName"`
+	Birthday    string       `json:"birthday"`
+	Email       string       `json:"email"`
+	Bio         string       `json:"bio"`
+	Image       string       `json:"image"`
+	Social      []EditSocial `json:"social"`
 }
 
 type Login struct {
-	Email    string `json:"email" validate:"required,email" example:"winner@mail.com"`
+	Email    string `json:"email" validate:"required" example:"winner@mail.com"`
 	Password string `json:"password" validate:"required" example:"winner"`
 }
 
@@ -37,13 +43,16 @@ type LoginResponse struct {
 }
 
 type UserDetails struct {
-	Token    string `json:"token"`
-	Refresh  string `json:"refreshToken"`
-	Mail     string `json:"mail"`
-	Username string `json:"username"`
-	Id       string `json:"_id"`
-	Coin     int    `json:"coin"`
-	IsAdmin  bool   `json:"isAdmin"`
+	Token       string `json:"token"`
+	Refresh     string `json:"refreshToken"`
+	Mail        string `json:"mail"`
+	Username    string `json:"username"`
+	DisplayName string `json:"displayName"`
+	Id          string `json:"_id"`
+	Coin        int    `json:"coin"`
+	CountFav    int    `json:"countFav"`
+	IsAdmin     bool   `json:"isAdmin"`
+	Bio         string `json:"bio"`
 }
 
 type TokenResponse struct {
@@ -65,6 +74,25 @@ type TemplateEmailData struct {
 	URL      string
 	Title    string
 	Button   string
+	OTP      string
+	RefCode  string
+}
+
+type EditUserRequest struct {
+	Username    *string      `json:"username"`
+	DisplayName *string      `json:"displayName"`
+	Bio         *string      `json:"bio"`
+	Social      []EditSocial `json:"social"`
+}
+type EditSocial struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+	Link string `json:"link"`
+}
+type OTPResponse struct {
+	Email     string    `json:"email"`
+	RefCode   string    `json:"refCode"`
+	ExpiredAt time.Time `json:"expiredAt"`
 }
 
 type UserService interface {
@@ -78,4 +106,6 @@ type UserService interface {
 	GetCoin(string) (interface{}, error)
 	GetAvatars(string, string) (interface{}, error)
 	ChangeAvatar(string, string) (interface{}, error)
+	EditUser(EditUserRequest, string) (interface{}, error)
+	VerifyEmail(Email) (interface{}, error)
 }

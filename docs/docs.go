@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/avatars": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get avatar's shop.",
                 "consumes": [
                     "application/json"
@@ -28,6 +33,43 @@ const docTemplate = `{
                     "avatar shop"
                 ],
                 "summary": "Get avatar's shop.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Only admin qdd avatar to shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "avatar shop"
+                ],
+                "summary": "Add avatar to shop",
+                "parameters": [
+                    {
+                        "description": "request body for adding avatar to shop",
+                        "name": "avatars",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.AvatarRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -121,6 +163,15 @@ const docTemplate = `{
                     "inventories"
                 ],
                 "summary": "Get user's inventory.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "item type that you want to get inventory [avatar/theme]",
+                        "name": "item_type",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -152,7 +203,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "item type that you want to add [avatar]",
+                        "description": "item type that you want to add [avatar/theme]",
                         "name": "item_type",
                         "in": "query",
                         "required": true
@@ -391,6 +442,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/questions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get questions by category or language .",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Get Questions.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Question's language [thai/eng]",
+                        "name": "lang",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Category of question",
+                        "name": "category",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/categories": {
+            "get": {
+                "description": "Get question's categories.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Get categories.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/refresh": {
             "post": {
                 "security": [
@@ -453,6 +569,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/themes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get theme's shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "theme shop"
+                ],
+                "summary": "Get theme's shop.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Only admin add theme to shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "theme shop"
+                ],
+                "summary": "Add theme to shop",
+                "parameters": [
+                    {
+                        "description": "request body for adding theme to shop",
+                        "name": "avatars",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.ThemeCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "return list users.",
@@ -466,6 +647,43 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "User change profile information.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Edit profile.",
+                "parameters": [
+                    {
+                        "description": "request body for editing user's profile",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.EditUserRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -576,6 +794,106 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/favorites": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Count Favorite of user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Count Fav",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/favorites/{receiverId}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Favorite other user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Favorite user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id that you want to like.",
+                        "name": "receiverId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Remove Favorite other user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "UnFavorite user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id that you want to like.",
+                        "name": "receiverId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/forgot-password": {
             "put": {
                 "description": "Send mail to reset password.",
@@ -651,6 +969,69 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "interfaces.AvatarRequest": {
+            "type": "object",
+            "required": [
+                "assets",
+                "name",
+                "preview",
+                "price"
+            ],
+            "properties": {
+                "assets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "preview": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "interfaces.EditSocial": {
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "interfaces.EditUserRequest": {
+            "type": "object",
+            "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "social": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interfaces.EditSocial"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "interfaces.Email": {
             "type": "object",
             "required": [
@@ -702,14 +1083,17 @@ const docTemplate = `{
         "interfaces.RegisterRequest": {
             "type": "object",
             "required": [
+                "characterId",
                 "email",
-                "image",
                 "password"
             ],
             "properties": {
                 "birthday": {
                     "type": "string",
                     "example": "2023-08-12"
+                },
+                "characterId": {
+                    "type": "string"
                 },
                 "displayName": {
                     "type": "string",
@@ -719,16 +1103,44 @@ const docTemplate = `{
                     "type": "string",
                     "example": "winner@mail.com"
                 },
-                "image": {
+                "isAdmin": {
+                    "type": "boolean"
+                },
+                "otp": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string",
                     "example": "winner"
                 },
+                "refCode": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string",
                     "example": "winnerkypt"
+                }
+            }
+        },
+        "interfaces.ThemeCreateRequest": {
+            "type": "object",
+            "required": [
+                "assets",
+                "name",
+                "price"
+            ],
+            "properties": {
+                "assets": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "song": {
+                    "type": "string"
                 }
             }
         },

@@ -5,12 +5,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
-	"log"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/config"
 	"meetme/be/errs"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -26,6 +26,7 @@ type userService struct {
 	userRepo      repositories.UserRepository
 	inventoryRepo repositories.InventoryRepository
 	avatarRepo    repositories.AvatarRepository
+	favRepo       repositories.FavoriteRepository
 }
 
 type jwtCustomClaims struct {
@@ -35,84 +36,99 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository) interfaces.UserService {
-	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo}
+//type verificationData struct {
+//	Email     string    `json:"email"`
+//	Code      string    `json:"code"`
+//	ExpiredAt time.Time `json:"expiredAt"`
+//}
+
+func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository, favRepo repositories.FavoriteRepository) interfaces.UserService {
+	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo, favRepo: favRepo}
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
-	isUsernameExist, _ := s.userRepo.GetByUsername(request.Username)
-	if isUsernameExist != nil {
-		return nil, errs.NewBadRequestError(request.Username + " is already exist.")
-	}
-	isEmailExist, _ := s.userRepo.GetByEmail(request.Email)
-	if isEmailExist != nil {
-		return nil, errs.NewBadRequestError(request.Email + " is already exist.")
-	}
-	bytes, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
+
+	isEmailExist, err := s.userRepo.GetByEmail(request.Email)
+
 	if err != nil {
-		log.Println(err)
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewUnauthorizedError("Please verify email.")
+		}
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	newUser := repoInt.User{
-		DisplayName: request.DisplayName,
-		Birthday:    request.Birthday,
-		Email:       request.Email,
-		Password:    string(bytes),
-		Username:    request.Username,
-		IsAdmin:     request.IsAdmin,
-	}
-	userResult, err := s.userRepo.Create(newUser)
-	if err != nil {
-		return nil, errs.NewInternalError(err.Error())
+	if request.OTP == isEmailExist.Code && request.RefCode == isEmailExist.RefCode {
+		if isEmailExist.IsVerify == true {
+			return nil, errs.NewBadRequestError("This email is already verified.")
+		} else {
+			if isEmailExist.ExpiredAt.Before(time.Now()) {
+				return nil, errs.NewBadRequestError("OTP expired, request it again")
+			}
+		}
+
+		isUsernameExist, _ := s.userRepo.GetByUsername(request.Username)
+		if isUsernameExist != nil {
+			return nil, errs.NewBadRequestError(request.Username + " is already exist.")
+		}
+
+		bytes, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
+		if err != nil {
+
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		newUser := repoInt.User{
+			DisplayName: request.DisplayName,
+			Birthday:    request.Birthday,
+			Email:       request.Email,
+			Password:    string(bytes),
+			Username:    request.Username,
+			IsAdmin:     request.IsAdmin,
+			IsVerify:    true,
+		}
+		userResult, err := s.userRepo.Create(newUser)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		itemId, err := primitive.ObjectIDFromHex(request.CharacterId)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		inventResult, err := s.inventoryRepo.Create(userResult.ID, itemId, "avatar")
+		userResult, err = s.userRepo.UpdateAvatarById(userResult.ID, inventResult.ID)
+		response := utils.DataResponse{
+			Data: &interfaces.RegisterResponse{
+				Birthday: userResult.Birthday,
+				Email:    userResult.Email,
+				Username: userResult.Username,
+			},
+			Message: "Create user success.",
+		}
+
+		return response, nil
+	} else {
+		return nil, errs.NewBadRequestError("OTP is incorrect!")
 	}
 
-	itemId, err := primitive.ObjectIDFromHex(request.CharacterId)
-	if err != nil {
-		return nil, errs.NewInternalError(err.Error())
-	}
-
-	inventResult, err := s.inventoryRepo.Create(userResult.ID, itemId, "avatar")
-	userResult, err = s.userRepo.UpdateAvatarById(userResult.ID, inventResult.ID)
-	response := utils.DataResponse{
-		Data: &interfaces.RegisterResponse{
-			Birthday: userResult.Birthday,
-			Email:    userResult.Email,
-			Username: userResult.Username,
-		},
-		Message: "Create user success.",
-	}
-
-	////send verify email
-	//templateData := interfaces.TemplateEmailData{
-	//	Username: userResult.Username,
-	//	Email:    userResult.Email,
-	//	Title:    "Verify Email",
-	//	Button:   "Verify Your Email",
-	//	URL:      os.Getenv("APP_URL"),
-	//}
-	//r := config.NewRequest([]string{userResult.Email}, "[meetmeplay] Verify Your Account", "")
-	//err = r.ParseTemplate("verifyFile.html", templateData)
-	//
-	//if err != nil {
-	//	return nil, errs.NewInternalError(err.Error())
-	//}
-	//
-	//ok, err := r.SendEmail()
-	//if err != nil || !ok {
-	//	return nil, errs.NewInternalError(err.Error())
-	//}
-
-	return response, nil
 }
 
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
-	user, err := s.userRepo.GetByEmail(request.Email)
+	var user *repoInt.UserResponse
+	var err error
+	if strings.Contains(request.Email, "@") {
+		user, err = s.userRepo.GetByEmail(request.Email)
+	} else {
+		user, err = s.userRepo.GetByUsername(request.Email)
+	}
+
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewUnauthorizedError("Email or password incorrect.")
 		}
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -141,25 +157,33 @@ func (s userService) Login(request interfaces.Login) (interface{}, error) {
 
 		t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
 		if err != nil {
-			log.Println(err)
+
 			return nil, errs.NewInternalError(err.Error())
 		}
 		r, err := refreshToken.SignedString([]byte(os.Getenv("APP_SECRET")))
 
 		if err != nil {
-			log.Println(err)
+
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		num, err := s.favRepo.CountFav(user.ID)
+		if err != nil {
 			return nil, errs.NewInternalError(err.Error())
 		}
 		response := interfaces.LoginResponse{
 
 			UserDetails: interfaces.UserDetails{
-				Token:    t,
-				Refresh:  r,
-				Mail:     user.Email,
-				Username: user.Username,
-				Id:       user.ID.Hex(),
-				Coin:     user.Coin,
-				IsAdmin:  user.IsAdmin,
+				Token:       t,
+				Refresh:     r,
+				Mail:        user.Email,
+				Username:    user.Username,
+				DisplayName: user.DisplayName,
+				Id:          user.ID.Hex(),
+				Coin:        user.Coin,
+				IsAdmin:     user.IsAdmin,
+				CountFav:    num,
+				Bio:         user.Bio,
 			},
 		}
 		return response, nil
@@ -178,7 +202,7 @@ func (s userService) GetUsers() (interface{}, error) {
 				Message: "Get users success.",
 			}, nil
 		}
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -196,7 +220,7 @@ func (s userService) GetUsers() (interface{}, error) {
 
 	response := utils.DataResponse{
 		Data:    userResponses,
-		Message: "Get users success.[test automated deploy]",
+		Message: "Get users success.",
 	}
 
 	return response, nil
@@ -223,7 +247,7 @@ func (s userService) RefreshToken(refreshToken string) (interface{}, error) {
 
 	t, err := token.SignedString([]byte(os.Getenv("APP_SECRET")))
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -242,7 +266,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewBadRequestError("This email address is not registered yet.")
 		}
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -269,7 +293,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		URL:      os.Getenv("APP_URL") + "/reset-password/" + t,
 	}
 	r := config.NewRequest([]string{user.Email}, "[meetmeplay] Reset Your Password", "")
-	err = r.ParseTemplate("verifyFile.html", templateData)
+	err = r.ParseTemplate("reset-password.html", templateData)
 
 	if err != nil {
 		return nil, errs.NewInternalError(err.Error())
@@ -289,7 +313,7 @@ func (s userService) ResetPassword(token string, password interfaces.Password) (
 	}
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password.Password), 14)
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -298,7 +322,7 @@ func (s userService) ResetPassword(token string, password interfaces.Password) (
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewUnauthorizedError("User not found")
 		}
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -339,7 +363,7 @@ func (s userService) GetAvatars(token string, id string) (interface{}, error) {
 	}
 	userId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 	user, err := s.userRepo.GetById(userId)
@@ -414,6 +438,204 @@ func (s userService) ChangeAvatar(token string, itemId string) (interface{}, err
 	return utils.DataResponse{
 		Data:    updateUser,
 		Message: "Change avatar from " + user.Inventory.Hex() + " to " + updateUser.Inventory.Hex() + " success.",
+	}, nil
+
+}
+
+func (s userService) EditUser(request interfaces.EditUserRequest, token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+
+	if reflect.DeepEqual(request, interfaces.EditUserRequest{}) {
+		return utils.ErrorResponse{Message: "Not enough data to update information."}, nil
+	}
+
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	//if *request.DisplayName == user.DisplayName && *request.Username == user.Username && *request.Bio == user.Bio {
+	//	return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//}
+	var updateUser *repoInt.UserResponse
+
+	//if (request.Username != nil && user.Username != "") || (request.Bio != nil && user.Bio != "") || (request.DisplayName != nil && user.DisplayName != "") {
+	//	fmt.Println(*request.Bio == user.Bio)
+	//	if *request.DisplayName == user.DisplayName && *request.Username == user.Username && *request.Bio == user.Bio {
+	//		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//	} else {
+	//		if request.Bio != nil {
+	//			updateUser, err = s.userRepo.UpdateBioByEmail(user.Email, *request.Bio)
+	//			if err != nil {
+	//				return nil, errs.NewInternalError(err.Error())
+	//			}
+	//		}
+	//
+	//		if request.DisplayName != nil {
+	//			updateUser, err = s.userRepo.UpdateDisplayNameByEmail(user.Email, *request.DisplayName)
+	//			if err != nil {
+	//				return nil, errs.NewInternalError(err.Error())
+	//			}
+	//		}
+	//
+	//		if request.Username != nil {
+	//			updateUser, err = s.userRepo.UpdateUsernameByEmail(user.Email, *request.Username)
+	//			if err != nil {
+	//				return nil, errs.NewInternalError(err.Error())
+	//			}
+	//		}
+	//
+	//	}
+	//}
+
+	if request.Bio != nil {
+		updateUser, err = s.userRepo.UpdateBioByEmail(user.Email, *request.Bio)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+	}
+
+	if request.DisplayName != nil {
+		updateUser, err = s.userRepo.UpdateDisplayNameByEmail(user.Email, *request.DisplayName)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+	}
+
+	if request.Username != nil {
+		updateUser, err = s.userRepo.UpdateUsernameByEmail(user.Email, *request.Username)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+	}
+
+	if request.Social != nil {
+		//if user.Social == nil {
+		updateUser, err = s.userRepo.AddSocial(user.Email, request.Social)
+		//} else {
+		//	updateUser, err = s.userRepo.UpdateSocialByEmail(user.Email, request.Social)
+		//}
+
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+	}
+
+	//
+	//if user.Bio == "" {
+	//	if request.Bio != nil {
+	//		updateUser, err = s.userRepo.UpdateBioByEmail(user.Email, *request.Bio)
+	//		if err != nil {
+	//			return nil, errs.NewInternalError(err.Error())
+	//		}
+	//	}
+	//} else {
+	//	if *request.Bio == user.Bio {
+	//		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//	} else {
+	//		updateUser, err = s.userRepo.UpdateBioByEmail(user.Email, *request.Bio)
+	//		if err != nil {
+	//			return nil, errs.NewInternalError(err.Error())
+	//		}
+	//	}
+	//}
+	//
+	//if request.DisplayName != nil {
+	//	if *request.DisplayName != user.DisplayName {
+	//		updateUser, err = s.userRepo.UpdateDisplayNameByEmail(user.Email, *request.DisplayName)
+	//		if err != nil {
+	//			return nil, errs.NewInternalError(err.Error())
+	//		}
+	//	} else {
+	//		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//	}
+	//
+	//}
+	//
+	//if request.Username != nil {
+	//	if *request.Username != user.Username {
+	//		updateUser, err = s.userRepo.UpdateUsernameByEmail(user.Email, *request.Username)
+	//		if err != nil {
+	//			return nil, errs.NewInternalError(err.Error())
+	//		}
+	//	} else {
+	//		return utils.ErrorResponse{Message: "Your request data is not change."}, nil
+	//	}
+	//
+	//}
+
+	result := interfaces.ListUserResponse{
+		ID:          updateUser.ID.Hex(),
+		Username:    updateUser.Username,
+		DisplayName: updateUser.DisplayName,
+		Email:       updateUser.Email,
+		Bio:         updateUser.Bio,
+		Birthday:    updateUser.Birthday,
+		Social:      updateUser.Social,
+	}
+	return utils.DataResponse{
+		Data:    result,
+		Message: "Edit user information success.",
+	}, nil
+}
+
+func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
+	var verifyData *repoInt.Mail
+	var err error
+	isEmailExist, _ := s.userRepo.GetByEmail(email.Email)
+
+	if isEmailExist == nil {
+		verifyData, err = s.userRepo.CreateVerifyMail(email.Email, utils.EncodeToString(6, "int"), utils.EncodeToString(6, "string"), time.Now().Add(time.Minute*10))
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+	} else {
+		if isEmailExist.IsVerify == true {
+			return nil, errs.NewBadRequestError(email.Email + " is already exist.")
+		} else {
+			verifyData, err = s.userRepo.UpdateVerifyMailCode(email.Email, utils.EncodeToString(6, "int"), utils.EncodeToString(6, "string"), time.Now().Add(time.Minute*10))
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+		}
+	}
+
+	//send verify email
+	templateData := interfaces.TemplateEmailData{
+		Username: email.Email,
+		Email:    email.Email,
+		Title:    "Verify and SignIn",
+		Button:   "Verify Your Email",
+		OTP:      verifyData.Code,
+		RefCode:  verifyData.RefCode,
+	}
+	r := config.NewRequest([]string{email.Email}, "[meetmeplay] Verify Your Account", "")
+	err = r.ParseTemplate("verify-mail.html", templateData)
+
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	ok, err := r.SendEmail()
+	if err != nil || !ok {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	return utils.DataResponse{
+		Data: interfaces.OTPResponse{
+			Email:     verifyData.Email,
+			RefCode:   verifyData.RefCode,
+			ExpiredAt: verifyData.ExpiredAt,
+		},
+		Message: "Send mail to verify success.",
 	}, nil
 
 }

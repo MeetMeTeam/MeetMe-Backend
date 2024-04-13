@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  api:
+    image: winnerkypt/meetme-backend:latest
+    container_name: api-docker
+    environment:
+      APP_PORT: ${APP_PORT}
+      APP_SECRET: ${APP_SECRET}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      APP_URL: ${APP_URL}
+      MAILER_HOST: ${MAILER_HOST}
+      MAILER_PORT: ${MAILER_PORT}
+      MAILER_USERNAME: ${MAILER_USERNAME}
+      MAILER_PASSWORD: ${MAILER_PASSWORD}
+    networks:
+      - meetme
+networks:
+  meetme:
+    external: true

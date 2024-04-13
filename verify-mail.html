@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
+    <title>Title</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Playpen+Sans:wght@100;200;300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Playpen+Sans:wght@100;200;300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <style>
+
+        .body {
+            height: 100%;
+            background-size: cover;
+            padding: 24px;
+            background-image: url("https://firebasestorage.googleapis.com/v0/b/meetme-1815f.appspot.com/o/web-image%2Femail-verify.png?alt=media&token=033d0dda-7705-4df3-b968-5e28b20ebbd5");
+        }
+         .container{
+             border-radius: 16px;
+             box-shadow: 0px 4px 36.9px 0px rgba(0, 0, 0, 0.25);
+             opacity: 0.8;
+             padding: 24px;
+             height: 100%;
+             width: 550px;
+             margin: auto;
+             background: white;
+             
+         }
+        .container-title {
+            text-align: center;
+        }
+
+        .title {
+            color: black;
+            font-family: 'IBM Plex Sans',sans-serif;
+            font-size: 40px;
+            font-weight: 700;
+        }
+
+        .sub-title {
+            color: black;
+            font-family: 'Inter', sans-serif;
+            font-size: 30px;
+            font-style: normal;
+            font-weight: 700;
+            padding: 24px 0;
+        }
+
+        .content {
+            color: black;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 24px;
+        }
+
+        .content-otp{
+            color: black;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            font-size: 64px;
+            font-style: normal;
+            font-weight: 700;
+            letter-spacing: 30px;
+        }
+
+    </style>
+</head>
+<body >
+<div class="body">
+    <div class="container">
+
+        <div class="container-title">
+<!--            <img  src="https://firebasestorage.googleapis.com/v0/b/meetme-1815f.appspot.com/o/web-image%2Fmeetme-shadow-circle_1.png?alt=media&token=eac5c7ac-43f6-4be8-a35b-c5084ec00c5e" width="10%" />-->
+
+            <span class="title">MeetMe</span>
+        </div>
+
+        <div class="sub-title">{{.Title}}</div>
+        <p class="content">Hi {{.Username}},</p>
+        <p class="content">
+            Use this OTP to complete your SignUp procedures
+            and verify your account on
+            <a href="https://dev-meetme.com/" style="color: #7E32CD; text-decoration: underline">meetmeplay.com</a>
+
+        </p>
+
+    <div class="container-title">
+        <p class="content-otp">{{.OTP}}</p>
+        <p class="content">RefCode: {{.RefCode}}</p>
+    </div>
+
+
+    </div>
+
+</div>
+<!--<div>-->
+<!--    <img src="image/bg.png" style="transform: rotate(-10.119deg);">-->
+<!--</div>-->
+
+</body>
+</html>

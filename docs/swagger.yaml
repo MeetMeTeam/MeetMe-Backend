@@ -1,5 +1,47 @@
 basePath: /api
 definitions:
+  interfaces.AvatarRequest:
+    properties:
+      assets:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      preview:
+        type: string
+      price:
+        type: integer
+      type:
+        type: string
+    required:
+    - assets
+    - name
+    - preview
+    - price
+    type: object
+  interfaces.EditSocial:
+    properties:
+      link:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  interfaces.EditUserRequest:
+    properties:
+      bio:
+        type: string
+      displayName:
+        type: string
+      social:
+        items:
+          $ref: '#/definitions/interfaces.EditSocial'
+        type: array
+      username:
+        type: string
+    type: object
   interfaces.Email:
     properties:
       email:
@@ -37,24 +79,45 @@ definitions:
       birthday:
         example: "2023-08-12"
         type: string
+      characterId:
+        type: string
       displayName:
         example: winnerkypt
         type: string
       email:
         example: winner@mail.com
         type: string
-      image:
+      isAdmin:
+        type: boolean
+      otp:
         type: string
       password:
         example: winner
+        type: string
+      refCode:
         type: string
       username:
         example: winnerkypt
         type: string
     required:
+    - characterId
     - email
-    - image
     - password
+    type: object
+  interfaces.ThemeCreateRequest:
+    properties:
+      assets:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      song:
+        type: string
+    required:
+    - assets
+    - name
+    - price
     type: object
   utils.DataResponse:
     properties:
@@ -86,7 +149,32 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
       summary: Get avatar's shop.
+      tags:
+      - avatar shop
+    post:
+      consumes:
+      - application/json
+      description: Only admin qdd avatar to shop.
+      parameters:
+      - description: request body for adding avatar to shop
+        in: body
+        name: avatars
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.AvatarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Add avatar to shop
       tags:
       - avatar shop
   /friends:
@@ -134,6 +222,12 @@ paths:
       consumes:
       - application/json
       description: Get inventory by token.
+      parameters:
+      - description: item type that you want to get inventory [avatar/theme]
+        in: query
+        name: item_type
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -156,7 +250,7 @@ paths:
         name: item_id
         required: true
         type: string
-      - description: item type that you want to add [avatar]
+      - description: item type that you want to add [avatar/theme]
         in: query
         name: item_type
         required: true
@@ -310,6 +404,47 @@ paths:
       summary: Login
       tags:
       - users
+  /questions:
+    get:
+      consumes:
+      - application/json
+      description: Get questions by category or language .
+      parameters:
+      - description: Question's language [thai/eng]
+        in: query
+        name: lang
+        type: string
+      - description: ID Category of question
+        in: query
+        name: category
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Questions.
+      tags:
+      - questions
+  /questions/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get question's categories.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      summary: Get categories.
+      tags:
+      - questions
   /refresh:
     post:
       consumes:
@@ -349,6 +484,46 @@ paths:
       summary: Register user
       tags:
       - users
+  /themes:
+    get:
+      consumes:
+      - application/json
+      description: Get theme's shop.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get theme's shop.
+      tags:
+      - theme shop
+    post:
+      consumes:
+      - application/json
+      description: Only admin add theme to shop.
+      parameters:
+      - description: request body for adding theme to shop
+        in: body
+        name: avatars
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.ThemeCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Add theme to shop
+      tags:
+      - theme shop
   /users:
     get:
       consumes:
@@ -362,6 +537,29 @@ paths:
           schema:
             $ref: '#/definitions/utils.DataResponse'
       summary: Get all users
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: User change profile information.
+      parameters:
+      - description: request body for editing user's profile
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.EditUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Edit profile.
       tags:
       - users
   /users/avatars/{id}:
@@ -426,6 +624,68 @@ paths:
       summary: Get Coin.
       tags:
       - users
+  /users/favorites:
+    get:
+      consumes:
+      - application/json
+      description: Count Favorite of user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Count Fav
+      tags:
+      - favorites
+  /users/favorites/{receiverId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove Favorite other user.
+      parameters:
+      - description: user id that you want to like.
+        in: path
+        name: receiverId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: UnFavorite user
+      tags:
+      - favorites
+    post:
+      consumes:
+      - application/json
+      description: Favorite other user.
+      parameters:
+      - description: user id that you want to like.
+        in: path
+        name: receiverId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Favorite user
+      tags:
+      - favorites
   /users/forgot-password:
     put:
       consumes:

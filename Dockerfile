@@ -20,7 +20,8 @@ RUN upx -9 /builder/main
 FROM gcr.io/distroless/static:latest
 WORKDIR /app
 COPY --from=base /builder/main main
-COPY /verifyFile.html verifyFile.html
+COPY /reset-password.html reset-password.html
+COPY /verify-mail.html verify-mail.html
 
 ENV PORT=8080
 

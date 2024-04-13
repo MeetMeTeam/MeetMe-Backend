@@ -4,7 +4,6 @@ import (
 	"errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"meetme/be/actions/repositories"
 	repoInt "meetme/be/actions/repositories/interfaces"
 	"meetme/be/actions/services/interfaces"
@@ -13,13 +12,15 @@ import (
 )
 
 type friendService struct {
-	friendRepo repositories.FriendRepository
-	userRepo   repositories.UserRepository
+	friendRepo    repositories.FriendRepository
+	userRepo      repositories.UserRepository
+	inventoryRepo repositories.InventoryRepository
+	avatarRepo    repositories.AvatarRepository
 	//friendRepo repositories.FriendshipRepository
 }
 
-func NewFriendService(friendRepo repositories.FriendRepository, userRepo repositories.UserRepository) friendService {
-	return friendService{friendRepo: friendRepo, userRepo: userRepo}
+func NewFriendService(friendRepo repositories.FriendRepository, userRepo repositories.UserRepository, avatarRepo repositories.AvatarRepository, inventoryRepo repositories.InventoryRepository) friendService {
+	return friendService{friendRepo: friendRepo, userRepo: userRepo, avatarRepo: avatarRepo, inventoryRepo: inventoryRepo}
 }
 
 func (s friendService) InviteFriend(token string, request interfaces.InviteRequest) (interface{}, error) {
@@ -65,13 +66,13 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 
 	createUser, err := s.friendRepo.Create(newUser)
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
 	user, err := s.userRepo.GetById(createUser.Receiver)
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 	response := utils.DataResponse{
@@ -95,7 +96,7 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 	}
 	receiver, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
-		log.Println("User not found.")
+
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewBadRequestError("User not found.")
 		}
@@ -105,7 +106,7 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 	results, err := s.friendRepo.GetByReceiverId(receiver.ID, "PENDING")
 
 	if err != nil {
-		log.Println("Friend invitation is empty")
+
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return utils.DataResponse{
 				Data:    []int{},
@@ -125,14 +126,27 @@ func (s friendService) CheckFriendInvite(token string) (interface{}, error) {
 	for _, result := range results {
 		user, err := s.userRepo.GetById(result.Sender)
 		if err != nil {
-			log.Println(err)
+
 			return nil, errs.NewInternalError(err.Error())
 		}
+		inventory, err := s.inventoryRepo.GetById(user.Inventory)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError(err.Error())
+			}
+		}
 
+		avatar, err := s.avatarRepo.GetById(inventory.Item)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError(err.Error())
+			}
+		}
 		userResponse := interfaces.CheckInviteResponse{
 			InviteId: result.ID,
 			Username: user.Username,
 			Email:    user.Email,
+			Image:    avatar.Preview,
 		}
 		userResponses = append(userResponses, userResponse)
 	}
@@ -159,7 +173,6 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 
 	id, err := primitive.ObjectIDFromHex(inviteId)
 	if err != nil {
-		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 	isInvite, err := s.friendRepo.GetByIdAndReceiverIdAndStatus(id, user.ID, "PENDING")
@@ -174,14 +187,11 @@ func (s friendService) AcceptInvitation(token string, inviteId string) (interfac
 
 	result, err := s.friendRepo.UpdateStatus(primitive.NilObjectID, id)
 	if err != nil {
-		log.Println("Update Status")
 		return nil, errs.NewInternalError(err.Error())
 	}
 
-	log.Print(result)
 	sender, err := s.userRepo.GetById(result[0].Sender)
 	if err != nil {
-		log.Println("get user 1")
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewBadRequestError("User not found.")
 		}
@@ -224,7 +234,7 @@ func (s friendService) AcceptAllInvitations(token string) (interface{}, error) {
 
 	results, err := s.friendRepo.UpdateStatus(user.ID, primitive.NilObjectID)
 	if err != nil {
-		log.Println("Update Status")
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -232,7 +242,6 @@ func (s friendService) AcceptAllInvitations(token string) (interface{}, error) {
 	for _, result := range results {
 		sender, err := s.userRepo.GetById(result.Sender)
 		if err != nil {
-			log.Println("get user 1")
 			if errors.Is(err, mongo.ErrNoDocuments) {
 				return nil, errs.NewBadRequestError("User not found.")
 			}
@@ -267,7 +276,7 @@ func (s friendService) RejectInvitation(token string, inviteId string) (interfac
 
 	id, err := primitive.ObjectIDFromHex(inviteId)
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -283,7 +292,7 @@ func (s friendService) RejectInvitation(token string, inviteId string) (interfac
 
 	err = s.friendRepo.Delete(primitive.NilObjectID, id, "PENDING")
 	if err != nil {
-		log.Println(err)
+
 		return nil, errs.NewInternalError(err.Error())
 	}
 	return utils.ErrorResponse{
@@ -316,7 +325,6 @@ func (s friendService) RejectAllInvitation(token string) (interface{}, error) {
 
 	err = s.friendRepo.Delete(user.ID, primitive.NilObjectID, "PENDING")
 	if err != nil {
-		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 	return utils.ErrorResponse{
@@ -331,7 +339,6 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 	}
 	user, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
-		log.Println("User not found.")
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewBadRequestError("User not found.")
 		}
@@ -341,7 +348,6 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 	results, err := s.friendRepo.GetByUserId(user.ID, "FRIEND")
 
 	if err != nil {
-		log.Println("Friend list is empty")
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return utils.DataResponse{
 				Data:    []int{},
@@ -368,8 +374,21 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 
 		user, err := s.userRepo.GetById(id)
 		if err != nil {
-			log.Println(err)
 			return nil, errs.NewInternalError(err.Error())
+		}
+
+		inventory, err := s.inventoryRepo.GetById(user.Inventory)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError(err.Error())
+			}
+		}
+
+		avatar, err := s.avatarRepo.GetById(inventory.Item)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError(err.Error())
+			}
 		}
 
 		userResponse := interfaces.ListUserResponse{
@@ -378,6 +397,7 @@ func (s friendService) GetFriend(token string) (interface{}, error) {
 			DisplayName: user.DisplayName,
 			Birthday:    user.Birthday,
 			Email:       user.Email,
+			Image:       avatar.Preview,
 		}
 		userResponses = append(userResponses, userResponse)
 	}
@@ -404,7 +424,6 @@ func (s friendService) DeleteFriend(token string, id string) (interface{}, error
 
 	friendId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 
@@ -420,7 +439,6 @@ func (s friendService) DeleteFriend(token string, id string) (interface{}, error
 
 	err = s.friendRepo.Delete(primitive.NilObjectID, isInvite.ID, "FRIEND")
 	if err != nil {
-		log.Println(err)
 		return nil, errs.NewInternalError(err.Error())
 	}
 
