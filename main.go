@@ -93,8 +93,9 @@ func main() {
 	inventoryApi.POST("", inventoryHandler.AddItem)
 
 	userApi := api.Group("/users")
-	//userApi.GET("", userHandler.GetAllUser)
+
 	userApi.PUT("", userHandler.EditUserInfo)
+  
 	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
 	userApi.GET("/coins", userHandler.GetCoins)
