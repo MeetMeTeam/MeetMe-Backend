@@ -291,8 +291,9 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		Title:    "Reset Password",
 		Button:   "Reset Your Password",
 		URL:      os.Getenv("APP_URL") + "/reset-password/" + t,
+		Web:	  os.Getenv("APP_URL")
 	}
-	r := config.NewRequest([]string{user.Email}, "[meetmeplay] Reset Your Password", "")
+	r := config.NewRequest([]string{user.Email}, "[meetmefun] Reset Your Password", "")
 	err = r.ParseTemplate("reset-password.html", templateData)
 
 	if err != nil {
@@ -616,8 +617,9 @@ func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
 		Button:   "Verify Your Email",
 		OTP:      verifyData.Code,
 		RefCode:  verifyData.RefCode,
+		Web:	  os.Getenv("APP_URL")
 	}
-	r := config.NewRequest([]string{email.Email}, "[meetmeplay] Verify Your Account", "")
+	r := config.NewRequest([]string{email.Email}, "[meetmefun] Verify Your Account", "")
 	err = r.ParseTemplate("verify-mail.html", templateData)
 
 	if err != nil {
