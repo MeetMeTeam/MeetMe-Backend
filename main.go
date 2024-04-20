@@ -50,6 +50,7 @@ func main() {
 	db := initDB()
 
 	avatarRepo := repositories.NewAvatarRepositoryDB(db)
+	bgRepo := repositories.NewBgRepositoryDB(db)
 	themeRepo := repositories.NewThemeRepositoryDB(db)
 	inventoryRepo := repositories.NewInventoryRepositoryDB(db)
 	userRepository := repositories.NewUserRepositoryDB(db)
@@ -58,6 +59,7 @@ func main() {
 	questionRepository := repositories.NewQuestionRepositoryDB(db)
 
 	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
+	bgService := services.NewBgService(bgRepo, userRepository, inventoryRepo)
 	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo)
 	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository)
@@ -66,6 +68,7 @@ func main() {
 	questionService := services.NewQuestionService(questionRepository)
 
 	avatarHandler := handlers.NewAvatarShopHandler(avatarService)
+	bgHandler := handlers.NewBgShopHandler(bgService)
 	themeHandler := handlers.NewThemeShopHandler(themeService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
 	userHandler := handlers.NewUserHandler(userService)
@@ -84,6 +87,10 @@ func main() {
 	avatarApi.GET("", avatarHandler.GetAvatarShop)
 	avatarApi.POST("", avatarHandler.AddAvatarToShop)
 
+	bgApi := api.Group("/backgrounds")
+	//avatarApi.GET("", avatarHandler.GetAvatarShop)
+	bgApi.POST("", bgHandler.AddBgToShop)
+
 	themeApi := api.Group("/themes")
 	themeApi.POST("", themeHandler.AddThemeToShop)
 	themeApi.GET("", themeHandler.GetThemeShop)
@@ -95,7 +102,7 @@ func main() {
 	userApi := api.Group("/users")
 
 	userApi.PUT("", userHandler.EditUserInfo)
-  
+
 	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
 	userApi.GET("/coins", userHandler.GetCoins)

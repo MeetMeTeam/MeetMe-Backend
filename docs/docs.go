@@ -48,7 +48,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Only admin qdd avatar to shop.",
+                "description": "Only admin add avatar to shop.",
                 "consumes": [
                     "application/json"
                 ],
@@ -67,6 +67,45 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/interfaces.AvatarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/backgrounds": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Only admin add bg to shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "background shop"
+                ],
+                "summary": "Add background to shop",
+                "parameters": [
+                    {
+                        "description": "request body for adding background to shop",
+                        "name": "bg",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.BgRequest"
                         }
                     }
                 ],
@@ -995,6 +1034,25 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "interfaces.BgRequest": {
+            "type": "object",
+            "required": [
+                "assets",
+                "name",
+                "price"
+            ],
+            "properties": {
+                "assets": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
                 }
             }
         },

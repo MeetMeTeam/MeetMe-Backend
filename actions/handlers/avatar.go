@@ -50,7 +50,7 @@ func (h avatarShopHandler) GetAvatarShop(c echo.Context) error {
 // AddAvatarToShop godoc
 //
 //	@Summary		Add avatar to shop
-//	@Description	Only admin qdd avatar to shop.
+//	@Description	Only admin add avatar to shop.
 //	@Tags			avatar shop
 //	@Accept			json
 //	@Produce		json

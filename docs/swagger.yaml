@@ -20,6 +20,19 @@ definitions:
     - preview
     - price
     type: object
+  interfaces.BgRequest:
+    properties:
+      assets:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    required:
+    - assets
+    - name
+    - price
+    type: object
   interfaces.EditSocial:
     properties:
       link:
@@ -157,7 +170,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Only admin qdd avatar to shop.
+      description: Only admin add avatar to shop.
       parameters:
       - description: request body for adding avatar to shop
         in: body
@@ -177,6 +190,30 @@ paths:
       summary: Add avatar to shop
       tags:
       - avatar shop
+  /backgrounds:
+    post:
+      consumes:
+      - application/json
+      description: Only admin add bg to shop.
+      parameters:
+      - description: request body for adding background to shop
+        in: body
+        name: bg
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.BgRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Add background to shop
+      tags:
+      - background shop
   /friends:
     get:
       consumes:
