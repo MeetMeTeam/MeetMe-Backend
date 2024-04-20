@@ -14,7 +14,7 @@ type Background struct {
 	Price  int    `bson:"price"`
 }
 type BgRepository interface {
-	//GetById(primitive.ObjectID) (*AvatarResponse, error)
+	GetById(primitive.ObjectID) (*BgResponse, error)
 	GetAll() ([]BgResponse, error)
 	Create(Background) (*Background, error)
 	//GetByType(string) ([]AvatarResponse, error)

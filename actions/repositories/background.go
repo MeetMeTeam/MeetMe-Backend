@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"meetme/be/actions/repositories/interfaces"
 )
@@ -39,4 +40,20 @@ func (r BgRepository) GetAll() ([]interfaces.BgResponse, error) {
 	}
 
 	return bg, nil
+}
+
+func (r BgRepository) GetById(id primitive.ObjectID) (*interfaces.BgResponse, error) {
+	var bg interfaces.BgResponse
+	filter := bson.D{{"_id", id}}
+	coll := r.db.Collection("bg_shops")
+	err := coll.FindOne(context.TODO(), filter).Decode(&bg)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// This error means your query did not match any documents.
+			return nil, err
+		}
+		panic(err)
+	}
+
+	return &bg, nil
 }

@@ -268,7 +268,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "item type that you want to add [avatar/theme]",
+                        "description": "item type that you want to add [avatar/theme/bg]",
                         "name": "item_type",
                         "in": "query",
                         "required": true

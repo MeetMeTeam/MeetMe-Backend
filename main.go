@@ -61,7 +61,7 @@ func main() {
 	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
 	bgService := services.NewBgService(bgRepo, userRepository, inventoryRepo)
 	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
-	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo)
+	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo, bgRepo)
 	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository)
 	friendService := services.NewFriendService(friendRepository, userRepository, avatarRepo, inventoryRepo)
 	favoriteService := services.NewFavoriteService(userRepository, favoriteRepository)

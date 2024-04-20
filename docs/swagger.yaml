@@ -303,7 +303,7 @@ paths:
         name: item_id
         required: true
         type: string
-      - description: item type that you want to add [avatar/theme]
+      - description: item type that you want to add [avatar/theme/bg]
         in: query
         name: item_type
         required: true
