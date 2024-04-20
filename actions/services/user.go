@@ -2,9 +2,6 @@ package services
 
 import (
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"gorm.io/gorm"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/config"
@@ -13,6 +10,10 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 
 	repoInt "meetme/be/actions/repositories/interfaces"
 
@@ -291,7 +292,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		Title:    "Reset Password",
 		Button:   "Reset Your Password",
 		URL:      os.Getenv("APP_URL") + "/reset-password/" + t,
-		Web:	  os.Getenv("APP_URL")
+		Web:      os.Getenv("APP_URL"),
 	}
 	r := config.NewRequest([]string{user.Email}, "[meetmefun] Reset Your Password", "")
 	err = r.ParseTemplate("reset-password.html", templateData)
@@ -617,7 +618,7 @@ func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
 		Button:   "Verify Your Email",
 		OTP:      verifyData.Code,
 		RefCode:  verifyData.RefCode,
-		Web:	  os.Getenv("APP_URL")
+		Web:      os.Getenv("APP_URL"),
 	}
 	r := config.NewRequest([]string{email.Email}, "[meetmefun] Verify Your Account", "")
 	err = r.ParseTemplate("verify-mail.html", templateData)
