@@ -77,7 +77,7 @@ func (s inventoryService) GetInventory(token string, itemType string) (interface
 			theme, err := s.themeRepo.GetThemeById(inventory.Item)
 			if err != nil {
 				if errors.Is(err, mongo.ErrNoDocuments) {
-					return nil, errs.NewBadRequestError("Avatar not found.")
+					return nil, errs.NewBadRequestError("Theme not found.")
 				}
 				return nil, errs.NewInternalError(err.Error())
 			}
@@ -94,6 +94,29 @@ func (s inventoryService) GetInventory(token string, itemType string) (interface
 		}
 
 		response = themeRes
+	} else if itemType == "bg" {
+		bgRes := []interfaces.BgResponse{}
+		for _, inventory := range inventories {
+
+			bg, err := s.bgRepo.GetById(inventory.Item)
+			if err != nil {
+				if errors.Is(err, mongo.ErrNoDocuments) {
+					return nil, errs.NewBadRequestError("Background not found.")
+				}
+				return nil, errs.NewInternalError(err.Error())
+			}
+
+			bgResponse := interfaces.BgResponse{
+				ID:     bg.ID.Hex(),
+				Name:   bg.Name,
+				Assets: bg.Assets,
+				Price:  bg.Price,
+			}
+			bgRes = append(bgRes, bgResponse)
+
+		}
+
+		response = bgRes
 	}
 
 	return utils.DataResponse{

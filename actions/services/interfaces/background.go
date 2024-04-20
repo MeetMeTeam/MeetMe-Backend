@@ -13,6 +13,13 @@ type BgShopResponse struct {
 	Price   int    `json:"price"`
 	IsOwner bool   `json:"isOwner"`
 }
+
+type BgResponse struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Assets string `json:"img"`
+	Price  int    `json:"price"`
+}
 type BgService interface {
 	GetBgShops(string) (interface{}, error)
 	AddBgShop(string, BgRequest) (interface{}, error)

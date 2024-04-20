@@ -231,7 +231,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item type that you want to get inventory [avatar/theme]",
+                        "description": "item type that you want to get inventory [avatar/theme/bg]",
                         "name": "item_type",
                         "in": "query",
                         "required": true

@@ -23,7 +23,7 @@ func NewInventoryHandler(inventoryService svInter.InventoryService) inventoryHan
 //	@Tags			inventories
 //	@Accept			json
 //	@Produce		json
-//	@Param			item_type	query	string	true	"item type that you want to get inventory [avatar/theme]"
+//	@Param			item_type	query	string	true	"item type that you want to get inventory [avatar/theme/bg]"
 //	@Success		200		{object}	utils.DataResponse
 //	@Router			/inventories [get]
 //
