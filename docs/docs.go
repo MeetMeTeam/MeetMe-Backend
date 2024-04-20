@@ -81,6 +81,32 @@ const docTemplate = `{
             }
         },
         "/backgrounds": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get background's shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "background shop"
+                ],
+                "summary": "Get background's shop.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {

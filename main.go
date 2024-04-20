@@ -88,7 +88,7 @@ func main() {
 	avatarApi.POST("", avatarHandler.AddAvatarToShop)
 
 	bgApi := api.Group("/backgrounds")
-	//avatarApi.GET("", avatarHandler.GetAvatarShop)
+	bgApi.GET("", bgHandler.GetBgShop)
 	bgApi.POST("", bgHandler.AddBgToShop)
 
 	themeApi := api.Group("/themes")

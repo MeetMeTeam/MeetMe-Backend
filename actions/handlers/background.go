@@ -61,3 +61,34 @@ func (h bgShopHandler) AddBgToShop(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, avatars)
 }
+
+// GetBgShop godoc
+//
+//	@Summary		Get background's shop.
+//	@Description	Get background's shop.
+//	@Tags			background shop
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	utils.DataResponse
+//	@Router			/backgrounds [get]
+//
+// @Security BearerAuth
+func (h bgShopHandler) GetBgShop(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+
+	themes, err := h.bgService.GetBgShops(token)
+	if err != nil {
+
+		appErr, ok := err.(errs.AppError)
+		if ok {
+			return c.JSON(appErr.Code, utils.ErrorResponse{
+				Message: appErr.Message,
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, themes)
+}

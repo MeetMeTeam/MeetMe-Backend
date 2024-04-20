@@ -15,7 +15,7 @@ type Background struct {
 }
 type BgRepository interface {
 	//GetById(primitive.ObjectID) (*AvatarResponse, error)
-	//GetAll() ([]AvatarResponse, error)
+	GetAll() ([]BgResponse, error)
 	Create(Background) (*Background, error)
 	//GetByType(string) ([]AvatarResponse, error)
 }

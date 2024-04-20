@@ -191,6 +191,22 @@ paths:
       tags:
       - avatar shop
   /backgrounds:
+    get:
+      consumes:
+      - application/json
+      description: Get background's shop.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get background's shop.
+      tags:
+      - background shop
     post:
       consumes:
       - application/json
