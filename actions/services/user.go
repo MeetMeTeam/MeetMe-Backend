@@ -37,12 +37,6 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-//type verificationData struct {
-//	Email     string    `json:"email"`
-//	Code      string    `json:"code"`
-//	ExpiredAt time.Time `json:"expiredAt"`
-//}
-
 func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository, favRepo repositories.FavoriteRepository) interfaces.UserService {
 	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo, favRepo: favRepo}
 }
@@ -639,6 +633,61 @@ func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
 			ExpiredAt: verifyData.ExpiredAt,
 		},
 		Message: "Send mail to verify success.",
+	}, nil
+
+}
+
+func (s userService) ChangeBackground(token string, itemId string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	id, err := primitive.ObjectIDFromHex(itemId)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	var updateDefault *repoInt.InventoryResponse
+	inventory, err := s.inventoryRepo.GetByTypeAndUserIdAndDefault("bg", user.ID, true)
+	if inventory.Item == id {
+		return nil, errs.NewBadRequestError("This item id is already default.")
+	}
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+
+			updateDefault, err = s.inventoryRepo.UpdateDefaultByUserIdAndItemIdAndType(user.ID, id, "bg", true)
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+
+		}
+		return nil, errs.NewInternalError(err.Error())
+	} else {
+		updateDefault, err = s.inventoryRepo.UpdateDefaultByUserIdAndItemIdAndType(user.ID, inventory.Item, "bg", false)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		updateDefault, err = s.inventoryRepo.UpdateDefaultByUserIdAndItemIdAndType(user.ID, id, "bg", true)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+	}
+
+	return utils.DataResponse{
+		Data: interfaces.ChangeBgResponse{
+			ItemId: updateDefault.Item.Hex(),
+		},
+		Message: "Change background from " + inventory.Item.Hex() + " to " + updateDefault.Item.Hex() + " success.",
 	}, nil
 
 }

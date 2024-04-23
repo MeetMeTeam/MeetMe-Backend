@@ -660,6 +660,29 @@ paths:
       summary: Change Avatar.
       tags:
       - users
+  /users/backgrounds/{id}:
+    put:
+      consumes:
+      - application/json
+      description: User change background of avatar.
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Change Background.
+      tags:
+      - users
   /users/coins:
     get:
       consumes:

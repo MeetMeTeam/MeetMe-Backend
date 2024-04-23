@@ -76,7 +76,7 @@ type TemplateEmailData struct {
 	Button   string
 	OTP      string
 	RefCode  string
-	Web 	 string
+	Web      string
 }
 
 type EditUserRequest struct {
@@ -106,7 +106,8 @@ type UserService interface {
 	ResetPassword(string, Password) (interface{}, error)
 	GetCoin(string) (interface{}, error)
 	GetAvatars(string, string) (interface{}, error)
-	ChangeAvatar(string, string) (interface{}, error)
 	EditUser(EditUserRequest, string) (interface{}, error)
 	VerifyEmail(Email) (interface{}, error)
+	ChangeAvatar(string, string) (interface{}, error)
+	ChangeBackground(string, string) (interface{}, error)
 }

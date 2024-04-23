@@ -1,6 +1,7 @@
 package interfaces
 
-type InventoryResponse struct {
+type ChangeBgResponse struct {
+	ItemId string `json:"item_id"`
 }
 type InventoryService interface {
 	GetInventory(string, string) (interface{}, error)
