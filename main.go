@@ -62,7 +62,7 @@ func main() {
 	bgService := services.NewBgService(bgRepo, userRepository, inventoryRepo)
 	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo, bgRepo)
-	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository)
+	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository, bgRepo)
 	friendService := services.NewFriendService(friendRepository, userRepository, avatarRepo, inventoryRepo)
 	favoriteService := services.NewFavoriteService(userRepository, favoriteRepository)
 	questionService := services.NewQuestionService(questionRepository)
@@ -108,6 +108,7 @@ func main() {
 	userApi.GET("/coins", userHandler.GetCoins)
 	userApi.GET("/avatars/:userId", userHandler.GetAvatarsByUserId)
 	userApi.PUT("/avatars/:itemId", userHandler.ChangeAvatar)
+	userApi.GET("/backgrounds", userHandler.GetBgByUserId)
 	userApi.PUT("/backgrounds/:itemId", userHandler.ChangeBg)
 
 	inviteApi := api.Group("/invitations")

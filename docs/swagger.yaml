@@ -660,6 +660,23 @@ paths:
       summary: Change Avatar.
       tags:
       - users
+  /users/backgrounds:
+    get:
+      consumes:
+      - application/json
+      description: Get Background that user set default.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Background.
+      tags:
+      - users
   /users/backgrounds/{id}:
     put:
       consumes:

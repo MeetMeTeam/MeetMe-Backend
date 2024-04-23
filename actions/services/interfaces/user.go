@@ -110,4 +110,5 @@ type UserService interface {
 	VerifyEmail(Email) (interface{}, error)
 	ChangeAvatar(string, string) (interface{}, error)
 	ChangeBackground(string, string) (interface{}, error)
+	GetBg(string) (interface{}, error)
 }

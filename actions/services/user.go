@@ -28,6 +28,7 @@ type userService struct {
 	inventoryRepo repositories.InventoryRepository
 	avatarRepo    repositories.AvatarRepository
 	favRepo       repositories.FavoriteRepository
+	bgRepo        repositories.BgRepository
 }
 
 type jwtCustomClaims struct {
@@ -37,8 +38,8 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository, favRepo repositories.FavoriteRepository) interfaces.UserService {
-	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo, favRepo: favRepo}
+func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository, favRepo repositories.FavoriteRepository, bgRepo repositories.BgRepository) interfaces.UserService {
+	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo, favRepo: favRepo, bgRepo: bgRepo}
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
@@ -690,4 +691,44 @@ func (s userService) ChangeBackground(token string, itemId string) (interface{},
 		Message: "Change background from " + inventory.Item.Hex() + " to " + updateDefault.Item.Hex() + " success.",
 	}, nil
 
+}
+
+func (s userService) GetBg(token string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	bg, err := s.inventoryRepo.GetByTypeAndUserIdAndDefault("bg", user.ID, true)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Do not have background default.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	bgResult, err := s.bgRepo.GetById(bg.Item)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Background not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+	return utils.DataResponse{
+		Data: interfaces.BgResponse{
+			ID:     bgResult.ID.Hex(),
+			Name:   bgResult.Name,
+			Assets: bgResult.Assets,
+			Price:  bgResult.Price,
+		},
+		Message: "Get background of " + user.Username + " success.",
+	}, nil
 }
