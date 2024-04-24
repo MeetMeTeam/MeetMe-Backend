@@ -710,7 +710,11 @@ func (s userService) GetBg(token string) (interface{}, error) {
 	bg, err := s.inventoryRepo.GetByTypeAndUserIdAndDefault("bg", user.ID, true)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewBadRequestError("Do not have background default.")
+			return utils.DataResponse{
+				Data: interfaces.DefaultLink{
+					Link: "https://firebasestorage.googleapis.com/v0/b/meetme-1815f.appspot.com/o/background%2FbgShop.png?alt=media&token=2811d8e3-6ceb-4a41-ad2d-94a511ab9cb9",
+				},
+				Message: "Send default background"}, nil
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}

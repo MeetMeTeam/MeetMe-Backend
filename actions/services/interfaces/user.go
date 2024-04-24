@@ -95,6 +95,9 @@ type OTPResponse struct {
 	RefCode   string    `json:"refCode"`
 	ExpiredAt time.Time `json:"expiredAt"`
 }
+type DefaultLink struct {
+	Link string `json:"link"`
+}
 
 type UserService interface {
 	GetUsers() (interface{}, error)
