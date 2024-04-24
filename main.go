@@ -108,7 +108,7 @@ func main() {
 	userApi.GET("/coins", userHandler.GetCoins)
 	userApi.GET("/avatars/:userId", userHandler.GetAvatarsByUserId)
 	userApi.PUT("/avatars/:itemId", userHandler.ChangeAvatar)
-	userApi.GET("/backgrounds", userHandler.GetBgByUserId)
+	userApi.GET("/backgrounds/:userId", userHandler.GetBgByUserId)
 	userApi.PUT("/backgrounds/:itemId", userHandler.ChangeBg)
 
 	inviteApi := api.Group("/invitations")

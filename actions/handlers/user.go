@@ -360,10 +360,10 @@ func (h userHandler) ChangeAvatar(c echo.Context) error {
 //
 // @Security BearerAuth
 func (h userHandler) GetBgByUserId(c echo.Context) error {
-
+	id := c.Param("userId")
 	token := c.Request().Header.Get("Authorization")
 
-	users, err := h.userService.GetBg(token)
+	users, err := h.userService.GetBg(token, id)
 	if err != nil {
 
 		appErr, ok := err.(errs.AppError)

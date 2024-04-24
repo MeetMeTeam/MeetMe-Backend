@@ -693,13 +693,17 @@ func (s userService) ChangeBackground(token string, itemId string) (interface{},
 
 }
 
-func (s userService) GetBg(token string) (interface{}, error) {
-	email, err := utils.IsTokenValid(token)
+func (s userService) GetBg(token string, id string) (interface{}, error) {
+	_, err := utils.IsTokenValid(token)
 	if err != nil {
 		return nil, err
 	}
+	userId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
 
-	user, err := s.userRepo.GetByEmail(email.Email)
+		return nil, errs.NewInternalError(err.Error())
+	}
+	user, err := s.userRepo.GetById(userId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.NewBadRequestError("User not found.")
