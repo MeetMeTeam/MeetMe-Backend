@@ -9,7 +9,7 @@ type BgRequest struct {
 type BgShopResponse struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
-	Assets  string `json:"img"`
+	Assets  string `json:"preview"`
 	Price   int    `json:"price"`
 	IsOwner bool   `json:"isOwner"`
 }
