@@ -17,7 +17,7 @@ type BgShopResponse struct {
 type BgResponse struct {
 	ID     string `json:"id"`
 	Name   string `json:"name"`
-	Assets string `json:"img"`
+	Assets string `json:"preview"`
 	Price  int    `json:"price"`
 }
 type BgService interface {
