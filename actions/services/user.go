@@ -6,6 +6,7 @@ import (
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/config"
 	"meetme/be/errs"
+	"net/mail"
 	"os"
 	"reflect"
 	"strings"
@@ -114,7 +115,8 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	var user *repoInt.UserResponse
 	var err error
-	if strings.Contains(request.Email, "@") {
+	_, err = mail.ParseAddress(request.Email)
+	if err == nil {
 		user, err = s.userRepo.GetByEmail(request.Email)
 	} else {
 		user, err = s.userRepo.GetByUsername(request.Email)
