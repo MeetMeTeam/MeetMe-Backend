@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/config"
@@ -660,9 +661,14 @@ func (s userService) ChangeBackground(token string, itemId string) (interface{},
 
 	var updateDefault *repoInt.InventoryResponse
 	inventory, err := s.inventoryRepo.GetByTypeAndUserIdAndDefault("bg", user.ID, true)
-	if inventory.Item == id {
-		return nil, errs.NewBadRequestError("This item id is already default.")
+	fmt.Println(inventory)
+
+	if inventory != nil {
+		if inventory.Item == id {
+			return nil, errs.NewBadRequestError("This item id is already default.")
+		}
 	}
+
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 
@@ -702,7 +708,6 @@ func (s userService) GetBg(token string, id string) (interface{}, error) {
 	}
 	userId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-
 		return nil, errs.NewInternalError(err.Error())
 	}
 	user, err := s.userRepo.GetById(userId)
@@ -716,13 +721,27 @@ func (s userService) GetBg(token string, id string) (interface{}, error) {
 	bg, err := s.inventoryRepo.GetByTypeAndUserIdAndDefault("bg", user.ID, true)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return utils.DataResponse{
-				Data: interfaces.DefaultLink{
-					Link: "https://firebasestorage.googleapis.com/v0/b/meetme-1815f.appspot.com/o/background%2FbgShop.png?alt=media&token=2811d8e3-6ceb-4a41-ad2d-94a511ab9cb9",
-				},
-				Message: "Send default background"}, nil
+			itemId, err := primitive.ObjectIDFromHex("662c8d385d244863126b6970")
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+			_, err = s.inventoryRepo.Create(user.ID, itemId, "bg")
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+
+			bg, err = s.inventoryRepo.UpdateDefaultByUserIdAndItemIdAndType(user.ID, itemId, "bg", true)
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+			//return utils.DataResponse{
+			//	Data: interfaces.DefaultLink{
+			//		Link: "https://firebasestorage.googleapis.com/v0/b/meetme-1815f.appspot.com/o/background%2FbgShop.png?alt=media&token=2811d8e3-6ceb-4a41-ad2d-94a511ab9cb9",
+			//	},
+			//	Message: "Send default background"}, nil
+		} else {
+			return nil, errs.NewInternalError(err.Error())
 		}
-		return nil, errs.NewInternalError(err.Error())
 	}
 
 	bgResult, err := s.bgRepo.GetById(bg.Item)
