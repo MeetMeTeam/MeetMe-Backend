@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"meetme/be/actions/repositories/interfaces"
 )
 
@@ -28,9 +29,10 @@ func (r BgRepository) Create(request interfaces.Background) (*interfaces.Backgro
 }
 
 func (r BgRepository) GetAll() ([]interfaces.BgResponse, error) {
+	opts := options.Find().SetSort(bson.D{{"price", 1}})
 	filter := bson.D{}
 	coll := r.db.Collection("bg_shops")
-	cursor, err := coll.Find(context.TODO(), filter)
+	cursor, err := coll.Find(context.TODO(), filter, opts)
 	if err != nil {
 		panic(err)
 	}
