@@ -15,10 +15,11 @@ type inventoryService struct {
 	userRepo      repositories.UserRepository
 	avatarRepo    repositories.AvatarRepository
 	themeRepo     repositories.ThemeRepository
+	bgRepo        repositories.BgRepository
 }
 
-func NewInventoryService(inventoryRepo repositories.InventoryRepository, userRepo repositories.UserRepository, avatarRepo repositories.AvatarRepository, themeRepo repositories.ThemeRepository) interfaces.InventoryService {
-	return inventoryService{inventoryRepo: inventoryRepo, userRepo: userRepo, avatarRepo: avatarRepo, themeRepo: themeRepo}
+func NewInventoryService(inventoryRepo repositories.InventoryRepository, userRepo repositories.UserRepository, avatarRepo repositories.AvatarRepository, themeRepo repositories.ThemeRepository, bgRepo repositories.BgRepository) interfaces.InventoryService {
+	return inventoryService{inventoryRepo: inventoryRepo, userRepo: userRepo, avatarRepo: avatarRepo, themeRepo: themeRepo, bgRepo: bgRepo}
 }
 
 func (s inventoryService) GetInventory(token string, itemType string) (interface{}, error) {
@@ -76,7 +77,7 @@ func (s inventoryService) GetInventory(token string, itemType string) (interface
 			theme, err := s.themeRepo.GetThemeById(inventory.Item)
 			if err != nil {
 				if errors.Is(err, mongo.ErrNoDocuments) {
-					return nil, errs.NewBadRequestError("Avatar not found.")
+					return nil, errs.NewBadRequestError("Theme not found.")
 				}
 				return nil, errs.NewInternalError(err.Error())
 			}
@@ -93,6 +94,29 @@ func (s inventoryService) GetInventory(token string, itemType string) (interface
 		}
 
 		response = themeRes
+	} else if itemType == "bg" {
+		bgRes := []interfaces.BgResponse{}
+		for _, inventory := range inventories {
+
+			bg, err := s.bgRepo.GetById(inventory.Item)
+			if err != nil {
+				if errors.Is(err, mongo.ErrNoDocuments) {
+					return nil, errs.NewBadRequestError("Background not found.")
+				}
+				return nil, errs.NewInternalError(err.Error())
+			}
+
+			bgResponse := interfaces.BgResponse{
+				ID:     bg.ID.Hex(),
+				Name:   bg.Name,
+				Assets: bg.Assets,
+				Price:  bg.Price,
+			}
+			bgRes = append(bgRes, bgResponse)
+
+		}
+
+		response = bgRes
 	}
 
 	return utils.DataResponse{
@@ -123,7 +147,9 @@ func (s inventoryService) AddItem(token string, id string, itemType string) (int
 	if err != nil {
 		return nil, errs.NewInternalError(err.Error())
 	}
-	updateCoin := 0
+	var updateCoin, price int
+	var name string
+
 	if itemType == "avatar" {
 		items, err := s.avatarRepo.GetById(itemId)
 		if err != nil {
@@ -133,14 +159,9 @@ func (s inventoryService) AddItem(token string, id string, itemType string) (int
 			return nil, errs.NewInternalError(err.Error())
 		}
 
-		isExist, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, itemId)
-		if isExist != nil {
-			return nil, errs.NewBadRequestError(items.Name + " is exist in your inventory.")
-		}
-		if items.Price > user.Coin {
-			return nil, errs.NewBadRequestError("Your coin not enough.")
-		}
-		updateCoin = user.Coin - items.Price
+		price = items.Price
+		name = items.Name
+
 	} else if itemType == "theme" {
 		items, err := s.themeRepo.GetThemeById(itemId)
 		if err != nil {
@@ -150,17 +171,32 @@ func (s inventoryService) AddItem(token string, id string, itemType string) (int
 			return nil, errs.NewInternalError(err.Error())
 		}
 
-		isExist, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, itemId)
-		if isExist != nil {
-			return nil, errs.NewBadRequestError(items.Name + " is exist in your inventory.")
+		price = items.Price
+		name = items.Name
+
+	} else if itemType == "bg" {
+		items, err := s.bgRepo.GetById(itemId)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError("Background not found.")
+			}
+			return nil, errs.NewInternalError(err.Error())
 		}
-		if items.Price > user.Coin {
-			return nil, errs.NewBadRequestError("Your coin not enough.")
-		}
-		updateCoin = user.Coin - items.Price
+		price = items.Price
+		name = items.Name
+
 	} else {
 		return nil, errs.NewBadRequestError("Check item type again.")
 	}
+
+	isExist, err := s.inventoryRepo.GetByUserIdAndItemId(user.ID, itemId)
+	if isExist != nil {
+		return nil, errs.NewBadRequestError(name + " is exist in your inventory.")
+	}
+	if price > user.Coin {
+		return nil, errs.NewBadRequestError("Your coin not enough.")
+	}
+	updateCoin = user.Coin - price
 
 	result, err := s.inventoryRepo.Create(user.ID, itemId, itemType)
 	if err != nil {
@@ -174,6 +210,6 @@ func (s inventoryService) AddItem(token string, id string, itemType string) (int
 
 	return utils.DataResponse{
 		Data:    result,
-		Message: "Add item: " + result.Item.Hex() + " to inventory success.",
+		Message: "[" + result.Type + "] Add item: " + result.Item.Hex() + " to inventory success.",
 	}, nil
 }

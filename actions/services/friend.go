@@ -9,6 +9,7 @@ import (
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/errs"
 	"meetme/be/utils"
+	"net/mail"
 )
 
 type friendService struct {
@@ -30,10 +31,6 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 		return nil, err
 	}
 
-	if email.Email == request.TargetMailAddress {
-		return nil, errs.NewBadRequestError("Can not add yourself.")
-	}
-
 	sender, err := s.userRepo.GetByEmail(email.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -41,12 +38,31 @@ func (s friendService) InviteFriend(token string, request interfaces.InviteReque
 		}
 		return nil, errs.NewInternalError(err.Error())
 	}
-	receiver, err := s.userRepo.GetByEmail(request.TargetMailAddress)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errs.NewBadRequestError("User not found.")
+
+	var receiver *repoInt.UserResponse
+	_, err = mail.ParseAddress(request.TargetMailAddress)
+	if err == nil {
+		receiver, err = s.userRepo.GetByEmail(request.TargetMailAddress)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError("User not found.")
+			}
+			return nil, errs.NewInternalError(err.Error())
 		}
-		return nil, errs.NewInternalError(err.Error())
+		if email.Email == request.TargetMailAddress {
+			return nil, errs.NewBadRequestError("Can not add yourself.")
+		}
+	} else {
+		receiver, err = s.userRepo.GetByUsername(request.TargetMailAddress)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNoDocuments) {
+				return nil, errs.NewBadRequestError("User not found.")
+			}
+			return nil, errs.NewInternalError(err.Error())
+		}
+		if sender.Username == request.TargetMailAddress {
+			return nil, errs.NewBadRequestError("Can not add yourself.")
+		}
 	}
 
 	isInvite, err := s.friendRepo.GetByReceiverIdAndSenderId(receiver.ID, sender.ID)

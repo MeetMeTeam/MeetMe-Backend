@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"meetme/be/actions/repositories/interfaces"
 )
 
@@ -53,9 +54,10 @@ func (r AvatarRepository) GetByType(itemType string) ([]interfaces.AvatarRespons
 }
 
 func (r AvatarRepository) GetAll() ([]interfaces.AvatarResponse, error) {
+	opts := options.Find().SetSort(bson.D{{"price", 1}})
 	filter := bson.D{}
 	coll := r.db.Collection("avatar_shops")
-	cursor, err := coll.Find(context.TODO(), filter)
+	cursor, err := coll.Find(context.TODO(), filter, opts)
 	if err != nil {
 		panic(err)
 	}

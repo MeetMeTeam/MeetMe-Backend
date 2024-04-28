@@ -50,6 +50,7 @@ func main() {
 	db := initDB()
 
 	avatarRepo := repositories.NewAvatarRepositoryDB(db)
+	bgRepo := repositories.NewBgRepositoryDB(db)
 	themeRepo := repositories.NewThemeRepositoryDB(db)
 	inventoryRepo := repositories.NewInventoryRepositoryDB(db)
 	userRepository := repositories.NewUserRepositoryDB(db)
@@ -58,14 +59,16 @@ func main() {
 	questionRepository := repositories.NewQuestionRepositoryDB(db)
 
 	avatarService := services.NewAvatarService(avatarRepo, userRepository, inventoryRepo)
+	bgService := services.NewBgService(bgRepo, userRepository, inventoryRepo)
 	themeService := services.NewThemeService(themeRepo, userRepository, inventoryRepo)
-	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo)
-	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository)
+	inventoryService := services.NewInventoryService(inventoryRepo, userRepository, avatarRepo, themeRepo, bgRepo)
+	userService := services.NewUserService(userRepository, inventoryRepo, avatarRepo, favoriteRepository, bgRepo)
 	friendService := services.NewFriendService(friendRepository, userRepository, avatarRepo, inventoryRepo)
 	favoriteService := services.NewFavoriteService(userRepository, favoriteRepository)
 	questionService := services.NewQuestionService(questionRepository)
 
 	avatarHandler := handlers.NewAvatarShopHandler(avatarService)
+	bgHandler := handlers.NewBgShopHandler(bgService)
 	themeHandler := handlers.NewThemeShopHandler(themeService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
 	userHandler := handlers.NewUserHandler(userService)
@@ -84,6 +87,10 @@ func main() {
 	avatarApi.GET("", avatarHandler.GetAvatarShop)
 	avatarApi.POST("", avatarHandler.AddAvatarToShop)
 
+	bgApi := api.Group("/backgrounds")
+	bgApi.GET("", bgHandler.GetBgShop)
+	bgApi.POST("", bgHandler.AddBgToShop)
+
 	themeApi := api.Group("/themes")
 	themeApi.POST("", themeHandler.AddThemeToShop)
 	themeApi.GET("", themeHandler.GetThemeShop)
@@ -95,12 +102,14 @@ func main() {
 	userApi := api.Group("/users")
 
 	userApi.PUT("", userHandler.EditUserInfo)
-  
+
 	userApi.PUT("/forgot-password", userHandler.SendMailForResetPassword)
 	userApi.PUT("/reset-password", userHandler.ChangePassword)
 	userApi.GET("/coins", userHandler.GetCoins)
 	userApi.GET("/avatars/:userId", userHandler.GetAvatarsByUserId)
 	userApi.PUT("/avatars/:itemId", userHandler.ChangeAvatar)
+	userApi.GET("/backgrounds/:userId", userHandler.GetBgByUserId)
+	userApi.PUT("/backgrounds/:itemId", userHandler.ChangeBg)
 
 	inviteApi := api.Group("/invitations")
 	inviteApi.POST("", friendHandler.InviteFriend)

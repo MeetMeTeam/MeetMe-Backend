@@ -76,7 +76,7 @@ type TemplateEmailData struct {
 	Button   string
 	OTP      string
 	RefCode  string
-	Web 	 string
+	Web      string
 }
 
 type EditUserRequest struct {
@@ -95,6 +95,9 @@ type OTPResponse struct {
 	RefCode   string    `json:"refCode"`
 	ExpiredAt time.Time `json:"expiredAt"`
 }
+type DefaultLink struct {
+	Link string `json:"link"`
+}
 
 type UserService interface {
 	GetUsers() (interface{}, error)
@@ -106,7 +109,9 @@ type UserService interface {
 	ResetPassword(string, Password) (interface{}, error)
 	GetCoin(string) (interface{}, error)
 	GetAvatars(string, string) (interface{}, error)
-	ChangeAvatar(string, string) (interface{}, error)
 	EditUser(EditUserRequest, string) (interface{}, error)
 	VerifyEmail(Email) (interface{}, error)
+	ChangeAvatar(string, string) (interface{}, error)
+	ChangeBackground(string, string) (interface{}, error)
+	GetBg(string, string) (interface{}, error)
 }

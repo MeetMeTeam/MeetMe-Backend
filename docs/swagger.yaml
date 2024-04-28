@@ -20,6 +20,19 @@ definitions:
     - preview
     - price
     type: object
+  interfaces.BgRequest:
+    properties:
+      assets:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    required:
+    - assets
+    - name
+    - price
+    type: object
   interfaces.EditSocial:
     properties:
       link:
@@ -157,7 +170,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Only admin qdd avatar to shop.
+      description: Only admin add avatar to shop.
       parameters:
       - description: request body for adding avatar to shop
         in: body
@@ -177,6 +190,46 @@ paths:
       summary: Add avatar to shop
       tags:
       - avatar shop
+  /backgrounds:
+    get:
+      consumes:
+      - application/json
+      description: Get background's shop.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get background's shop.
+      tags:
+      - background shop
+    post:
+      consumes:
+      - application/json
+      description: Only admin add bg to shop.
+      parameters:
+      - description: request body for adding background to shop
+        in: body
+        name: bg
+        required: true
+        schema:
+          $ref: '#/definitions/interfaces.BgRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Add background to shop
+      tags:
+      - background shop
   /friends:
     get:
       consumes:
@@ -223,7 +276,7 @@ paths:
       - application/json
       description: Get inventory by token.
       parameters:
-      - description: item type that you want to get inventory [avatar/theme]
+      - description: item type that you want to get inventory [avatar/theme/bg]
         in: query
         name: item_type
         required: true
@@ -250,7 +303,7 @@ paths:
         name: item_id
         required: true
         type: string
-      - description: item type that you want to add [avatar/theme]
+      - description: item type that you want to add [avatar/theme/bg]
         in: query
         name: item_type
         required: true
@@ -605,6 +658,46 @@ paths:
       security:
       - BearerAuth: []
       summary: Change Avatar.
+      tags:
+      - users
+  /users/backgrounds:
+    get:
+      consumes:
+      - application/json
+      description: Get Background that user set default.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Background.
+      tags:
+      - users
+  /users/backgrounds/{id}:
+    put:
+      consumes:
+      - application/json
+      description: User change background of avatar.
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.DataResponse'
+      security:
+      - BearerAuth: []
+      summary: Change Background.
       tags:
       - users
   /users/coins:

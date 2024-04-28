@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"meetme/be/actions/repositories/interfaces"
 )
 
@@ -28,9 +29,10 @@ func (r ThemeRepository) CreateTheme(request interfaces.Theme) (*interfaces.Them
 }
 
 func (r ThemeRepository) GetAllTheme() ([]interfaces.ThemeResponse, error) {
+	opts := options.Find().SetSort(bson.D{{"price", 1}})
 	filter := bson.D{}
 	coll := r.db.Collection("theme_shops")
-	cursor, err := coll.Find(context.TODO(), filter)
+	cursor, err := coll.Find(context.TODO(), filter, opts)
 	if err != nil {
 		panic(err)
 	}

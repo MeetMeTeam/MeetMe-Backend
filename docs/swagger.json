@@ -42,7 +42,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Only admin qdd avatar to shop.",
+                "description": "Only admin add avatar to shop.",
                 "consumes": [
                     "application/json"
                 ],
@@ -61,6 +61,71 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/interfaces.AvatarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/backgrounds": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get background's shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "background shop"
+                ],
+                "summary": "Get background's shop.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Only admin add bg to shop.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "background shop"
+                ],
+                "summary": "Add background to shop",
+                "parameters": [
+                    {
+                        "description": "request body for adding background to shop",
+                        "name": "bg",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interfaces.BgRequest"
                         }
                     }
                 ],
@@ -160,7 +225,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item type that you want to get inventory [avatar/theme]",
+                        "description": "item type that you want to get inventory [avatar/theme/bg]",
                         "name": "item_type",
                         "in": "query",
                         "required": true
@@ -197,7 +262,7 @@
                     },
                     {
                         "type": "string",
-                        "description": "item type that you want to add [avatar/theme]",
+                        "description": "item type that you want to add [avatar/theme/bg]",
                         "name": "item_type",
                         "in": "query",
                         "required": true
@@ -760,6 +825,71 @@
                 }
             }
         },
+        "/users/backgrounds": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Background that user set default.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get Background.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/backgrounds/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "User change background of avatar.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Change Background.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.DataResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/coins": {
             "get": {
                 "security": [
@@ -989,6 +1119,25 @@
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "interfaces.BgRequest": {
+            "type": "object",
+            "required": [
+                "assets",
+                "name",
+                "price"
+            ],
+            "properties": {
+                "assets": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
                 }
             }
         },

@@ -2,17 +2,20 @@ package services
 
 import (
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"gorm.io/gorm"
+	"fmt"
 	"meetme/be/actions/repositories"
 	"meetme/be/actions/services/interfaces"
 	"meetme/be/config"
 	"meetme/be/errs"
+	"net/mail"
 	"os"
 	"reflect"
 	"strings"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 
 	repoInt "meetme/be/actions/repositories/interfaces"
 
@@ -27,6 +30,7 @@ type userService struct {
 	inventoryRepo repositories.InventoryRepository
 	avatarRepo    repositories.AvatarRepository
 	favRepo       repositories.FavoriteRepository
+	bgRepo        repositories.BgRepository
 }
 
 type jwtCustomClaims struct {
@@ -36,14 +40,8 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-//type verificationData struct {
-//	Email     string    `json:"email"`
-//	Code      string    `json:"code"`
-//	ExpiredAt time.Time `json:"expiredAt"`
-//}
-
-func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository, favRepo repositories.FavoriteRepository) interfaces.UserService {
-	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo, favRepo: favRepo}
+func NewUserService(userRepo repositories.UserRepository, inventoryRepo repositories.InventoryRepository, avatarRepo repositories.AvatarRepository, favRepo repositories.FavoriteRepository, bgRepo repositories.BgRepository) interfaces.UserService {
+	return userService{userRepo: userRepo, inventoryRepo: inventoryRepo, avatarRepo: avatarRepo, favRepo: favRepo, bgRepo: bgRepo}
 }
 
 func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}, error) {
@@ -118,7 +116,8 @@ func (s userService) CreateUser(request interfaces.RegisterRequest) (interface{}
 func (s userService) Login(request interfaces.Login) (interface{}, error) {
 	var user *repoInt.UserResponse
 	var err error
-	if strings.Contains(request.Email, "@") {
+	_, err = mail.ParseAddress(request.Email)
+	if err == nil {
 		user, err = s.userRepo.GetByEmail(request.Email)
 	} else {
 		user, err = s.userRepo.GetByUsername(request.Email)
@@ -291,7 +290,7 @@ func (s userService) ForgotPassword(mail interfaces.Email) (interface{}, error) 
 		Title:    "Reset Password",
 		Button:   "Reset Your Password",
 		URL:      os.Getenv("APP_URL") + "/reset-password/" + t,
-		Web:	  os.Getenv("APP_URL")
+		Web:      os.Getenv("APP_URL"),
 	}
 	r := config.NewRequest([]string{user.Email}, "[meetmefun] Reset Your Password", "")
 	err = r.ParseTemplate("reset-password.html", templateData)
@@ -617,7 +616,7 @@ func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
 		Button:   "Verify Your Email",
 		OTP:      verifyData.Code,
 		RefCode:  verifyData.RefCode,
-		Web:	  os.Getenv("APP_URL")
+		Web:      os.Getenv("APP_URL"),
 	}
 	r := config.NewRequest([]string{email.Email}, "[meetmefun] Verify Your Account", "")
 	err = r.ParseTemplate("verify-mail.html", templateData)
@@ -640,4 +639,125 @@ func (s userService) VerifyEmail(email interfaces.Email) (interface{}, error) {
 		Message: "Send mail to verify success.",
 	}, nil
 
+}
+
+func (s userService) ChangeBackground(token string, itemId string) (interface{}, error) {
+	email, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByEmail(email.Email)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	id, err := primitive.ObjectIDFromHex(itemId)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	var updateDefault *repoInt.InventoryResponse
+	inventory, err := s.inventoryRepo.GetByTypeAndUserIdAndDefault("bg", user.ID, true)
+	fmt.Println(inventory)
+
+	if inventory != nil {
+		if inventory.Item == id {
+			return nil, errs.NewBadRequestError("This item id is already default.")
+		}
+	}
+
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+
+			updateDefault, err = s.inventoryRepo.UpdateDefaultByUserIdAndItemIdAndType(user.ID, id, "bg", true)
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+
+		}
+		return nil, errs.NewInternalError(err.Error())
+	} else {
+		updateDefault, err = s.inventoryRepo.UpdateDefaultByUserIdAndItemIdAndType(user.ID, inventory.Item, "bg", false)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+		updateDefault, err = s.inventoryRepo.UpdateDefaultByUserIdAndItemIdAndType(user.ID, id, "bg", true)
+		if err != nil {
+			return nil, errs.NewInternalError(err.Error())
+		}
+
+	}
+
+	return utils.DataResponse{
+		Data: interfaces.ChangeBgResponse{
+			ItemId: updateDefault.Item.Hex(),
+		},
+		Message: "Change background from " + inventory.Item.Hex() + " to " + updateDefault.Item.Hex() + " success.",
+	}, nil
+
+}
+
+func (s userService) GetBg(token string, id string) (interface{}, error) {
+	_, err := utils.IsTokenValid(token)
+	if err != nil {
+		return nil, err
+	}
+	userId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+	user, err := s.userRepo.GetById(userId)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("User not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+
+	bg, err := s.inventoryRepo.GetByTypeAndUserIdAndDefault("bg", user.ID, true)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			itemId, err := primitive.ObjectIDFromHex("662c8d385d244863126b6970")
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+			_, err = s.inventoryRepo.Create(user.ID, itemId, "bg")
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+
+			bg, err = s.inventoryRepo.UpdateDefaultByUserIdAndItemIdAndType(user.ID, itemId, "bg", true)
+			if err != nil {
+				return nil, errs.NewInternalError(err.Error())
+			}
+			//return utils.DataResponse{
+			//	Data: interfaces.DefaultLink{
+			//		Link: "https://firebasestorage.googleapis.com/v0/b/meetme-1815f.appspot.com/o/background%2FbgShop.png?alt=media&token=2811d8e3-6ceb-4a41-ad2d-94a511ab9cb9",
+			//	},
+			//	Message: "Send default background"}, nil
+		} else {
+			return nil, errs.NewInternalError(err.Error())
+		}
+	}
+
+	bgResult, err := s.bgRepo.GetById(bg.Item)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, errs.NewBadRequestError("Background not found.")
+		}
+		return nil, errs.NewInternalError(err.Error())
+	}
+	return utils.DataResponse{
+		Data: interfaces.BgResponse{
+			ID:     bgResult.ID.Hex(),
+			Name:   bgResult.Name,
+			Assets: bgResult.Assets,
+			Price:  bgResult.Price,
+		},
+		Message: "Get background of " + user.Username + " success.",
+	}, nil
 }

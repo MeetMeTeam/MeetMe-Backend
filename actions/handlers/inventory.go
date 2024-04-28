@@ -23,7 +23,7 @@ func NewInventoryHandler(inventoryService svInter.InventoryService) inventoryHan
 //	@Tags			inventories
 //	@Accept			json
 //	@Produce		json
-//	@Param			item_type	query	string	true	"item type that you want to get inventory [avatar/theme]"
+//	@Param			item_type	query	string	true	"item type that you want to get inventory [avatar/theme/bg]"
 //	@Success		200		{object}	utils.DataResponse
 //	@Router			/inventories [get]
 //
@@ -57,7 +57,7 @@ func (h inventoryHandler) GetInventory(c echo.Context) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			item_id	query	string	true	"item id that you want to add"
-//	@Param			item_type	query	string	true	"item type that you want to add [avatar/theme]"
+//	@Param			item_type	query	string	true	"item type that you want to add [avatar/theme/bg]"
 //
 // @Success		200		{object}	utils.DataResponse
 // @Router			/inventories [post]
