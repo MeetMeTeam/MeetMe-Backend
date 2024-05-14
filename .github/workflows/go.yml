@@ -84,6 +84,7 @@ jobs:
             docker system prune -a -f
             docker volume prune -a -f
             cd MeetMe-Backend/
+            git pull
             docker pull winnerkypt/meetme-backend-dev:latest
             docker rm -f api-docker
             docker compose -f docker-compose.yml up -d
