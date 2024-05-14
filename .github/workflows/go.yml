@@ -9,7 +9,8 @@ on:
       - main
       - developer
 jobs:
-  build:
+  build-dev:
+    if: github.ref == 'refs/heads/developer'
     runs-on: 
       - self-hosted
     steps:
@@ -23,12 +24,6 @@ jobs:
         with:
           go-version: '1.15'
 
-  push-to-dockerhub-dev:
-    if: github.ref == 'refs/heads/developer'
-    runs-on:
-      - self-hosted
-    needs: build
-    steps:
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
@@ -37,6 +32,7 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v2
         with:
@@ -44,6 +40,39 @@ jobs:
           file: Dockerfile
           push: true
           tags: winnerkypt/meetme-backend-dev:latest
+
+  build-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on:
+      - self-hosted
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Git Pull
+        run: git pull
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.15'
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: winnerkypt/meetme-backend:latest
+
   push-to-dockerhub-prod:
     if: github.ref == 'refs/heads/main'
     runs-on:
@@ -84,7 +113,6 @@ jobs:
             docker system prune -a -f
             docker volume prune -a -f
             cd MeetMe-Backend/
-            git pull
             docker pull winnerkypt/meetme-backend-dev:latest
             docker rm -f api-docker
             docker compose -f docker-compose.yml up -d
