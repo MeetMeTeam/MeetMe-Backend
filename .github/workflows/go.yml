@@ -68,6 +68,7 @@ jobs:
 
 
   deploy-dev:
+    if: github.ref == 'refs/heads/developer'
     runs-on:
       - self-hosted
     needs:  push-to-dockerhub-dev
@@ -88,9 +89,10 @@ jobs:
             docker compose -f docker-compose.yml up -d
             echo finish
   deploy-prod:
+    if: github.ref == 'refs/heads/main'
     runs-on:
       - self-hosted
-    needs:  push-to-dockerhub-dev
+    needs:  push-to-dockerhub-prod
 
     steps:
       - name: SSH and Deploy
