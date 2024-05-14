@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   api:
-    image: ${DOCKER_IMAGE}
+    image: winnerkypt/meetme-backend-dev:latest
     container_name: api-docker
     environment:
       APP_PORT: ${APP_PORT}
