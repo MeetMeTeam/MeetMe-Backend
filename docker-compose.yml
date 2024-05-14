@@ -15,7 +15,6 @@ services:
       MAILER_PORT: ${MAILER_PORT}
       MAILER_USERNAME: ${MAILER_USERNAME}
       MAILER_PASSWORD: ${MAILER_PASSWORD}
-      DOCKER_IMAGE: ${DOCKER_IMAGE}
     networks:
       - meetme
 networks:
