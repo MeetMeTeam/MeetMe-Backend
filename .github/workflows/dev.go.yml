@@ -9,8 +9,7 @@ on:
       - developer
 jobs:
   build-dev:
-    runs-on:
-      - self-hosted
+    runs-on: gh-runner-1
     steps:
       - uses: actions/checkout@v3
 
@@ -41,8 +40,7 @@ jobs:
 
 
   deploy-dev:
-    runs-on:
-      - self-hosted
+    runs-on: gh-runner-2
     needs:  build-dev
     steps:
       - name: SSH and Deploy
