@@ -9,10 +9,7 @@ on:
       - developer
 jobs:
   build-dev:
-    runs-on: [self-hosted]
-    strategy:
-      matrix:
-        runner: [gh-runner-1, gh-runner-2]
+    runs-on: gh-runner-1
     steps:
       - uses: actions/checkout@v3
 
@@ -43,10 +40,7 @@ jobs:
 
 
   deploy-dev:
-    runs-on: [self-hosted]
-    strategy:
-      matrix:
-        runner: [gh-runner-1, gh-runner-2]
+    runs-on: gh-runner-2
     needs:  build-dev
     steps:
       - name: SSH and Deploy
