@@ -9,10 +9,10 @@ on:
       - developer
 jobs:
   build-dev:
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted]
     strategy:
       matrix:
-        os: [ gh-runner-1, gh-runner-2 ]
+        runner: [gh-runner-1, gh-runner-2]
     steps:
       - uses: actions/checkout@v3
 
@@ -43,10 +43,10 @@ jobs:
 
 
   deploy-dev:
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted]
     strategy:
       matrix:
-        os: [ gh-runner-1, gh-runner-2 ]
+        runner: [gh-runner-1, gh-runner-2]
     needs:  build-dev
     steps:
       - name: SSH and Deploy
