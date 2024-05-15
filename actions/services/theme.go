@@ -104,7 +104,7 @@ func (s themeService) GetThemeShops(token string) (interface{}, error) {
 
 	response := utils.DataResponse{
 		Data:    themeResponses,
-		Message: "Get theme shop success.",
+		Message: "Get theme shop success.[test]",
 	}
 
 	return response, nil
