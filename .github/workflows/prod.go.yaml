@@ -9,9 +9,10 @@ on:
       - main
 jobs:
   build-prod:
-    runs-on:
-      - gh-runner-1
-      - gh-runner-2
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [gh-runner-1, gh-runner-2]
     steps:
       - uses: actions/checkout@v3
 
@@ -41,9 +42,10 @@ jobs:
           tags: winnerkypt/meetme-backend:latest
 
   deploy-prod:
-    runs-on:
-      - gh-runner-1
-      - gh-runner-2
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ gh-runner-1, gh-runner-2 ]
     needs:  build-prod
 
     steps:
